@@ -10,10 +10,9 @@
 
 namespace hypermind {
 
-    HMChar *readFile(const char *file_name) {
-        FILE *pfile = fopen(file_name, "r");
 
-    }
+
+
 }
 
 
