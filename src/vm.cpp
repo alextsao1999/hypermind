@@ -24,4 +24,8 @@ namespace hypermind {
         return realloc(ptr, newSize);
 
     }
+
+    uint32_t VM::getAllocatedBytes() {
+        return allocatedBytes;
+    }
 }

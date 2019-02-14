@@ -5,7 +5,7 @@ hypermind language
 
 ## Grammer
 
-It's just like javascript but there is many differences
+It's just like javascript but there are many differences
 
 ```javascript
 file = import("file")

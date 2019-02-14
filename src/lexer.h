@@ -7,7 +7,8 @@
 
 #include <hypermind.h>
 #include <deque>
-
+#include <vm.h>
+#include <buffer.h>
 #define NEXT_CHAR mSource[mPosition + 1]
 
 #define CURRENT_CHAR mSource[mPosition]
@@ -122,7 +123,8 @@ namespace hypermind {
         Token mCurrentToken;
 
     public:
-        explicit Lexer(HMChar *str) : mSource(str) {};
+        Lexer(VM *mVM, HMChar *mSource);
+
         ~Lexer();
 
         Token read();
@@ -133,8 +135,9 @@ namespace hypermind {
         }
 
     private:
+        VM *mVM;
         HMChar *mSource;
-        int mPosition{};
+        int mPosition{0};
         int mLine{1};
     };
 }

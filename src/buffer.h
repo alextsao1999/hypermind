@@ -8,8 +8,8 @@
 #include <hypermind.h>
 #include <cstdint>
 
-// Buffer 成长
-#define BUFFER_GROWTH(count) ceilToPowerOf2(count * 2)
+// Buffer
+#define BUFFER_GROWTH(count) ceilToPowerOf2(count)
 
 namespace hypermind {
 
@@ -19,16 +19,17 @@ namespace hypermind {
     class Buffer {
     public:
         explicit Buffer(VM *mVM) : mVM(mVM) {}
+        ~Buffer();
 
         void fill(Type data, uint32_t count);
         void add(Type data);
         uint32_t getCount();
+        Type* getData();
 
         void clear();
 
         Type &operator[](uint32_t index);
 
-        ~Buffer();
 
     private:
         Type *mData{nullptr};
@@ -89,6 +90,11 @@ namespace hypermind {
     template<class Type>
     uint32_t Buffer<Type>::getCount() {
         return mCount;
+    }
+
+    template<class Type>
+    Type *Buffer<Type>::getData() {
+        return mData;
     }
 
 }

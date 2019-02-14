@@ -11,8 +11,7 @@ namespace hypermind {
     class VM {
     public:
         void *memManger(void *ptr, size_t oldSize, size_t newSize);
-
-
+        uint32_t getAllocatedBytes();
     protected:
         // 已经分配的字节数
         uint32_t allocatedBytes{0};

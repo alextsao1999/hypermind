@@ -209,16 +209,53 @@ namespace hypermind {
         TOKEN_LENGTH((uint32_t)(NOW - TOKEN_START));
     }
     inline void Lexer::parseString() {
-        TOKEN(TK_STRING, NOW, 0, CURRENT_LINE);
+        Buffer<HMChar> strbuf(mVM);
         HMChar first = CURRENT_CHAR;
+        NEXT(); // 跳过 '   "  文本符
+        TOKEN(TK_STRING, NOW, 0, CURRENT_LINE);
         do {
-            if (CURRENT_CHAR == _HM_C('\\')) // 跳过转义符
+            if (CURRENT_CHAR == _HM_C('\\')) { // 跳过转义符
                 NEXT();
+                switch (CURRENT_CHAR) {
+                    case _HM_C('n'):
+                        strbuf.add('\n');
+                        break;
+                    case _HM_C('\''):
+                        strbuf.add('\'');
+                        break;
+                    case _HM_C('\"'):
+                        strbuf.add('"');
+                        break;
+                    case _HM_C('\\'):
+                        strbuf.add('\\');
+                        break;
+                    case _HM_C('a'):
+                        strbuf.add('\a');
+                        break;
+                    case _HM_C('b'):
+                        strbuf.add('\b');
+                        break;
+                    case _HM_C('f'):
+                        strbuf.add('\f');
+                        break;
+                    case _HM_C('r'):
+                        strbuf.add('\r');
+                        break;
+                }
+            } else {
+                strbuf.add(CURRENT_CHAR);
+            }
             NEXT();
         } while (CURRENT_CHAR != _HM_C(first));
-        // 当前字符为 " ' 跳过 "   获取下一个字符
-        NEXT();
         TOKEN_LENGTH((uint32_t)(NOW - TOKEN_START));
+        // 当前字符为 " ' 跳过   获取下一个字符
+        NEXT();
+        strbuf.add(_HM_C('\0'));
+        std::cout << "parse String : " << strbuf.getData() << std::endl;
+
+        strbuf.clear();
+
+
     }
     inline void Lexer::parseIdentifier() {
         TOKEN(TK_IDENTIFIER, NOW, 0, CURRENT_LINE);
@@ -239,6 +276,8 @@ namespace hypermind {
         }
         return readAToken();
     }
+
+    Lexer::Lexer(VM *mVM, HMChar *mSource) : mVM(mVM), mSource(mSource) {}
 
     Token::Token(TokenType mType, HMChar *mStart, int mLength, int mLine) : mType(mType), mStart(mStart),
                                                                                 mLength(mLength), mLine(mLine) {}

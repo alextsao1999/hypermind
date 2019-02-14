@@ -9,16 +9,17 @@ using namespace hypermind;
 
 using namespace std;
 int main() {
+    auto *source = const_cast<HMChar *>("int test ='test\\n \\\\ string value' ; ");
     VM vm;
-    Buffer<int> buf(&vm);
 
-    for (int i = 0; i < 101; ++i) {
-        buf.add(1234);
+    Lexer lexer(&vm, source);
+
+    Token token;
+    while ((token = lexer.read()).mType != TK_EOF) {
+        dumpToken(token);
+
     }
-    buf[120] = 777;
-    buf[0] = 666;
 
-    std::cout << buf[119] << "   数量 : " << buf.getCount() << std::endl;
 
     return 0;
 }
