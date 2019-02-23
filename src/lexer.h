@@ -11,6 +11,8 @@
 #include <buffer.h>
 #define NEXT_CHAR mSource[mPosition + 1]
 
+//当前位置
+#define CURRENT_POS (mSource + mPosition)
 #define CURRENT_CHAR mSource[mPosition]
 #define CURRENT_LINE mLine
 #define CURRENT_TOKEN mCurrentToken
@@ -25,84 +27,84 @@ mCurrentToken.mLine = line; }
 #define TOKEN_LENGTH(l) {mCurrentToken.mLength = l;}
 #define TOKEN_START mCurrentToken.mStart
 
-//当前位置
-#define NOW (mSource + mPosition)
 //下一个位置
 #define NEXT() {mPosition++;}
 
-#define LEXER_UNKOWNCHAR(str) std::cout << "词法分析器错误  : 未知符号 -> " << str << "  行号 : " << mLine << std::endl
+#define LEXER_UNKOWNCHAR(str) std::cout << "词法分析器错误  : 未知字符 -> " << str << "  行号 : " << mLine << std::endl
 
 namespace hypermind {
-    inline bool isNumber(HMChar ch);
-    inline bool isAlpha(HMChar ch);
-    inline bool isCodeChar(HMChar ch);
-    inline bool isSpace(HMChar ch);
+    inline bool IsNumber(HMChar ch);
+    inline bool IsAlpha(HMChar ch);
+    inline bool IsCodeChar(HMChar ch);
+    inline bool IsSpace(HMChar ch);
 
-    typedef enum {
-        TK_EOF,
-        TK_EOL,
-        TK_NUMBER, //数字
-        TK_STRING, //文本
-        TK_IDENTIFIER, //标识符
-        TK_DOT, //点号
-        TK_COMMA, //逗号
-        TK_LPAREN, // ( 小括号
-        TK_RPAREN,  // )
-        TK_LBRACKET, // [ 中括号
-        TK_RBRACKET, // ]
-        TK_LBRACE,  // { 大括号
-        TK_RBRACE, // }
+    enum class TokenType {
+        End,
+        Delimiter,
+        Number, //数字
+        String, //文本
+        Identifier, //标识符
+        Dot, //点号
+        Comma, //逗号
+        LeftParen, // ( 小括号
+        RightParen,  // )
+        LeftBracket, // [ 中括号
+        RightBracket, // ]
+        LeftBrace,  // { 大括号
+        RightBrace, // }
 
         //四则运算 + - * /
-        TK_ADD,
-        TK_SUB,
-        TK_MUL,
-        TK_DIV,
+        Add,
+        Sub,
+        Mul,
+        Div,
 
-        TK_INC,  // ++
-        TK_DEC, // --
-        TK_AA, // += Addition assignment
-        TK_SA, // -=Subtraction assignment and so on.....
+        Increase,  // ++
+        Decrease, // --
+        Assign, // assignment 赋值 =
+        AddAssign, // += Addition assignment
+        SubAssign, // -=Subtraction assignment and so on.....
+        MulAssign,
+        DivAssign,
+        ModAssign,
+        AndAssign,
+        OrAssign,
+        XorAssign,
         //等式 不等式
-
-        TK_AS, // assignment 赋值
+        Arrow, //  -> 箭头
 
         // 后面这些TOKEN 暂时用不到 之后再添加吧
-        TK_NOT, // !
-        TK_EQ,  // ==
-        TK_NE, // !=
-        TK_GT, // >
-        TK_LT, // <
-        TK_GE, // >=
-        TK_LE, // <=
+        Not, // !
+        Equal,  // ==
+        NotEqual, // !=
+        Greater, // >
+        Less, // <
+        GreaterEqual, // >=
+        LessEqual, // <=
 
         // | 或
-        TK_OR,
-        TK_LOGIC_OR,
+        Or,
+        LogicOr,
 
         // & 且
-        TK_AND,
-        TK_LOGIC_AND,
+        And,
+        LogicAnd,
 
         // #
-        TK_SHARP,  // #
-        TK_DOLLAR, // $ 美元
-        TK_MOD, // % remainder 取余
+        Mod, // % remainder 取余
 
-        TK_AT,  // @
+        At,  // @
 
-        TK_COLON  //冒号 :
+        Colon  //冒号 :
+    };
 
-    } TokenType;
-
-    class Token {
-    public:
+    struct Token {
         TokenType mType;
         const HMChar *mStart;
-        int mLength;
-        int mLine;
+        HMUINT32 mLength;
+        HMUINT32 mLine;
 
-        Token(TokenType mType, HMChar *mStart, int mLength, int mLine);
+        Token(TokenType mType, HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine);
         Token();
 
     };
@@ -111,15 +113,15 @@ namespace hypermind {
 
     class Lexer {
     protected:
-        bool mEof{};
+        bool mEof{false};
         std::deque<Token> mTokens;
 
-        Token readAToken();
-        inline void skipSpace();
-        inline void skipComment();
-        inline void parseIdentifier();
-        inline void parseString();
-        inline void parseNumber();
+        Token ReadAToken();
+        inline void SkipSpace();
+        inline void SkipComment();
+        inline void ParseIdentifier();
+        inline void ParseString();
+        inline void ParseNumber();
         Token mCurrentToken;
 
     public:
@@ -127,18 +129,18 @@ namespace hypermind {
 
         ~Lexer();
 
-        Token read();
-        Token peek(int i);
-        bool match(TokenType tokenKind);
-        HMChar *getSource() {
+        Token Read();
+        Token Peek(HMInteger i);
+        bool Match(TokenType tokenKind);
+        HMChar *GetSource() {
             return mSource;
         }
 
     private:
         VM *mVM;
         HMChar *mSource;
-        int mPosition{0};
-        int mLine{1};
+        HMUINT32 mPosition{0};
+        HMUINT32 mLine{1};
     };
 }
 

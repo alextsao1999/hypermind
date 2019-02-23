@@ -6,15 +6,15 @@
 #define HYPERMIND_PARSER_H
 
 #include <lexer.h>
-#include <hash_map>
-namespace hypermind{
+
+namespace hypermind {
     class Parser {
     protected:
-        const char *mFileName;
+        const HMChar *mFileName;
         Lexer mLexer;
 
     public:
-        Parser(const char *mFileName, const Lexer &mLexer);
+        Parser(const HMChar *mFileName, const Lexer &mLexer);
 
 
 

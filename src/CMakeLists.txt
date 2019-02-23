@@ -1,5 +1,15 @@
+# Created By 曹顺 
+cmake_minimum_required(VERSION 3.13)
+project(HyperMind)
+
+set(CMAKE_CXX_STANDARD 14)
+
+set(DIRS . obj ast)
+
 include_directories(.)
 
-set(FILES main.cpp buffer.cpp lexer.cpp parser.cpp utils.cpp utils.h  vm.cpp obj/string.cpp ast/ASTBase.cpp ast/ASTBase.h ast/ASTNode.cpp ast/ASTNode.h ast/ASTExpr.cpp ast/ASTExpr.h ast/ASTBinary.cpp ast/ASTBinary.h obj/header.cpp obj/header.h)
+foreach (DIR ${DIRS})
+    aux_source_directory(${DIR} FILES)
+endforeach ()
 
 add_executable(HyperMind ${FILES})

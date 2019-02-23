@@ -22,7 +22,7 @@ print("test value: %(some.my.test)")
 
 // function
 
-add(x, y) = x + y
+Append(x, y) = x + y
 
 sub(x, y) = {
     return x + y

@@ -8,7 +8,8 @@
 namespace hypermind {
     /**
      * 虚拟机内存管理
-     * 有可优化空间 频繁的申请内存可以用内存池代替
+     * 频繁的申请内存可以用内存池代替
+     *  记录内存变化
      * @param ptr 指针
      * @param oldSize 原长度
      * @param newSize  新长度
@@ -18,7 +19,7 @@ namespace hypermind {
         allocatedBytes += newSize - oldSize;
         if (newSize == 0){
             free(ptr);
-            return nullptr;
+            return nullptr; // 防止野指针
         }
 
         return realloc(ptr, newSize);

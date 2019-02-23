@@ -5,12 +5,21 @@
 #ifndef HYPERMIND_HYPERMIND_H
 #define HYPERMIND_HYPERMIND_H
 
+#include <string>
 #include <cstdio>
-//字符宏
+#include <cstdint>
+// 字符宏
 
 #define _HM_C(ch) ch
-//字符通用字符类型
+// 字符通用字符类型
 typedef char HMChar;
+// 数据类型
+typedef char HMByte;
+typedef int HMInteger;
+typedef uint32_t HMUINT32;
+typedef double HMDouble;
+typedef float HMFloat;
+typedef std::string HMString;
 
 #define UNUSED __attribute__ ((unused))
 

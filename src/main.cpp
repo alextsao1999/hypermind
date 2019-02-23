@@ -5,22 +5,40 @@
 
 #include <buffer.h>
 
+#include "obj/value.h"
 using namespace hypermind;
 
 using namespace std;
 int main() {
+
     auto *source = const_cast<HMChar *>("int test ='test\\n \\\\ string value' ; ");
     VM vm;
 
-    Lexer lexer(&vm, source);
+    Buffer<HMInteger > buf(&vm);
+    buf.Append(111);
+    buf.Append(2222);
+    buf.Append(333);
 
-    Token token;
-    while ((token = lexer.read()).mType != TK_EOF) {
-        dumpToken(token);
+    buf.Insert(5, 90);
 
-    }
+    //buf.Remove(3);
+
+
+    buf.Dump();
+    std::cout << "长度 : " << buf.GetCount();
+
 
 
     return 0;
+
+    //Lexer lexer(&vm, source);
+//    Token token;
+//    while ((token = lexer.Read()).mType != TokenType::End) {
+//        dumpToken(token);
+//
+//    }
+//
+//
+//    return 0;
 }
 

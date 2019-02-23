@@ -5,7 +5,7 @@
 #include "buffer.h"
 
 namespace hypermind {
-    uint32_t ceilToPowerOf2(uint32_t v) {
+    HMUINT32 CeilToPowerOf2(HMUINT32 v) {
         v += (v == 0);
         v--;
         v |= v >> 1;

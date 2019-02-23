@@ -6,44 +6,44 @@
 #include "lexer.h"
 
 namespace hypermind {
-    inline bool isSpace(HMChar ch){
+    inline bool IsSpace(HMChar ch){
         return ch == _HM_C(' ') || ch == _HM_C('\r');
     }
-    inline bool isNumber(HMChar ch) {
+    inline bool IsNumber(HMChar ch) {
         return ch >= _HM_C('0') && ch <= _HM_C('9');
     }
-    inline bool isAlpha(HMChar ch) {
+    inline bool IsAlpha(HMChar ch) {
         return (ch >= _HM_C('a') && ch <= _HM_C('z')) || (ch >= _HM_C('A') && ch <= _HM_C('Z'));
     }
-    inline bool isCodeChar(HMChar ch) {
-        return isAlpha(ch) || ch == _HM_C('_');
+    inline bool IsCodeChar(HMChar ch) {
+        return IsAlpha(ch) || ch == _HM_C('_');
     }
 
     void dumpToken(Token token) {
         std::string name;
         switch (token.mType) {
-            case TK_EOF:
+            case TokenType::End:
                 name = "<结束>";
                 break;
-            case TK_EOL:
+            case TokenType::Delimiter:
                 name = "<行结束>";
                 break;
-            case TK_ADD:
+            case TokenType::Add:
                 name = "<加号 +>";
                 break;
-            case TK_SUB:
+            case TokenType::Sub:
                 name = "<减号 ->";
                 break;
-            case TK_MUL:
+            case TokenType::Mul:
                 name = "<乘号 *>";
                 break;
-            case TK_DIV:
+            case TokenType::Div:
                 name = "<除号 />";
                 break;
-            case TK_IDENTIFIER:
+            case TokenType::Identifier:
                 name = "<标识符>";
                 break;
-            case TK_NUMBER:
+            case TokenType::Number:
                 name = "<数字>";
                 break;
             default:
@@ -59,103 +59,106 @@ namespace hypermind {
     }
 
     //读取一个Token
-    Token Lexer::readAToken() {
+    Token Lexer::ReadAToken() {
         if (mEof)
             return CURRENT_TOKEN;
         //跳过空格
-        skipSpace();
+        SkipSpace();
         switch (CURRENT_CHAR) {
             case _HM_C('\n'):
-                TOKEN(TK_EOL, NOW, 1, CURRENT_LINE++);
+                TOKEN(TokenType::Delimiter, CURRENT_POS, 1, CURRENT_LINE++);
                 break;
             case _HM_C(';'):
-                TOKEN(TK_EOL, NOW, 1, CURRENT_LINE); // 同样也是行分隔符 但是不会增加行号
+                TOKEN(TokenType::Delimiter, CURRENT_POS, 1, CURRENT_LINE); // 同样也是行分隔符 但是不会增加行号
                 break;
             case _HM_C('('):
-                TOKEN(TK_LPAREN, NOW, 1, CURRENT_LINE);
+                TOKEN(TokenType::LeftParen, CURRENT_POS, 1, CURRENT_LINE);
                 break;
             case _HM_C(')'):
-                TOKEN(TK_RPAREN, NOW, 1, CURRENT_LINE);
+                TOKEN(TokenType::RightParen, CURRENT_POS, 1, CURRENT_LINE);
                 break;
             case _HM_C('['):
-                TOKEN(TK_LBRACKET, NOW, 1, CURRENT_LINE);
+                TOKEN(TokenType::LeftBracket, CURRENT_POS, 1, CURRENT_LINE);
                 break;
             case _HM_C(']'):
-                TOKEN(TK_RBRACKET, NOW, 1, CURRENT_LINE);
+                TOKEN(TokenType::RightBracket, CURRENT_POS, 1, CURRENT_LINE);
                 break;
             case _HM_C('{'):
-                TOKEN(TK_LBRACE, NOW, 1, CURRENT_LINE);
+                TOKEN(TokenType::LeftBrace, CURRENT_POS, 1, CURRENT_LINE);
                 break;
             case _HM_C('}'):
-                TOKEN(TK_RBRACE, NOW, 1, CURRENT_LINE);
+                TOKEN(TokenType::RightBrace, CURRENT_POS, 1, CURRENT_LINE);
                 break;
             case _HM_C('.'):
-                TOKEN(TK_DOT, NOW, 1, CURRENT_LINE);
+                TOKEN(TokenType::Dot, CURRENT_POS, 1, CURRENT_LINE);
                 break;
             case _HM_C('!'):
                 if (NEXT_CHAR == _HM_C('=')) {
-                    TOKEN(TK_NE, NOW, 2, CURRENT_LINE);  // != not equal 不相等
+                    TOKEN(TokenType::NotEqual, CURRENT_POS, 2, CURRENT_LINE);  // != not equal 不相等
                     NEXT();
                 } else {
-                    TOKEN(TK_NOT, NOW, 1, CURRENT_LINE);  // !
+                    TOKEN(TokenType::Not, CURRENT_POS, 1, CURRENT_LINE);  // !
                 }
                 break;
             case _HM_C('+'):
                 if (NEXT_CHAR == _HM_C('+')) {
-                    TOKEN(TK_INC, NOW, 2, CURRENT_LINE); // ++
+                    TOKEN(TokenType::Increase, CURRENT_POS, 2, CURRENT_LINE); // ++
                     NEXT();
                 } else if (NEXT_CHAR == _HM_C('=')) {
-                    TOKEN(TK_AA, NOW, 2, CURRENT_LINE); // +=
+                    TOKEN(TokenType::AddAssign, CURRENT_POS, 2, CURRENT_LINE); // +=
                     NEXT();
                 } else {
-                    TOKEN(TK_ADD, NOW, 1, CURRENT_LINE); // +
+                    TOKEN(TokenType::Add, CURRENT_POS, 1, CURRENT_LINE); // +
                 }
                 break;
             case _HM_C('='):
                 if (NEXT_CHAR == _HM_C('=')) {
-                    TOKEN(TK_EQ, NOW, 2, CURRENT_LINE); // ==
+                    TOKEN(TokenType::Equal, CURRENT_POS, 2, CURRENT_LINE); // ==
                     NEXT();
                 } else {
-                    TOKEN(TK_AS, NOW, 1, CURRENT_LINE); // =
+                    TOKEN(TokenType::Assign, CURRENT_POS, 1, CURRENT_LINE); // =
                 }
                 break;
             case _HM_C('-'):
                 if (NEXT_CHAR == _HM_C('-')) { // --
-                    TOKEN(TK_DEC, NOW, 1, CURRENT_LINE); // 自减
+                    TOKEN(TokenType::Decrease, CURRENT_POS, 1, CURRENT_LINE); // 自减
                     NEXT();
                 } else if (NEXT_CHAR == _HM_C('=')) { // -=
-                    TOKEN(TK_SA, NOW, 1, CURRENT_LINE);
+                    TOKEN(TokenType::SubAssign, CURRENT_POS, 1, CURRENT_LINE);
+                    NEXT();
+                } else if (NEXT_CHAR == _HM_C('>')) { // -> Arrow 箭头
+                    TOKEN(TokenType::Arrow, CURRENT_POS, 1, CURRENT_LINE);
                     NEXT();
                 } else {
-                    TOKEN(TK_SUB, NOW, 1, CURRENT_LINE); // -
+                    TOKEN(TokenType::Sub, CURRENT_POS, 1, CURRENT_LINE); // -
                 }
                 break;
             case _HM_C('*'):
-                TOKEN(TK_MUL, NOW, 1, CURRENT_LINE);
+                TOKEN(TokenType::Mul, CURRENT_POS, 1, CURRENT_LINE);
                 break;
             case _HM_C(','):
-                TOKEN(TK_COMMA, NOW, 1, CURRENT_LINE);
+                TOKEN(TokenType::Comma, CURRENT_POS, 1, CURRENT_LINE);
                 break;
             // 可能为注释 或者除号
             case _HM_C('/'):
                 if (NEXT_CHAR == _HM_C('/') || NEXT_CHAR == _HM_C('*')) {
-                    skipComment();
-                    return readAToken(); // 跳过之后继续读取一个token
+                    SkipComment();
+                    return ReadAToken(); // 跳过之后继续读取一个token
                 } else {
-                    TOKEN(TK_DIV, NOW, 1, CURRENT_LINE);
+                    TOKEN(TokenType::Div, CURRENT_POS, 1, CURRENT_LINE);
                 }
                 break;
             case _HM_C('\0'):
                 mEof = true;
-                TOKEN(TK_EOF, NOW, 0, CURRENT_LINE);
+                TOKEN(TokenType::Delimiter, CURRENT_POS, 0, CURRENT_LINE);
                 return CURRENT_TOKEN; // 已经到文件尾部了 返回就ok
             default:
-                if (isCodeChar(CURRENT_CHAR)) {
-                    parseIdentifier();
-                } else if (isNumber(CURRENT_CHAR)) {
-                    parseNumber();
+                if (IsCodeChar(CURRENT_CHAR)) {
+                    ParseIdentifier();
+                } else if (IsNumber(CURRENT_CHAR)) {
+                    ParseNumber();
                 } else if (CURRENT_CHAR == _HM_C('"') || CURRENT_CHAR == _HM_C('\'')) {
-                    parseString();
+                    ParseString();
                 } else {
                     LEXER_UNKOWNCHAR(CURRENT_CHAR);
                     NEXT();
@@ -168,118 +171,122 @@ namespace hypermind {
     }
 
 
-    inline void Lexer::skipComment() {
+    inline void Lexer::SkipComment() {
+        // TODO 多行注释跳过 /*   */
         do {
             NEXT();
         } while (CURRENT_CHAR == _HM_C('\n'));
         CURRENT_LINE++;
     }
 
-    inline void Lexer::skipSpace() {
-        if (isSpace(CURRENT_CHAR)){
+    inline void Lexer::SkipSpace() {
+        if (IsSpace(CURRENT_CHAR)){
             do {
                 NEXT();
-            } while (isSpace(CURRENT_CHAR));
+            } while (IsSpace(CURRENT_CHAR));
         }
     }
 
-    bool Lexer::match(TokenType type) {
-        Token token = peek(1);
-        if (token.mType == type) {
+    bool Lexer::Match(TokenType tokenKind) {
+        Token token = Peek(1);
+        if (token.mType == tokenKind) {
             mTokens.pop_front();
             return true;
         }
         return false;
     }
 
-    Token Lexer::peek(int i) {
+    Token Lexer::Peek(HMInteger i) {
         while (mTokens.size() < i) {
             if (mEof)
                 return CURRENT_TOKEN;
-            mTokens.push_back(readAToken());
+            mTokens.push_back(ReadAToken());
         }
         return mTokens[i - 1];
     }
 
-    inline void Lexer::parseNumber() {
-        TOKEN(TK_NUMBER, NOW, 0, CURRENT_LINE);
+    inline void Lexer::ParseNumber() {
+        TOKEN(TokenType::Number, CURRENT_POS, 0, CURRENT_LINE);
         do {
             NEXT();
-        } while (isNumber(CURRENT_CHAR) || CURRENT_CHAR == _HM_C('.'));
-        TOKEN_LENGTH((uint32_t)(NOW - TOKEN_START));
+        } while (IsNumber(CURRENT_CHAR) || CURRENT_CHAR == _HM_C('.'));
+        TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
     }
-    inline void Lexer::parseString() {
+    inline void Lexer::ParseString() {
         Buffer<HMChar> strbuf(mVM);
         HMChar first = CURRENT_CHAR;
         NEXT(); // 跳过 '   "  文本符
-        TOKEN(TK_STRING, NOW, 0, CURRENT_LINE);
+        TOKEN(TokenType::String, CURRENT_POS, 0, CURRENT_LINE);
         do {
             if (CURRENT_CHAR == _HM_C('\\')) { // 跳过转义符
                 NEXT();
                 switch (CURRENT_CHAR) {
                     case _HM_C('n'):
-                        strbuf.add('\n');
+                        strbuf.Append('\n');
                         break;
                     case _HM_C('\''):
-                        strbuf.add('\'');
+                        strbuf.Append('\'');
                         break;
                     case _HM_C('\"'):
-                        strbuf.add('"');
+                        strbuf.Append('"');
                         break;
                     case _HM_C('\\'):
-                        strbuf.add('\\');
+                        strbuf.Append('\\');
                         break;
                     case _HM_C('a'):
-                        strbuf.add('\a');
+                        strbuf.Append('\a');
                         break;
                     case _HM_C('b'):
-                        strbuf.add('\b');
+                        strbuf.Append('\b');
                         break;
                     case _HM_C('f'):
-                        strbuf.add('\f');
+                        strbuf.Append('\f');
                         break;
                     case _HM_C('r'):
-                        strbuf.add('\r');
+                        strbuf.Append('\r');
+                        break;
+                    default:
+                        // 不存在
                         break;
                 }
             } else {
-                strbuf.add(CURRENT_CHAR);
+                strbuf.Append(CURRENT_CHAR);
             }
             NEXT();
         } while (CURRENT_CHAR != _HM_C(first));
-        TOKEN_LENGTH((uint32_t)(NOW - TOKEN_START));
+        TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
         // 当前字符为 " ' 跳过   获取下一个字符
         NEXT();
-        strbuf.add(_HM_C('\0'));
-        std::cout << "parse String : " << strbuf.getData() << std::endl;
+        strbuf.Append(_HM_C('\0'));
+        std::cout << "parse String : " << strbuf.GetData() << std::endl;
 
-        strbuf.clear();
+        strbuf.Clear();
 
 
     }
-    inline void Lexer::parseIdentifier() {
-        TOKEN(TK_IDENTIFIER, NOW, 0, CURRENT_LINE);
+    inline void Lexer::ParseIdentifier() {
+        TOKEN(TokenType::Identifier, CURRENT_POS, 0, CURRENT_LINE);
         do {
             NEXT();
-        } while (isCodeChar(CURRENT_CHAR) || isNumber(CURRENT_CHAR));
-        TOKEN_LENGTH((uint32_t)(NOW - TOKEN_START));
+        } while (IsCodeChar(CURRENT_CHAR) || IsNumber(CURRENT_CHAR));
+        TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
     }
 
     Lexer::~Lexer() {
     }
 
-    Token Lexer::read() {
+    Token Lexer::Read() {
         if (!mTokens.empty()) {
             Token token = mTokens.front();
             mTokens.pop_front();
             return token;
         }
-        return readAToken();
+        return ReadAToken();
     }
 
     Lexer::Lexer(VM *mVM, HMChar *mSource) : mVM(mVM), mSource(mSource) {}
 
-    Token::Token(TokenType mType, HMChar *mStart, int mLength, int mLine) : mType(mType), mStart(mStart),
+    Token::Token(TokenType mType, HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine) : mType(mType), mStart(mStart),
                                                                                 mLength(mLength), mLine(mLine) {}
     Token::Token() {}
 
