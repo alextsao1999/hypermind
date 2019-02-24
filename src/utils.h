@@ -6,11 +6,10 @@
 #define HYPERMIND_UTILS_H
 
 #include <hypermind.h>
-#include <cstdio>
 
 namespace hypermind {
 
-
+    HMUINT32 hashString(const char *str, uint32_t length);
 
 
 }

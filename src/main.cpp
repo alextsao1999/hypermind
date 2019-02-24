@@ -34,7 +34,7 @@ int main() {
     //Lexer lexer(&vm, source);
 //    Token token;
 //    while ((token = lexer.Read()).mType != TokenType::End) {
-//        dumpToken(token);
+//        DumpToken(token);
 //
 //    }
 //

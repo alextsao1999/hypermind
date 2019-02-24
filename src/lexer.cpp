@@ -19,7 +19,7 @@ namespace hypermind {
         return IsAlpha(ch) || ch == _HM_C('_');
     }
 
-    void dumpToken(Token token) {
+    void DumpToken(Token token) {
         std::string name;
         switch (token.mType) {
             case TokenType::End:
@@ -69,7 +69,7 @@ namespace hypermind {
                 TOKEN(TokenType::Delimiter, CURRENT_POS, 1, CURRENT_LINE++);
                 break;
             case _HM_C(';'):
-                TOKEN(TokenType::Delimiter, CURRENT_POS, 1, CURRENT_LINE); // 同样也是行分隔符 但是不会增加行号
+                TOKEN(TokenType::Delimiter, CURRENT_POS, 1, CURRENT_LINE); 
                 break;
             case _HM_C('('):
                 TOKEN(TokenType::LeftParen, CURRENT_POS, 1, CURRENT_LINE);

@@ -109,7 +109,7 @@ namespace hypermind {
 
     };
 
-    void dumpToken(Token token);
+    void DumpToken(Token token);
 
     class Lexer {
     protected:

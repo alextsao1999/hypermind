@@ -5,10 +5,18 @@
 #ifndef HYPERMIND_STRING_H
 #define HYPERMIND_STRING_H
 
+#include <hypermind.h>
+#include "object.h"
+namespace hypermind {
+    struct HMString : public HMObject {
+        String str;
+        HMUINT32 hashCode;
 
-class string {
+        HMString(ObjectType type, HMClass *objClass, HMObject *next, const String &str);
 
-};
+        HMUINT32 hash() override;
+    };
 
+}
 
 #endif //HYPERMIND_STRING_H

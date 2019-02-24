@@ -4,7 +4,7 @@ project(HyperMind)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(DIRS . obj ast)
+set(DIRS . obj)
 
 include_directories(.)
 

@@ -5,15 +5,15 @@
 #ifndef HYPERMIND_BUFFER_H
 #define HYPERMIND_BUFFER_H
 
-#include <iostream>
-#include <vm.h>
 #include <hypermind.h>
-#include <cstdint>
+#include <vm.h>
+#include <iostream>
 
 // Buffer
 #define BUFFER_GROWTH(count) CeilToPowerOf2(count)
 
 namespace hypermind {
+    class VM;
 
     HMUINT32 CeilToPowerOf2(HMUINT32 v);
 
@@ -68,7 +68,7 @@ namespace hypermind {
 
     template<typename T>
     void Buffer<T>::Clear() {
-        mData = (T *) mVM->memManger(mData, mCapacity * sizeof(T), 0);
+        mData = (T *) mVM->MemManger(mData, mCapacity * sizeof(T), 0);
     }
 
     template<typename T>
@@ -87,7 +87,7 @@ namespace hypermind {
             size_t oldSize = mCapacity * sizeof(T);
             mCapacity = BUFFER_GROWTH(count);
             size_t newSize = mCapacity * sizeof(T);
-            mData = (T *) mVM->memManger(mData, oldSize, newSize);
+            mData = (T *) mVM->MemManger(mData, oldSize, newSize);
         }
     }
 
@@ -117,15 +117,6 @@ namespace hypermind {
             memmove(&mData[index + 1], &mData[index], (mCount - index - 1) * sizeof(T));
         }
         mData[index] = data;
-//        HMUINT32 idx = mCount;
-//        EnsureCapacity(++mCount);
-//        if (index >= mCount){ // 插入到最后一位
-//            mData[mCount - 1] = data;
-//            return false;
-//        }
-//        while (idx > index)
-//            mData[idx] = mData[--idx];
-//        mData[index] = data;
         return true;
     }
 

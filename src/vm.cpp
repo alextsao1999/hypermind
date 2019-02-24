@@ -2,7 +2,7 @@
 // Created by 曹顺 on 2019/2/13.
 //
 
-#include <cstdlib>
+
 #include "vm.h"
 
 namespace hypermind {
@@ -15,8 +15,8 @@ namespace hypermind {
      * @param newSize  新长度
      * @return
      */
-    void *VM::memManger(void *ptr, size_t oldSize, size_t newSize) {
-        allocatedBytes += newSize - oldSize;
+    void *VM::MemManger(void *ptr, size_t oldSize, size_t newSize) {
+        mAllocatedBytes += newSize - oldSize;
         if (newSize == 0){
             free(ptr);
             return nullptr; // 防止野指针
@@ -26,7 +26,7 @@ namespace hypermind {
 
     }
 
-    uint32_t VM::getAllocatedBytes() {
-        return allocatedBytes;
+    uint32_t VM::GetAllocatedBytes() {
+        return mAllocatedBytes;
     }
 }
