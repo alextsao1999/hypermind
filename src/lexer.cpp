@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include "lexer.h"
-
+#include "obj/string.h"
 namespace hypermind {
     inline bool IsSpace(HMChar ch){
         return ch == _HM_C(' ') || ch == _HM_C('\r');
@@ -257,12 +257,13 @@ namespace hypermind {
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
         // 当前字符为 " ' 跳过   获取下一个字符
         NEXT();
-        strbuf.Append(_HM_C('\0'));
-        std::cout << "parse String : " << strbuf.GetData() << std::endl;
-
+        auto *objString = mVM->Allocate<HMString>();
+        // 此时的HMString 会储存在Token.mValue 中函数编译完成后 会储存到constants 中
+        // 当函数闭包没有引用时会释放constants的对象
+        new(objString) HMString(mVM, strbuf.GetData(), strbuf.GetSize());
+        TOKEN_VALUE.type = ValueType::Object;
+        TOKEN_VALUE.objval = objString;
         strbuf.Clear();
-
-
     }
     inline void Lexer::ParseIdentifier() {
         TOKEN(TokenType::Identifier, CURRENT_POS, 0, CURRENT_LINE);

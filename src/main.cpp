@@ -4,14 +4,23 @@
 #include <vm.h>
 
 #include <buffer.h>
+#include <tchar.h>
 
 #include "obj/value.h"
+#include "obj/string.h"
+
 using namespace hypermind;
 
 using namespace std;
+
 int main() {
 
-    auto *source = const_cast<HMChar *>("int test ='test\\n \\\\ string value' ; ");
+
+    exit(0);
+
+
+
+    auto *source = const_cast<HMChar *>(R"(int test ='test\n \\ string value' ; )");
     VM vm;
 
     Buffer<HMInteger > buf(&vm);

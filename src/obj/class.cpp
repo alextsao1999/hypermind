@@ -5,12 +5,13 @@
 #include "class.h"
 namespace hypermind {
 
-    HMUINT32 HMMethod::hash() {
+    HMHash HMMethod::hash() {
         return 0;
     }
 
-    HMUINT32 HMClass::hash() {
+    HMHash HMClass::hash() {
         return 0;
     }
 
+    HMInstance::HMInstance(ObjectType type, HMClass *objClass, HMObject *next) : HMObject(type, objClass, next) {}
 }

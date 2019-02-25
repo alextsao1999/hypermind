@@ -27,15 +27,22 @@ namespace hypermind {
         void Append(const T &data);
         HMUINT32 GetCount();
         T* GetData();
+        /**
+         *  注意: 删除时会调用析构函数
+         * @param index
+         * @return
+         */
         bool Remove(HMUINT32 index);
         bool Insert(HMUINT32 index, const T &data);
         void Dump();
 
+        HMUINT32 GetSize() {
+            return mCount * sizeof(T);
+        };
 
         void Clear();
 
         T &operator[](HMUINT32 index);
-
 
     private:
         T *mData{nullptr};
@@ -103,7 +110,8 @@ namespace hypermind {
 
     template<typename T>
     bool Buffer<T>::Remove(HMUINT32 index) {
-        mData[index].~T();
+        // 删除一个对象
+        mData[index].~T(); // 调用析构函数
         memcpy(&mData[index], &mData[index  + 1], (--mCount - index) * sizeof(T));
         return true;
     }

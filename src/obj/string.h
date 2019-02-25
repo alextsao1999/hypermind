@@ -7,14 +7,24 @@
 
 #include <hypermind.h>
 #include "object.h"
+#include "vm.h"
+#include "utils.h"
 namespace hypermind {
     struct HMString : public HMObject {
-        String str;
-        HMUINT32 hashCode;
+        HMHash hashCode{};
+        HMUINT32 length{};
+        HMChar *charSequence{nullptr};
 
-        HMString(ObjectType type, HMClass *objClass, HMObject *next, const String &str);
+        explicit HMString(VM *vm, const HMChar *str, HMUINT32 length) : HMObject(vm, ObjectType::String,
+                                                                                 vm->mStringClass){
+            // 计算文本hash
+            hashCode = hashString(charSequence, length);
+            length *= sizeof(HMChar);
+            charSequence = (HMChar *) vm->Allocate(length);
+            memcpy(charSequence, str, length);
+        };
 
-        HMUINT32 hash() override;
+        HMHash hash() override;
     };
 
 }

@@ -6,14 +6,14 @@
 #define HYPERMIND_FUNCTION_H
 
 #include "hypermind.h"
-#include "buffer.h"
 #include "object.h"
+#include "buffer.h"
 #include "module.h"
 #include "value.h"
 namespace hypermind {
     // 闭包对象
     struct HMClosure : public HMObject {
-        HMUINT32 hash() override;
+        HMHash hash() override;
 
     };
 
@@ -28,19 +28,19 @@ namespace hypermind {
         FunctionDebug *debug;
 #endif
 
-        HMUINT32 hash() override;
+        HMHash hash() override;
     };
 
     // Upvalue对象
     struct HMUpvalue : public HMObject {
-        HMUINT32 hash() override;
+        HMHash hash() override;
     };
 
 
     // 调试结构
     struct FunctionDebug {
         HMChar *name;  // 函数名称
-        Buffer<HMInteger >line;  // 所在行号
+        Buffer<HMInteger>line;  // 所在行号
     };
 
 }

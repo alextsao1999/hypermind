@@ -9,6 +9,7 @@
 #include <deque>
 #include <vm.h>
 #include <buffer.h>
+#include "obj/value.h"
 #define NEXT_CHAR mSource[mPosition + 1]
 
 //当前位置
@@ -18,14 +19,16 @@
 #define CURRENT_TOKEN mCurrentToken
 
 // 设置当前Token
-#define TOKEN(k, s, len, line) { mCurrentToken.mType = k; \
-mCurrentToken.mStart = s;  \
+#define TOKEN(K, S, len, line) { mCurrentToken.mType = K; \
+mCurrentToken.mStart = S;  \
 mCurrentToken.mLength = len; \
-mCurrentToken.mLine = line; }
+mCurrentToken.mLine = line; \
+mCurrentToken.mValue = {ValueType::Undefined, 0}; }
 
-#define TOKEN_TYPE(k) mCurrentToken.mType = k;
+#define TOKEN_TYPE(K) mCurrentToken.mType = K;
 #define TOKEN_LENGTH(l) {mCurrentToken.mLength = l;}
 #define TOKEN_START mCurrentToken.mStart
+#define TOKEN_VALUE mCurrentToken.mValue
 
 //下一个位置
 #define NEXT() {mPosition++;}
@@ -103,6 +106,7 @@ namespace hypermind {
         const HMChar *mStart;
         HMUINT32 mLength;
         HMUINT32 mLine;
+        Value mValue;
 
         Token(TokenType mType, HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine);
         Token();
@@ -130,7 +134,7 @@ namespace hypermind {
         ~Lexer();
 
         Token Read();
-        Token Peek(HMInteger i);
+        Token Peek(HMInteger i = 1);
         bool Match(TokenType tokenKind);
         HMChar *GetSource() {
             return mSource;

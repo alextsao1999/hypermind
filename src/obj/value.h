@@ -15,10 +15,12 @@ namespace hypermind {
         Null,
         True,
         False,
-        Number,
+        Integer,
+        Double,
         Object
     };
 
+    //Tagged union
     struct Value {
         ValueType type;
         union {

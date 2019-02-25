@@ -4,7 +4,13 @@
 
 #include "object.h"
 namespace hypermind {
-    HMObject::HMObject(hypermind::ObjectType type, hypermind::HMClass *objClass,
-                                  hypermind::HMObject *next) : type(type), objClass(objClass), next(next) {}
+
+    bool HMObject::release() {
+        return false;
+    }
+
+    HMObject::HMObject(VM *vm, ObjectType type, HMClass *classObj) : type(type), classObj(classObj) {
+        vm->LinkObject(this);
+    }
 
 }

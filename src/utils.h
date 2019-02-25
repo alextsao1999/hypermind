@@ -9,7 +9,7 @@
 
 namespace hypermind {
 
-    HMUINT32 hashString(const char *str, uint32_t length);
+    HMHash hashString(const HMChar *str, HMUINT32 length);
 
 
 }

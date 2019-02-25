@@ -30,12 +30,15 @@ namespace hypermind {
     struct HMObject {
         ObjectType type;
         bool isDark{false};  // 是否可达
-        HMClass *objClass;
+        HMClass *classObj;
         HMObject *next; // 链接下一个Object
+        HMObject(VM *vm, ObjectType type, HMClass *classObj);
 
-        HMObject(ObjectType type, HMClass *objClass, HMObject *next);
+        // 获得对象hash值
+        virtual HMHash hash() = 0;
 
-        virtual HMUINT32 hash() = 0;
+        // 释放对象内存
+        virtual bool release();
 
     };
 

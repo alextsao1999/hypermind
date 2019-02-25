@@ -20,6 +20,7 @@ typedef uint32_t HMUINT32;
 typedef double HMDouble;
 typedef float HMFloat;
 typedef std::string String;
+typedef HMUINT32 HMHash;
 
 #define UNUSED __attribute__ ((unused))
 
