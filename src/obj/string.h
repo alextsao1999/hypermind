@@ -17,11 +17,11 @@ namespace hypermind {
         HMChar *charSequence{nullptr};
 
         explicit HMString(VM *vm, const HMChar *str, HMUINT32 length) : HMObject(vm, ObjectType::String,
-                                                                                 vm->mStringClass){
+                                                                                 vm->mStringClass), length(length){
             // 计算文本hash
-            hashCode = hashString(charSequence, length);
             HMUINT32 size = length * sizeof(HMChar);
             charSequence = (HMChar *) vm->Allocate(size);
+            hashCode = hashString(charSequence, size);
             memcpy(charSequence, str, size);
         };
 

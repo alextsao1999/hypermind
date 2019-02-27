@@ -102,11 +102,14 @@ namespace hypermind {
     };
 
     struct Token {
-        TokenType mType;
-        const HMChar *mStart;
-        HMUINT32 mLength;
-        HMUINT32 mLine;
-        Value mValue;
+        TokenType mType{TokenType::End};
+        const HMChar *mStart{};
+        HMUINT32 mLength{};
+        HMUINT32 mLine{};
+        Value mValue{};
+
+        Token(TokenType mType, const HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine);
+        Token() = default;
 
     };
 

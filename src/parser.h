@@ -11,11 +11,14 @@ namespace hypermind {
     class Parser {
     protected:
         const HMChar *mFileName;
-        Lexer mLexer;
+        Lexer &mLexer;
 
     public:
-        Parser(const HMChar *mFileName, const Lexer &mLexer);
+        Parser(const HMChar *mFileName, Lexer &mLexer) : mFileName(mFileName), mLexer(mLexer) {}
 
+        void BindFunction(){
+
+        }
 
 
     };

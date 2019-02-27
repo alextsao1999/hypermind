@@ -16,20 +16,17 @@ using namespace std;
 int main() {
     auto *source = const_cast<HMChar *>(R"(int test ='test\n \\ string value' ; )");
     VM vm;
+    vm.New<HMString>(&vm, source, 37);
+    vm.New<HMString>(&vm, source, 36);
+    vm.New<HMString>(&vm, source, 35);
+    vm.New<HMString>(&vm, source, 34);
+    vm.New<HMString>(&vm, source, 22);
+    vm.New<HMString>(&vm, source, 11);
+    cout << " allocated bytes: "  << vm.GetAllocatedBytes() << endl;
 
-    Buffer<HMInteger > buf(&vm);
-    buf.Append(111);
-    buf.Append(2222);
-    buf.Append(333);
+    cout << "size of Object : " << sizeof(HMObject) << endl;
 
-    buf.Insert(5, 90);
-
-    //buf.Remove(3);
-
-
-    buf.Dump();
-    std::cout << "长度 : " << buf.GetCount();
-
+    vm.DumpAllObjects();
 
 
     return 0;

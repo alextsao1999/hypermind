@@ -258,10 +258,12 @@ namespace hypermind {
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
         // 当前字符为 " ' 跳过   获取下一个字符
         NEXT();
-        auto *objString = mVM->Allocate<HMString>();
+        //auto *objString = mVM->Allocate<HMString>();
          // 此时的HMString 会储存在Token.mValue 中函数编译完成后 会储存到constants 中
          // 当函数闭包没有引用时会释放constants的对象
-        new(objString) HMString(mVM, strbuf.GetData(), strbuf.GetSize());
+        //new(objString) HMString(mVM, strbuf.GetData(), strbuf.GetSize());
+        auto *objString = mVM->New<HMString>(mVM, strbuf.GetData(), strbuf.GetSize());
+
         TOKEN_VALUE.type = ValueType::Object;
         TOKEN_VALUE.objval = objString;
         strbuf.Clear();
@@ -274,8 +276,7 @@ namespace hypermind {
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
     }
 
-    Lexer::~Lexer() {
-    }
+    Lexer::~Lexer() = default;
 
     Token Lexer::Read() {
         if (!mTokens.empty()) {
@@ -286,11 +287,17 @@ namespace hypermind {
         return ReadAToken();
     }
 
-    Lexer::Lexer(VM *mVM, HMChar *mSource) : mVM(mVM), mSource(mSource) {}
+    Lexer::Lexer(VM *mVM, HMChar *mSource) : mVM(mVM), mSource(mSource) {
 
-    Token::Token(TokenType mType, HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine) : mType(mType), mStart(mStart),
-                                                                                mLength(mLength), mLine(mLine) {}
-    Token::Token() {}
+    }
 
 
+    Token::Token(TokenType mType, const HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine) : mType(mType),
+                                                                                            mStart(mStart),
+                                                                                            mLength(mLength),
+                                                                                            mLine(mLine) {
+
+
+
+    }
 }

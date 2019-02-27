@@ -7,6 +7,5 @@
 namespace hypermind{
 
 
-    Parser::Parser(const char *mFileName, const Lexer &mLexer) : mFileName(mFileName), mLexer(mLexer) {}
 
 }

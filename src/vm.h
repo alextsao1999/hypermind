@@ -27,6 +27,7 @@ namespace hypermind {
         void *MemManger(void *ptr, size_t oldSize, size_t newSize);
         HMUINT32 GetAllocatedBytes();
 
+
         /**
          * 在虚拟机中申请内存
          * @tparam T  申请类型
@@ -46,6 +47,7 @@ namespace hypermind {
         }
 
         void LinkObject(HMObject *obj);
+        void DumpAllObjects();
 
         template<typename T, typename ...Args>
         T *New(Args...args) {
