@@ -6,7 +6,7 @@
 #define HYPERMIND_TABLE_H
 
 namespace hypermind {
-    class HMTable {
+    struct HMTable : public HMObject {
 
     };
 

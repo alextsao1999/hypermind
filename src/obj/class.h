@@ -4,15 +4,12 @@
 
 #ifndef HYPERMIND_CLASS_H
 #define HYPERMIND_CLASS_H
-#include "buffer.h"
 
-#include "vm.h"
-#include "object.h"
+#include "buffer.h"
 #include "function.h"
 #include "value.h"
 namespace hypermind {
     // 原生函数指针
-    class VM;
     typedef bool (*HMPrimitive)(VM *vm, Value *args);
 
     enum class MethodType {
@@ -31,22 +28,19 @@ namespace hypermind {
 
         };
         HMHash hash() override;
-
+        HMMethod(VM *vm, MethodType methodType, HMClosure *fn);
     };
 
     // 类对象
     struct HMClass : public HMObject {
         HMClass *superClass;  // 父类
         HMUINT32 fieldNumer;
-        Buffer<HMMethod> methods;
-
         HMHash hash() override;
-
+        Buffer<HMMethod> methods;
     };
+
     struct HMInstance : public HMObject {
         Value *fields{nullptr};
-        HMInstance(ObjectType type, HMClass *objClass, HMObject *next);
-
     };
 
 }

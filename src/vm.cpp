@@ -2,7 +2,6 @@
 // Created by 曹顺 on 2019/2/13.
 //
 
-
 #include "vm.h"
 
 namespace hypermind {
@@ -19,8 +18,4 @@ namespace hypermind {
         return mAllocatedBytes;
     }
 
-    void VM::LinkObject(HMObject *obj) {
-        obj->next = mAllObjects;
-        mAllObjects->next = obj;
-    }
 }

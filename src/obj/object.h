@@ -6,10 +6,8 @@
 #define HYPERMIND_OBJECT_H
 
 #include "hypermind.h"
-#include "buffer.h"
-
+#include "vm.h"
 namespace hypermind {
-    struct HMObject;
     struct HMClass;
 
     enum class ObjectType {
@@ -21,29 +19,46 @@ namespace hypermind {
         String,
         Upval,
         Function,
+        Method,
         Closure,
         Instance,
         Thread
     };
-
     // Object 是一切对象的基类
     struct HMObject {
-        ObjectType type;
+        ObjectType type{};
         bool isDark{false};  // 是否可达
-        HMClass *classObj;
-        HMObject *next; // 链接下一个Object
+        HMClass *classObj{};
+        HMObject *next{}; // 链接下一个Object
+
+        HMObject() = default;
+        HMObject(ObjectType type, HMClass *classObj) : type(type), classObj(classObj) {};
+
+        /**
+         * 自动将对象链接到虚拟机中
+         * @param vm
+         * @param type
+         * @param classObj
+         */
         HMObject(VM *vm, ObjectType type, HMClass *classObj);
 
-        // 获得对象hash值
+        /**
+         * 获得对象hash值
+         * @return hash值
+         */
         virtual HMHash hash() = 0;
 
-        // 释放对象内存
-        virtual bool release();
+        virtual void dump(){};
 
+        /**
+         * 释放对象内存
+         * @return bool
+         */
+        virtual HMBool release(VM *vm){
+            return true;
+        };
     };
 
 
 }
-
-
 #endif //HYPERMIND_OBJECT_H

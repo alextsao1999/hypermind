@@ -6,6 +6,7 @@
 #include "lexer.h"
 #include "obj/string.h"
 namespace hypermind {
+
     inline bool IsSpace(HMChar ch){
         return ch == _HM_C(' ') || ch == _HM_C('\r');
     }
@@ -253,13 +254,13 @@ namespace hypermind {
                 strbuf.Append(CURRENT_CHAR);
             }
             NEXT();
-        } while (CURRENT_CHAR != _HM_C(first));
+        } while (CURRENT_CHAR != first);
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
         // 当前字符为 " ' 跳过   获取下一个字符
         NEXT();
         auto *objString = mVM->Allocate<HMString>();
-        // 此时的HMString 会储存在Token.mValue 中函数编译完成后 会储存到constants 中
-        // 当函数闭包没有引用时会释放constants的对象
+         // 此时的HMString 会储存在Token.mValue 中函数编译完成后 会储存到constants 中
+         // 当函数闭包没有引用时会释放constants的对象
         new(objString) HMString(mVM, strbuf.GetData(), strbuf.GetSize());
         TOKEN_VALUE.type = ValueType::Object;
         TOKEN_VALUE.objval = objString;

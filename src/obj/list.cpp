@@ -3,3 +3,7 @@
 //
 
 #include "list.h"
+
+namespace hypermind {
+
+}

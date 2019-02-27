@@ -5,6 +5,7 @@
 #ifndef HYPERMIND_HYPERMIND_H
 #define HYPERMIND_HYPERMIND_H
 
+#include <vector>
 #include <string>
 #include <cstdio>
 #include <cstdint>
@@ -21,7 +22,11 @@ typedef double HMDouble;
 typedef float HMFloat;
 typedef std::string String;
 typedef HMUINT32 HMHash;
-
+typedef bool HMBool;
+namespace hypermind {
+    struct HMClass;
+    struct HMObject;
+}
 #define UNUSED __attribute__ ((unused))
 
 #ifdef DEBUG

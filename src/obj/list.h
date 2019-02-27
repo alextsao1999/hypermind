@@ -5,10 +5,8 @@
 #ifndef HYPERMIND_LIST_H
 #define HYPERMIND_LIST_H
 
+namespace hypermind {
 
-class list {
-
-};
-
+}
 
 #endif //HYPERMIND_LIST_H

@@ -108,9 +108,6 @@ namespace hypermind {
         HMUINT32 mLine;
         Value mValue;
 
-        Token(TokenType mType, HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine);
-        Token();
-
     };
 
     void DumpToken(Token token);
@@ -119,6 +116,7 @@ namespace hypermind {
     protected:
         bool mEof{false};
         std::deque<Token> mTokens;
+        Token mCurrentToken;
 
         Token ReadAToken();
         inline void SkipSpace();
@@ -126,7 +124,6 @@ namespace hypermind {
         inline void ParseIdentifier();
         inline void ParseString();
         inline void ParseNumber();
-        Token mCurrentToken;
 
     public:
         Lexer(VM *mVM, HMChar *mSource);

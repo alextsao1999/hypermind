@@ -6,9 +6,11 @@
 #define HYPERMIND_MODULE_H
 
 #include "object.h"
+
 namespace hypermind {
     // 模块对象
     struct HMModule : public HMObject {
+
 
     };
 

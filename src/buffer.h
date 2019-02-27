@@ -5,16 +5,13 @@
 #ifndef HYPERMIND_BUFFER_H
 #define HYPERMIND_BUFFER_H
 
-#include <hypermind.h>
-#include <vm.h>
 #include <iostream>
-
+#include "hypermind.h"
+#include "vm.h"
 // Buffer
 #define BUFFER_GROWTH(count) CeilToPowerOf2(count)
 
 namespace hypermind {
-    class VM;
-
     HMUINT32 CeilToPowerOf2(HMUINT32 v);
 
     template <typename T>

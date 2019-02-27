@@ -8,8 +8,6 @@
 #include "object.h"
 
 namespace hypermind {
-    struct HMObject;
-
     enum class ValueType {
         Undefined,
         Null,

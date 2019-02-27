@@ -3,14 +3,24 @@
 //
 
 #include "object.h"
+#include "class.h"
+
 namespace hypermind {
 
-    bool HMObject::release() {
-        return false;
+    HMHash HMClass::hash() {
+        return 0;
     }
 
-    HMObject::HMObject(VM *vm, ObjectType type, HMClass *classObj) : type(type), classObj(classObj) {
-        vm->LinkObject(this);
+    HMObject::HMObject(VM *vm, ObjectType type, HMClass *classObj) {
+        next = vm->mAllObjects;
+        vm->mAllObjects->next = this;
     }
+
+
+    void VM::LinkObject(HMObject *obj) {
+        obj->next = mAllObjects;
+        mAllObjects->next = obj;
+    }
+
 
 }

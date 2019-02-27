@@ -14,12 +14,6 @@ using namespace hypermind;
 using namespace std;
 
 int main() {
-
-
-    exit(0);
-
-
-
     auto *source = const_cast<HMChar *>(R"(int test ='test\n \\ string value' ; )");
     VM vm;
 
@@ -39,15 +33,5 @@ int main() {
 
 
     return 0;
-
-    //Lexer lexer(&vm, source);
-//    Token token;
-//    while ((token = lexer.Read()).mType != TokenType::End) {
-//        DumpToken(token);
-//
-//    }
-//
-//
-//    return 0;
 }
 

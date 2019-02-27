@@ -9,9 +9,8 @@ namespace hypermind {
         return 0;
     }
 
-    HMHash HMClass::hash() {
-        return 0;
+    HMMethod::HMMethod(VM *vm, MethodType methodType, HMClosure *fn) : HMObject(vm, ObjectType::Method, vm->mMethodClass) {
+
     }
 
-    HMInstance::HMInstance(ObjectType type, HMClass *objClass, HMObject *next) : HMObject(type, objClass, next) {}
 }

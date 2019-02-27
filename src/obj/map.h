@@ -5,10 +5,8 @@
 #ifndef HYPERMIND_MAP_H
 #define HYPERMIND_MAP_H
 
+namespace hypermind {
 
-class map {
-
-};
-
+}
 
 #endif //HYPERMIND_MAP_H
