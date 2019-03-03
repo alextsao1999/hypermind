@@ -10,14 +10,15 @@ namespace hypermind {
         return hashCode;
     }
 
-    HMBool HMString::release(VM *vm) {
+    HMBool HMString::free(VM *vm) {
+
         charSequence = (HMChar *) vm->MemManger(charSequence, length * sizeof(HMChar), 0);
         return charSequence == nullptr;
     }
 
     void HMString::dump() {
         std::string str(charSequence, length * sizeof(HMChar));
-        std::cout << " { string(" << sizeof(HMString) << ") value : " << str << "   hash : " << hashCode << "  } "
+        std::cout << " { string(" << sizeof(HMString) << ")   " << str << "   hash : " << hashCode << "  } "
                   << std::endl;
 
     }

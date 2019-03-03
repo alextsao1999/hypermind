@@ -54,7 +54,7 @@ namespace hypermind {
          * 释放对象内存
          * @return bool
          */
-        virtual HMBool release(VM *vm){
+        virtual HMBool free(VM *vm){
             return true;
         };
     };

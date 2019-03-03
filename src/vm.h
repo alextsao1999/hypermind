@@ -27,7 +27,6 @@ namespace hypermind {
         void *MemManger(void *ptr, size_t oldSize, size_t newSize);
         HMUINT32 GetAllocatedBytes();
 
-
         /**
          * 在虚拟机中申请内存
          * @tparam T  申请类型
@@ -46,12 +45,16 @@ namespace hypermind {
             return MemManger(nullptr, 0, elementSize * count);
         }
 
+        void *Deallocate(void *ptr, HMUINT32 size){
+            return nullptr;
+        };
+
         void LinkObject(HMObject *obj);
         void DumpAllObjects();
 
         template<typename T, typename ...Args>
-        T *New(Args...args) {
-            return new(MemManger(nullptr, 0, sizeof(T))) T(args...);
+        T *New(Args&&...args) {
+            return new(MemManger(nullptr, 0, sizeof(T))) T(std::forward<Args>(args)...);
         }
 
     protected:

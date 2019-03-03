@@ -20,9 +20,9 @@ namespace hypermind {
         return IsAlpha(ch) || ch == _HM_C('_');
     }
 
-    void DumpToken(Token token) {
+    void Token::dump(std::ostream &os) {
         std::string name;
-        switch (token.mType) {
+        switch (mType) {
             case TokenType::End:
                 name = "<结束>";
                 break;
@@ -50,12 +50,11 @@ namespace hypermind {
             default:
                 name = "<未知>";
         }
-        if (token.mLength != 1){
-            std::string str(token.mStart, token.mLength);
+        if (mLength != 1){
+            std::string str(mStart, mLength);
             name += str;
         }
-
-        std::cout << name  << " length:" << token.mLength << "  lineNum: " << token.mLine << std::endl;
+        os << name  << " length:" << mLength << "  lineNum: " << mLine << std::endl;
 
     }
 
@@ -262,7 +261,7 @@ namespace hypermind {
          // 此时的HMString 会储存在Token.mValue 中函数编译完成后 会储存到constants 中
          // 当函数闭包没有引用时会释放constants的对象
         //new(objString) HMString(mVM, strbuf.GetData(), strbuf.GetSize());
-        auto *objString = mVM->New<HMString>(mVM, strbuf.GetData(), strbuf.GetSize());
+        auto *objString = mVM->New<HMString>(mVM, strbuf.GetData(), strbuf.GetCount());
 
         TOKEN_VALUE.type = ValueType::Object;
         TOKEN_VALUE.objval = objString;
@@ -297,7 +296,6 @@ namespace hypermind {
                                                                                             mLength(mLength),
                                                                                             mLine(mLine) {
 
-
-
     }
+
 }

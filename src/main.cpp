@@ -8,7 +8,6 @@
 
 #include "obj/value.h"
 #include "obj/string.h"
-
 using namespace hypermind;
 
 using namespace std;
@@ -23,6 +22,7 @@ int main() {
     vm.New<HMString>(&vm, source, 22);
     vm.New<HMString>(&vm, source, 11);
     cout << " allocated bytes: "  << vm.GetAllocatedBytes() << endl;
+
 
     cout << "size of Object : " << sizeof(HMObject) << endl;
 

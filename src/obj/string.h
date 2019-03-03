@@ -9,7 +9,7 @@
 #include "vm.h"
 #include "object.h"
 #include "utils.h"
-
+#include <memory>
 namespace hypermind {
     struct HMString : public HMObject {
         HMHash hashCode{};
@@ -18,16 +18,16 @@ namespace hypermind {
 
         explicit HMString(VM *vm, const HMChar *str, HMUINT32 length) : HMObject(vm, ObjectType::String,
                                                                                  vm->mStringClass), length(length){
-            // 计算文本hash
             HMUINT32 size = length * sizeof(HMChar);
+            // 计算文本hash
             charSequence = (HMChar *) vm->Allocate(size);
-            hashCode = hashString(charSequence, size);
+            hashCode = hashString(charSequence, length);
             memcpy(charSequence, str, size);
         };
 
         HMHash hash() override;
 
-        HMBool release(VM *vm) override;
+        HMBool free(VM *vm) override;
 
         void dump() override;
     };

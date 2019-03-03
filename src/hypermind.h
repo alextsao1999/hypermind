@@ -23,6 +23,8 @@ typedef float HMFloat;
 typedef std::string String;
 typedef HMUINT32 HMHash;
 typedef bool HMBool;
+typedef std::string String;
+
 namespace hypermind {
     struct HMClass;
     struct HMObject;
