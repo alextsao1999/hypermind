@@ -34,27 +34,17 @@ namespace hypermind{
     // BinaryOp ::= ('+'  Unary)
     ASTExprPtr Parser::ParseBinaryOp(ASTExprPtr lhs, HMInteger prec) {
         while (true) {
-            Token nextToken = mLexer.Peek();
             TokenType op = mLexer.PeekTokenType();
             Precedence nextOp = opPrecs[(HMInteger) op];
-            if (nextOp.prec == -1) // 没有符号优先级信息 并不是 Expression
+            if (nextOp.prec == -1) // 没有符号优先级信息
                 return lhs;
-            mLexer.Consume();
-            ASTExprPtr rhs;
             if (prec > nextOp.prec)
                 break;
+            mLexer.Consume();
             ASTBinaryPtr lhsBin = make_ptr(ASTBinary);
             lhsBin->op.mType = op;
             lhsBin->mLHS = lhs;
-/*
-            if (nextOp.association) { // 真为 左结合
-                lhsBin->mRHS = ParseBinaryOp(lhs, nextOp.prec + 1);
-            } else {
-                lhsBin->mRHS = ParseBinaryOp(lhs, nextOp.prec);
-            }
-*/
-            lhsBin->mRHS = ParseBinaryOp(lhs, nextOp.prec);
-
+            lhsBin->mRHS = ParseBinaryOp(ParseUnary(), nextOp.association ? nextOp.prec + 1 : nextOp.prec);
             lhs = lhsBin;
         }
         return lhs;

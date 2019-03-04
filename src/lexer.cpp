@@ -46,8 +46,113 @@ namespace hypermind {
             case TokenType::Number:
                 name = String(mStart, mLength * sizeof(HMChar));
                 break;
+            case TokenType::String:
+                break;
+            case TokenType::Dot:
+                name = ".";
+                break;
+            case TokenType::Comma:
+                name = ",";
+                break;
+            case TokenType::LeftParen:
+                name = "(";
+                break;
+            case TokenType::RightParen:
+                name = ")";
+                break;
+            case TokenType::LeftBracket:
+                name = "[";
+                break;
+            case TokenType::RightBracket:
+                name = "]";
+                break;
+            case TokenType::LeftBrace:
+                name = "{";
+                break;
+            case TokenType::RightBrace:
+                name = "}";
+                break;
+            case TokenType::Increase:
+                name = "++";
+                break;
+            case TokenType::Decrease:
+                name = "--";
+                break;
+            case TokenType::Assign:
+                name = "=";
+                break;
+            case TokenType::AddAssign:
+                name = "+=";
+                break;
+            case TokenType::SubAssign:
+                name = "-=";
+                break;
+            case TokenType::MulAssign:
+                name = "*=";
+                break;
+            case TokenType::DivAssign:
+                name = "/=";
+                break;
+            case TokenType::ModAssign:
+                name = "%=";
+                break;
+            case TokenType::AndAssign:
+                name = "&=";
+                break;
+            case TokenType::OrAssign:
+                name = "|=";
+                break;
+            case TokenType::XorAssign:
+                name = "^=";
+                break;
+            case TokenType::Arrow:
+                name = "->";
+                break;
+            case TokenType::Not:
+                name = "!";
+                break;
+            case TokenType::Equal:
+                name = "==";
+                break;
+            case TokenType::NotEqual:
+                name = "!=";
+                break;
+            case TokenType::Greater:
+                name = ">";
+                break;
+            case TokenType::Less:
+                name = "<";
+                break;
+            case TokenType::GreaterEqual:
+                name = ">=";
+                break;
+            case TokenType::LessEqual:
+                name = "<=";
+                break;
+            case TokenType::Or:
+                name = "|";
+                break;
+            case TokenType::LogicOr:
+                name = "||";
+                break;
+            case TokenType::And:
+                name = "&";
+                break;
+            case TokenType::LogicAnd:
+                name = "&&";
+                break;
+            case TokenType::Mod:
+                name = "%";
+                break;
+            case TokenType::At:
+                name = "@";
+                break;
+            case TokenType::Colon:
+                name = ":";
+                break;
             default:
                 name = "<未知>";
+
         }
         os << " " << name << " " ;
     }
