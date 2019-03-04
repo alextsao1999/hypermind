@@ -16,8 +16,9 @@ int main() {
     auto *source = const_cast<HMChar *>("1+2*3");
     VM vm;
     Lexer lexer(&vm, source);
+
     Parser parser("", lexer);
-    ASTExprPtr ast = parser.parseExpression();
+    ASTExprPtr ast = parser.ParseExpression();
     ast->dump(cout, 0);
 
 //    vm.New<HMString>(&vm, source, 37);

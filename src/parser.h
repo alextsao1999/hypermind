@@ -17,7 +17,7 @@ namespace hypermind {
         HMInteger prec;
         HMBool association; // true 为左结合  false 为右结合
     };
-    Precedence opPrecs[] = {
+    static Precedence opPrecs[] = {
             /*End,*/   UNPREC,
             /*Delimiter,*/ UNPREC,
             /*Number*/  UNPREC,
@@ -75,16 +75,14 @@ namespace hypermind {
     protected:
         const HMChar *mFileName{};
         Lexer &mLexer;
+        inline ASTExprPtr ParsePrimary();
+        inline ASTExprPtr ParseUnary();
+        inline ASTExprPtr ParseBinaryOp(ASTExprPtr lhs, HMInteger prec);
 
     public:
         Parser(const HMChar *mFileName, Lexer &mLexer) : mFileName(mFileName), mLexer(mLexer) {}
 
-        inline ASTExprPtr parsePrimary();
-        inline ASTExprPtr parseUnary();
-        inline ASTExprPtr parseExpression();
-
-        inline ASTExprPtr parseBinaryOp(ASTExprPtr lhs, HMInteger prec);
-
+        ASTExprPtr ParseExpression();
 
     };
 

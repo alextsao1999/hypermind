@@ -7,12 +7,12 @@
 namespace hypermind{
 
     // Unary ::= Primary |  ! Primary | ++ Primary | Primary ++
-    ASTExprPtr Parser::parseUnary() {
-        return parsePrimary();
+    ASTExprPtr Parser::ParseUnary() {
+        return ParsePrimary();
     }
 
     // Primary ::= Literal | Varible
-    ASTExprPtr Parser::parsePrimary() {
+    ASTExprPtr Parser::ParsePrimary() {
         Token tok = mLexer.Read();
         if (tok.mType == TokenType::Identifier) {
             ASTVariablePtr astVariablePtr = make_ptr(ASTVariable);
@@ -26,13 +26,13 @@ namespace hypermind{
 
     }
 
-    ASTExprPtr Parser::parseExpression() {
-        ASTExprPtr lhs = parseUnary();
-        return parseBinaryOp(lhs, 0);
+    ASTExprPtr Parser::ParseExpression() {
+        ASTExprPtr lhs = ParseUnary();
+        return ParseBinaryOp(lhs, 0);
     }
 
     // BinaryOp ::= ('+'  Unary)
-    ASTExprPtr Parser::parseBinaryOp(ASTExprPtr lhs, HMInteger prec) {
+    ASTExprPtr Parser::ParseBinaryOp(ASTExprPtr lhs, HMInteger prec) {
         while (true) {
             TokenType op = mLexer.PeekTokenType();
             Precedence nextOp = opPrecs[(HMInteger) op];
@@ -42,13 +42,12 @@ namespace hypermind{
             ASTExprPtr rhs;
             if (nextOp.prec < prec)
                 break;
-
             ASTBinaryPtr &&lhsBin = make_ptr(ASTBinary);
             lhsBin->mLHS = lhs;
             if (nextOp.association) { // 真为 左结合
-                lhsBin->mRHS = parseBinaryOp(lhs, nextOp.prec + 1);
+                lhsBin->mRHS = ParseBinaryOp(lhs, nextOp.prec + 1);
             } else {
-                lhsBin->mRHS = parseBinaryOp(lhs, nextOp.prec);
+                lhsBin->mRHS = ParseBinaryOp(lhs, nextOp.prec);
             }
             lhs = lhsBin;
         }

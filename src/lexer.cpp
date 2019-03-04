@@ -21,50 +21,44 @@ namespace hypermind {
     }
 
     void Token::dump(std::ostream &os) {
-/*
         std::string name;
         switch (mType) {
             case TokenType::End:
                 name = "<结束>";
                 break;
             case TokenType::Delimiter:
-                name = "<行结束>";
+                name = "<行结束> \n";
                 break;
             case TokenType::Add:
-                name = "<加号 +>";
+                name = "+";
                 break;
             case TokenType::Sub:
-                name = "<减号 ->";
+                name = "-";
                 break;
             case TokenType::Mul:
-                name = "<乘号 *>";
+                name = "*";
                 break;
             case TokenType::Div:
-                name = "<除号 />";
+                name = "/";
                 break;
             case TokenType::Identifier:
-                name = "<标识符>";
+                name = String(mStart, mLength);
                 break;
             case TokenType::Number:
-                name = "<数字>";
+                name = String(mStart, mLength);
                 break;
             default:
                 name = "<未知>";
         }
-        if (mLength != 1){
-            std::string str(mStart, mLength);
-            name += str;
-        }
-        os << name  << " length:" << mLength << "  lineNum: " << mLine << std::endl;
-*/
+        os << " " << name << " " << std::endl;
 
     }
 
-    //读取一个Token
+    // 读取一个Token
     void Lexer::GetNextToken() {
         if (mEof)
             return;
-        //跳过空格
+        // 跳过空格
         SkipSpace();
         switch (CURRENT_CHAR) {
             case _HM_C('\n'):
@@ -153,7 +147,7 @@ namespace hypermind {
             case _HM_C('\0'):
                 mEof = true;
                 TOKEN(TokenType::Delimiter, CURRENT_POS, 0, CURRENT_LINE);
-                return; // 已经到文件尾部了 返回就ok
+                break;
             default:
                 if (IsCodeChar(CURRENT_CHAR)) {
                     ParseIdentifier();
@@ -165,7 +159,7 @@ namespace hypermind {
                     LEXER_UNKOWNCHAR(CURRENT_CHAR);
                     NEXT();
                 }
-                // 不NEXT 直接返回
+                return; // 已经到文件尾部了 返回就ok
         }
         NEXT();
     }
