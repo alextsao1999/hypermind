@@ -28,11 +28,10 @@ namespace hypermind {
     AST_DUMP(ASTLiteral) {
         switch (mValue.type) {
             case ValueType::Integer:
-                os << "[" << mValue.intval << "]";
-                
+                os << "[inval : " << mValue.intval << "]";
                 break;
             case ValueType::Object:
-                mValue.objval->dump();
+                mValue.objval->dump(os);
                 break;
             case ValueType::Double:
                 os << mValue.dbval;
@@ -51,6 +50,7 @@ namespace hypermind {
                 break;
         }
     }
+
     AST_DUMP(ASTVariable) {
         // 字面量Dump
         mVar.dump(os);

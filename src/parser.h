@@ -70,7 +70,6 @@ namespace hypermind {
             /*At*/  UNPREC,  // @
             /*Colon*/  UNPREC //冒号 :
     };
-
     class Parser {
     protected:
         const HMChar *mFileName{};

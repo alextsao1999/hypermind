@@ -14,9 +14,7 @@ using namespace hypermind;
 using namespace std;
 
 int main() {
-
-
-    auto *source = const_cast<HMChar *>("1+2*3");
+    auto *source = const_cast<HMChar *>("111+222*333");
     VM vm;
     Lexer lexer(&vm, source);
 

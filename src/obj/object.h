@@ -5,16 +5,17 @@
 #ifndef HYPERMIND_OBJECT_H
 #define HYPERMIND_OBJECT_H
 
+#include <iostream>
 #include "hypermind.h"
 #include "vm.h"
 
 #define HM_OBJECT(name) \
 struct HM##name : public HMObject
 #define HM_OBJ_DECL() HMHash hash() override; \
-void dump() override; \
+void dump(std::ostream &os) override; \
 HMBool free(VM *vm) override;
 #define HM_OBJ_HASH(obj)  HMHash HM##obj::hash()
-#define HM_OBJ_DUMP(obj)  void HM##obj::dump()
+#define HM_OBJ_DUMP(obj)  void HM##obj::dump(std::ostream &os)
 #define HM_OBJ_FREE(obj)  HMBool HM##obj::free(VM *vm)
 
 namespace hypermind {
@@ -58,7 +59,7 @@ namespace hypermind {
          */
         virtual HMHash hash() = 0;
 
-        virtual void dump(){};
+        virtual void dump(std::ostream &os){};
 
         /**
          * 释放对象内存

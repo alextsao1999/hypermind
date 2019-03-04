@@ -49,7 +49,7 @@ namespace hypermind {
             default:
                 name = "<未知>";
         }
-        os << " " << name << " " << std::endl;
+        os << " " << name << " " ;
     }
 
     // 读取一个Token

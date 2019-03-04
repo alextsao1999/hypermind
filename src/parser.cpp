@@ -40,15 +40,16 @@ namespace hypermind{
                 return lhs;
             mLexer.Consume();
             ASTExprPtr rhs;
-            if (nextOp.prec < prec)
+            if (prec > nextOp.prec)
                 break;
-            ASTBinaryPtr &&lhsBin = make_ptr(ASTBinary);
+            ASTBinaryPtr lhsBin = make_ptr(ASTBinary);
             lhsBin->mLHS = lhs;
             if (nextOp.association) { // 真为 左结合
                 lhsBin->mRHS = ParseBinaryOp(lhs, nextOp.prec + 1);
             } else {
                 lhsBin->mRHS = ParseBinaryOp(lhs, nextOp.prec);
             }
+
             lhs = lhsBin;
         }
         return lhs;
