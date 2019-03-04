@@ -81,9 +81,9 @@ namespace hypermind {
 
         inline ASTExprPtr parsePrimary();
         inline ASTExprPtr parseUnary();
-        inline ASTExprPtr parseBinary();
+        inline ASTExprPtr parseExpression();
 
-        inline ASTExprPtr parseBinOp(ASTExprPtr lhs, HMInteger prec);
+        inline ASTExprPtr parseBinaryOp(ASTExprPtr lhs, HMInteger prec);
 
 
     };

@@ -136,6 +136,9 @@ namespace hypermind {
         inline Token Read();
 
         inline TokenType ReadTokenType();
+        inline TokenType PeekTokenType();
+        inline void Consume();
+
 
         inline Token Peek(HMInteger i = 1);
         inline bool Match(TokenType tokenKind);

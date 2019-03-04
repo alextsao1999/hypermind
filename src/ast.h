@@ -65,8 +65,7 @@ namespace hypermind {
         Token op;
         ASTExprPtr mLHS; // 产生式左边
         ASTExprPtr mRHS; // 产生式右边
-        ASTBinary(const Token &op, const ASTExprPtr &mLHS, const ASTExprPtr &mRHS);
-
+        //ASTBinary(const Token &op, const ASTExprPtr &mLHS, const ASTExprPtr &mRHS);
         AST_DECL_CODEGEN();
     };
 

@@ -296,6 +296,18 @@ namespace hypermind {
         return CURRENT_TOKEN.mType;
     }
 
+    TokenType Lexer::PeekTokenType() {
+        GetNextToken();
+        mTokens.push_back(mCurrentToken);
+        return mCurrentToken.mType;
+    }
+
+    void Lexer::Consume() {
+        if (!mTokens.empty())
+            mTokens.pop_front();
+        GetNextToken();
+    }
+
     Token::Token(TokenType mType, const HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine) : mType(mType),
                                                                                             mStart(mStart),
                                                                                             mLength(mLength),
