@@ -10,8 +10,12 @@
 
 #define HM_OBJECT(name) \
 struct HM##name : public HMObject
-#define HM_OBJ_DECL() HMHash hash() override;
+#define HM_OBJ_DECL() HMHash hash() override; \
+void dump() override; \
+HMBool free(VM *vm) override;
 #define HM_OBJ_HASH(obj)  HMHash HM##obj::hash()
+#define HM_OBJ_DUMP(obj)  void HM##obj::dump()
+#define HM_OBJ_FREE(obj)  HMBool HM##obj::free(VM *vm)
 
 namespace hypermind {
     struct HMClass;

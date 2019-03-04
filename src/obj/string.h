@@ -24,12 +24,7 @@ namespace hypermind {
             hashCode = hashString(charSequence, length);
             memcpy(charSequence, str, size);
         };
-
         HM_OBJ_DECL();
-
-        HMBool free(VM *vm) override;
-
-        void dump() override;
     };
 
 }

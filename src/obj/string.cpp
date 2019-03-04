@@ -9,18 +9,14 @@ namespace hypermind {
     HM_OBJ_HASH(String) {
         return hashCode;
     }
-
-    HMBool HMString::free(VM *vm) {
-
+    HM_OBJ_FREE(String) {
         charSequence = (HMChar *) vm->MemManger(charSequence, length * sizeof(HMChar), 0);
         return charSequence == nullptr;
     }
-
-    void HMString::dump() {
+    HM_OBJ_DUMP(String) {
         std::string str(charSequence, length * sizeof(HMChar));
         std::cout << " { string(" << sizeof(HMString) << ")   " << str << "   hash : " << hashCode << "  } "
                   << std::endl;
-
     }
 
 }

@@ -9,15 +9,10 @@
 
 namespace hypermind {
 
-    HMHash HMClass::hash() {
-        return 0;
-    }
-
     HMObject::HMObject(VM *vm, ObjectType type, HMClass *classObj) {
         next = vm->mAllObjects;
         vm->mAllObjects = this;
     }
-
 
     void VM::LinkObject(HMObject *obj) {
         obj->next = mAllObjects;

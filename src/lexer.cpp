@@ -22,7 +22,7 @@ namespace hypermind {
     }
 
     void Token::dump(std::ostream &os) {
-        std::string name;
+        String name;
         switch (mType) {
             case TokenType::End:
                 name = "<结束>";

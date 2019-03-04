@@ -7,5 +7,12 @@
 namespace hypermind {
     HM_OBJ_HASH(Module) {
         return 0;
-    };
+    }
+    HM_OBJ_FREE(Module) {
+        return false;
+    }
+    HM_OBJ_DUMP(Module) {
+
+    }
+
 }
