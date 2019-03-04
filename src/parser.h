@@ -4,86 +4,89 @@
 
 #ifndef HYPERMIND_PARSER_H
 #define HYPERMIND_PARSER_H
+#define UNPREC {-1, false}
+#define PREC(p,a) {p, a}
 
-#include <lexer.h>
+#include <memory>
+#include "lexer.h"
+#include "ast.h"
+#define make_ptr(v) std::make_shared<v>()
 
 namespace hypermind {
-    class Parser;
-    enum class SignatureType {
-        Constructor,
-        Method,
-        Getter,
-        Setter,
-        Iterator,
-        Subscript,
-        SubscriptSetter
-    };   //方法的签名
-
-    // 签名构造
-    struct Signature {
-        SignatureType type;  // 签名类型
-        const HMChar *name;    // 签名
-        HMUINT32 length;    // 签名长度
-        HMUINT32 argNum;    // 参数个数
+    struct Precedence {
+        HMInteger prec;
+        HMBool association; // true 为左结合  false 为右结合
     };
+    Precedence opPrecs[] = {
+            /*End,*/   UNPREC,
+            /*Delimiter,*/ UNPREC,
+            /*Number*/  UNPREC,
+            /*String*/  UNPREC,
+            /*Identifier*/  UNPREC,
+            /*Dot*/  UNPREC,
+            /*Comma*/  UNPREC,
+            /*LeftParen*/  UNPREC,
+            /*RightParen*/  UNPREC,
+            /*LeftBracket*/  UNPREC,
+            /*RightBracket*/  UNPREC,
+            /*LeftBrace*/  UNPREC,
+            /*RightBrace*/  UNPREC,
 
-    // 绑定能力
-    enum class BindPower {
-        None,
-        Lowest,    //最低绑定能力
-        Assign,    // =
-        Condition,   // ? :
-        LogicOr,    // ||
-        LogicAnd,   // &&
-        Equal,      // == !=
-        Is,        // is
-        Cmp,       // < > <= >=
-        BitOr,    // |
-        BitAnd,   // &
-        BitShift, // << >>
-        Range,       // ..
-        Term,      // + -
-        Factor,      // * / %
-        Unary,    // - ! ~
-        Call,     // . () []
-        Highest
-    } BindPower;   // 定义操作符绑定权值(优先级)
-    typedef void (Parser::*DenotationFn)(bool canAssign);
-    typedef void (Parser::*MethodSignatureFn)(Signature *signature);
+            //四则运算 + - * /
+            /*Add*/  PREC(11, true),
+            /*Sub*/  PREC(11, true),
+            /*Mul*/  PREC(12, true),
+            /*Div*/  PREC(12, true),
 
-    struct SymbolBindRule {
-        const HMChar *id;          // 符号
-        // 左绑定权值,不关注左边操作数的符号此值为0
-        DenotationFn nud;
-        DenotationFn led;
-        MethodSignatureFn methodSign;
-
-        SymbolBindRule(const HMChar *id, DenotationFn nud, DenotationFn led,
-                       MethodSignatureFn methodSign);
-
+            /*Increase*/  UNPREC,
+            /*Decrease*/  UNPREC, // --
+            /*Assign*/  PREC(1, false), // assignment 赋值 =
+            /*AddAssign*/  PREC(1, false), // += Addition assignment
+            /*SubAssign*/  PREC(1, false), // -=Subtraction assignment and so on.....
+            /*MulAssign*/  PREC(1, false),
+            /*DivAssign*/  PREC(1, false),
+            /*ModAssign*/  PREC(1, false),
+            /*AndAssign*/  PREC(1, false),
+            /*OrAssign*/  PREC(1, false),
+            /*XorAssign*/  PREC(1, false),
+            //等式 不等式
+            /*Arrow*/  UNPREC, //  -> 箭头
+            // 后面这些TOKEN 暂时用不到 之后再添加吧
+            /*Not*/  UNPREC, // !
+            /*Equal*/  PREC(8, true),  // ==
+            /*NotEqual*/  PREC(8, true), // !=
+            /*Greater*/  PREC(9, true), // >
+            /*Less*/  PREC(9, true), // <
+            /*GreaterEqual*/  PREC(9, true), // >=
+            /*LessEqual*/  PREC(9, true), // <=
+            // | 或
+            /*Or*/  PREC(7, true),
+            /*LogicOr*/  PREC(3, false),
+            // & 且
+            /*And*/  PREC(7, true),
+            /*LogicAnd*/  PREC(4, false),
+            // #
+            /*Mod*/  PREC(12, true), // % remainder 取余
+            /*At*/  UNPREC,  // @
+            /*Colon*/  UNPREC //冒号 :
     };
 
     class Parser {
     protected:
         const HMChar *mFileName{};
-        const Lexer &mLexer;
+        Lexer &mLexer;
 
     public:
-        Parser(const HMChar *mFileName, const Lexer &mLexer) : mFileName(mFileName), mLexer(mLexer) {}
-        void BindFunction(bool canAssign) {
+        Parser(const HMChar *mFileName, Lexer &mLexer) : mFileName(mFileName), mLexer(mLexer) {}
 
+        inline ASTExprPtr parsePrimary();
+        inline ASTExprPtr parseUnary();
+        inline ASTExprPtr parseBinary();
 
-        };
+        inline ASTExprPtr parseBinOp(ASTExprPtr lhs, HMInteger prec);
 
-        void Signature(Signature sign){
-
-        };
 
     };
-    void test(){
-        auto t = &Parser::BindFunction;
-
-    }
 
 }
 

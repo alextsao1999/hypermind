@@ -29,11 +29,6 @@ namespace hypermind {
     };
     using ASTNodePtr = std::shared_ptr<ASTNode>;
 
-    // 值的字面量
-    AST_NODE(ASTLiteral, ASTLiteralPtr){
-        Value mValue{};
-        AST_DECL_CODEGEN();
-    };
 
     // 表达式Node
     AST_NODE(ASTExpr, ASTExprPtr) {
@@ -54,12 +49,24 @@ namespace hypermind {
         AST_DECL_CODEGEN();
     };
 
+    AST_EXPR(ASTVariable, ASTVariablePtr){
+        Token mVar;
+        AST_DECL_CODEGEN();
+    };
+
+    // 值的字面量
+    AST_EXPR(ASTLiteral, ASTLiteralPtr){
+        Value mValue{};
+        AST_DECL_CODEGEN();
+    };
 
     // 二元表达式
     AST_EXPR(ASTBinary, ASTBinaryPtr) {
         Token op;
         ASTExprPtr mLHS; // 产生式左边
         ASTExprPtr mRHS; // 产生式右边
+        ASTBinary(const Token &op, const ASTExprPtr &mLHS, const ASTExprPtr &mRHS);
+
         AST_DECL_CODEGEN();
     };
 

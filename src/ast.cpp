@@ -24,9 +24,17 @@ namespace hypermind {
         os << std::endl;
     }
 
+    ASTBinary::ASTBinary(const Token &op, const ASTExprPtr &mLHS, const ASTExprPtr &mRHS) : op(op), mLHS(mLHS),
+                                                                                            mRHS(mRHS) {}
+
     // 字面量Dump
     AST_DUMP(ASTLiteral) {
         os << mValue.dbval << std::endl;
+
+    }
+    AST_DUMP(ASTVariable) {
+        // 字面量Dump
+        mVar.dump(os);
 
     }
 

@@ -7,20 +7,21 @@
 #include "obj/string.h"
 namespace hypermind {
 
-    inline bool IsSpace(HMChar ch){
+    bool IsSpace(HMChar ch){
         return ch == _HM_C(' ') || ch == _HM_C('\r');
     }
-    inline bool IsNumber(HMChar ch) {
+    bool IsNumber(HMChar ch) {
         return ch >= _HM_C('0') && ch <= _HM_C('9');
     }
-    inline bool IsAlpha(HMChar ch) {
+    bool IsAlpha(HMChar ch) {
         return (ch >= _HM_C('a') && ch <= _HM_C('z')) || (ch >= _HM_C('A') && ch <= _HM_C('Z'));
     }
-    inline bool IsCodeChar(HMChar ch) {
+    bool IsCodeChar(HMChar ch) {
         return IsAlpha(ch) || ch == _HM_C('_');
     }
 
     void Token::dump(std::ostream &os) {
+/*
         std::string name;
         switch (mType) {
             case TokenType::End:
@@ -55,13 +56,14 @@ namespace hypermind {
             name += str;
         }
         os << name  << " length:" << mLength << "  lineNum: " << mLine << std::endl;
+*/
 
     }
 
     //读取一个Token
-    Token Lexer::ReadAToken() {
+    void Lexer::GetNextToken() {
         if (mEof)
-            return CURRENT_TOKEN;
+            return;
         //跳过空格
         SkipSpace();
         switch (CURRENT_CHAR) {
@@ -143,7 +145,7 @@ namespace hypermind {
             case _HM_C('/'):
                 if (NEXT_CHAR == _HM_C('/') || NEXT_CHAR == _HM_C('*')) {
                     SkipComment();
-                    return ReadAToken(); // 跳过之后继续读取一个token
+                    return GetNextToken(); // 跳过之后继续读取一个token
                 } else {
                     TOKEN(TokenType::Div, CURRENT_POS, 1, CURRENT_LINE);
                 }
@@ -151,7 +153,7 @@ namespace hypermind {
             case _HM_C('\0'):
                 mEof = true;
                 TOKEN(TokenType::Delimiter, CURRENT_POS, 0, CURRENT_LINE);
-                return CURRENT_TOKEN; // 已经到文件尾部了 返回就ok
+                return; // 已经到文件尾部了 返回就ok
             default:
                 if (IsCodeChar(CURRENT_CHAR)) {
                     ParseIdentifier();
@@ -164,14 +166,11 @@ namespace hypermind {
                     NEXT();
                 }
                 // 不NEXT 直接返回
-                return CURRENT_TOKEN;
         }
         NEXT();
-        return CURRENT_TOKEN;
     }
 
-
-    inline void Lexer::SkipComment() {
+    void Lexer::SkipComment() {
         // TODO 多行注释跳过 /*   */
         do {
             NEXT();
@@ -179,7 +178,7 @@ namespace hypermind {
         CURRENT_LINE++;
     }
 
-    inline void Lexer::SkipSpace() {
+    void Lexer::SkipSpace() {
         if (IsSpace(CURRENT_CHAR)){
             do {
                 NEXT();
@@ -200,19 +199,20 @@ namespace hypermind {
         while (mTokens.size() < i) {
             if (mEof)
                 return CURRENT_TOKEN;
-            mTokens.push_back(ReadAToken());
+            GetNextToken();
+            mTokens.push_back(CURRENT_TOKEN);
         }
         return mTokens[i - 1];
     }
 
-    inline void Lexer::ParseNumber() {
+    void Lexer::ParseNumber() {
         TOKEN(TokenType::Number, CURRENT_POS, 0, CURRENT_LINE);
         do {
             NEXT();
         } while (IsNumber(CURRENT_CHAR) || CURRENT_CHAR == _HM_C('.'));
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
     }
-    inline void Lexer::ParseString() {
+    void Lexer::ParseString() {
         Buffer<HMChar> strbuf(mVM);
         HMChar first = CURRENT_CHAR;
         NEXT(); // 跳过 '   "  文本符
@@ -267,7 +267,7 @@ namespace hypermind {
         TOKEN_VALUE.objval = objString;
         strbuf.Clear();
     }
-    inline void Lexer::ParseIdentifier() {
+    void Lexer::ParseIdentifier() {
         TOKEN(TokenType::Identifier, CURRENT_POS, 0, CURRENT_LINE);
         do {
             NEXT();
@@ -283,13 +283,18 @@ namespace hypermind {
             mTokens.pop_front();
             return token;
         }
-        return ReadAToken();
+        GetNextToken();
+        return CURRENT_TOKEN;
     }
 
     Lexer::Lexer(VM *mVM, HMChar *mSource) : mVM(mVM), mSource(mSource) {
 
     }
 
+    TokenType Lexer::ReadTokenType() {
+        GetNextToken();
+        return CURRENT_TOKEN.mType;
+    }
 
     Token::Token(TokenType mType, const HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine) : mType(mType),
                                                                                             mStart(mStart),

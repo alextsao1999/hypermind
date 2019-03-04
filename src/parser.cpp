@@ -5,17 +5,32 @@
 #include "parser.h"
 
 namespace hypermind{
-    SymbolBindRule::SymbolBindRule(const HMChar *id, DenotationFn nud, DenotationFn led,
-                                   MethodSignatureFn methodSign): id(id), nud(nud), led(led),
-                                                                  methodSign(methodSign) {
+
+    ASTExprPtr Parser::parseUnary() {
+        return parsePrimary();
     }
 
-    SymbolBindRule Rules[] = {
-            SymbolBindRule("-", (DenotationFn) &Parser::BindFunction, (DenotationFn) &Parser::BindFunction,
-                           (MethodSignatureFn) &Parser::Signature),
-            SymbolBindRule("-", (DenotationFn) &Parser::BindFunction, (DenotationFn) &Parser::BindFunction,
-                           (MethodSignatureFn) &Parser::Signature),
+    ASTExprPtr Parser::parsePrimary() {
+        Token tok = mLexer.Read();
+        if (tok.mType == TokenType::Identifier) {
+            ASTVariablePtr astVariablePtr = make_ptr(ASTVariable);
+            astVariablePtr->mVar = tok;
+            return astVariablePtr;
+        } else {
+            ASTLiteralPtr astLiteralPtr = make_ptr(ASTLiteral);
+            astLiteralPtr->mValue = tok.mValue;
+            return astLiteralPtr;
+        }
 
-    };
+    }
+
+    ASTExprPtr Parser::parseBinary() {
+
+        return hypermind::ASTExprPtr();
+    }
+
+    ASTExprPtr Parser::parseBinOp(ASTExprPtr lhs, HMInteger prec) {
+        return hypermind::ASTExprPtr();
+    }
 
 }

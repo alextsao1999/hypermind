@@ -114,15 +114,12 @@ namespace hypermind {
 
     };
 
-    void DumpToken(Token token);
-
     class Lexer {
     protected:
         bool mEof{false};
         std::deque<Token> mTokens;
-        Token mCurrentToken;
 
-        Token ReadAToken();
+        inline void GetNextToken();
         inline void SkipSpace();
         inline void SkipComment();
         inline void ParseIdentifier();
@@ -130,13 +127,18 @@ namespace hypermind {
         inline void ParseNumber();
 
     public:
+        Token mCurrentToken;
+
         Lexer(VM *mVM, HMChar *mSource);
 
         ~Lexer();
 
-        Token Read();
-        Token Peek(HMInteger i = 1);
-        bool Match(TokenType tokenKind);
+        inline Token Read();
+
+        inline TokenType ReadTokenType();
+
+        inline Token Peek(HMInteger i = 1);
+        inline bool Match(TokenType tokenKind);
         HMChar *GetSource() {
             return mSource;
         }
