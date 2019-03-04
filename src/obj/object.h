@@ -7,6 +7,12 @@
 
 #include "hypermind.h"
 #include "vm.h"
+
+#define HM_OBJECT(name) \
+struct HM##name : public HMObject
+#define HM_OBJ_DECL() HMHash hash() override;
+#define HM_OBJ_HASH(obj)  HMHash HM##obj::hash()
+
 namespace hypermind {
     struct HMClass;
 

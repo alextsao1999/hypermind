@@ -11,13 +11,13 @@
 #include "utils.h"
 #include <memory>
 namespace hypermind {
-    struct HMString : public HMObject {
+    HM_OBJECT(String) {
         HMHash hashCode{};
         HMUINT32 length{};
         HMChar *charSequence{nullptr};
 
         explicit HMString(VM *vm, const HMChar *str, HMUINT32 length) : HMObject(vm, ObjectType::String,
-                                                                                 vm->mStringClass), length(length){
+                                                                                 vm->mStringClass), length(length) {
             HMUINT32 size = length * sizeof(HMChar);
             // 计算文本hash
             charSequence = (HMChar *) vm->Allocate(size);
@@ -25,7 +25,7 @@ namespace hypermind {
             memcpy(charSequence, str, size);
         };
 
-        HMHash hash() override;
+        HM_OBJ_DECL();
 
         HMBool free(VM *vm) override;
 

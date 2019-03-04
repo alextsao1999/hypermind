@@ -12,26 +12,26 @@ namespace hypermind {
     struct HMObject;
 
     // 闭包对象
-    struct HMClosure : public HMObject {
-        HMHash hash() override;
+    HM_OBJECT(Closure) {
+        HM_OBJ_DECL();
     };
 
     // 函数对象
-    struct HMFunction : public HMObject {
+    HM_OBJECT(Function) {
 //        Buffer<HMByte> instructions; // 指令流
 //        Buffer<Value> constants;  // 所有常量
 //        HMModule *module;   // 所属模块
-        HMUINT32 maxStackNumber;  // 最大栈空间
-        HMUINT32 upvalueNumber; // upval 数量
+        HMUINT32 maxStackNumber{};  // 最大栈空间
+        HMUINT32 upvalueNumber{}; // upval 数量
 #ifdef DEBUG
         FunctionDebug *debug;
 #endif
-        HMHash hash() override;
+        HM_OBJ_DECL();
     };
 
     // Upvalue对象
-    struct HMUpvalue : public HMObject {
-        HMHash hash() override;
+    HM_OBJECT(Upvalue) {
+        HM_OBJ_DECL();
     };
 
 

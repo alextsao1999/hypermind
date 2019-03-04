@@ -8,11 +8,14 @@
 
 #include "obj/value.h"
 #include "obj/string.h"
+#include <windows.h>
 using namespace hypermind;
 
 using namespace std;
 
 int main() {
+
+
     auto *source = const_cast<HMChar *>("1+2*3");
     VM vm;
     Lexer lexer(&vm, source);

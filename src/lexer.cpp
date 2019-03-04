@@ -5,6 +5,7 @@
 #include <iostream>
 #include "lexer.h"
 #include "obj/string.h"
+#include <windows.h>
 namespace hypermind {
 
     bool IsSpace(HMChar ch){
@@ -42,16 +43,13 @@ namespace hypermind {
                 name = "/";
                 break;
             case TokenType::Identifier:
-                name = String(mStart, mLength);
-                break;
             case TokenType::Number:
-                name = String(mStart, mLength);
+                name = String(mStart, mLength * sizeof(HMChar));
                 break;
             default:
                 name = "<未知>";
         }
         os << " " << name << " " << std::endl;
-
     }
 
     // 读取一个Token
@@ -205,6 +203,9 @@ namespace hypermind {
             NEXT();
         } while (IsNumber(CURRENT_CHAR) || CURRENT_CHAR == _HM_C('.'));
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
+        mCurrentToken.mValue.type = ValueType::Integer;
+        mCurrentToken.mValue.intval = (int) strtod(mCurrentToken.mStart, nullptr);
+
     }
     void Lexer::ParseString() {
         Buffer<HMChar> strbuf(mVM);

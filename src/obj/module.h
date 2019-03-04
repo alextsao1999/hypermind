@@ -9,9 +9,8 @@
 
 namespace hypermind {
     // 模块对象
-    struct HMModule : public HMObject {
-
-
+    HM_OBJECT(Module) {
+        HM_OBJ_DECL();
     };
 
 }

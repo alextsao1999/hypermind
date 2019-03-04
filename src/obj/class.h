@@ -20,27 +20,28 @@ namespace hypermind {
     };
 
     // Method对象
-    struct HMMethod : public HMObject {
+    HM_OBJECT(Method) {
         MethodType type;
         union {
             HMClosure *fn{};  // 方法引用的函数闭包
             HMPrimitive *pfn; // 指向原生方法
-
         };
-        HMHash hash() override;
+        HM_OBJ_DECL();
         HMMethod(VM *vm, MethodType methodType, HMClosure *fn);
     };
 
     // 类对象
-    struct HMClass : public HMObject {
+    HM_OBJECT(Class) {
         HMClass *superClass;  // 父类
         HMUINT32 fieldNumer;
-        HMHash hash() override;
         Buffer<HMMethod> methods;
+        HM_OBJ_DECL();
     };
 
-    struct HMInstance : public HMObject {
+    // 实例对象
+    HM_OBJECT(Instance) {
         Value *fields{nullptr};
+        HM_OBJ_DECL();
     };
 
 }

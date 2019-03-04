@@ -5,7 +5,7 @@
 #include "class.h"
 namespace hypermind {
 
-    HMHash HMMethod::hash() {
+    HM_OBJ_HASH(Method) {
         return 0;
     }
 

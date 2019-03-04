@@ -5,15 +5,15 @@
 #include "function.h"
 namespace hypermind {
 
-    HMHash HMClosure::hash() {
+    HM_OBJ_HASH(Closure) {
         return 0;
     }
 
-    HMHash HMFunction::hash() {
+    HM_OBJ_HASH(Function) {
         return 0;
     }
 
-    HMHash HMUpvalue::hash() {
+    HM_OBJ_HASH(Upvalue) {
         return 0;
     }
 }

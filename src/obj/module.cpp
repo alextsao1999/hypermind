@@ -5,5 +5,7 @@
 #include "module.h"
 
 namespace hypermind {
-
+    HM_OBJ_HASH(Module) {
+        return 0;
+    };
 }

@@ -5,10 +5,11 @@
 #ifndef HYPERMIND_LEXER_H
 #define HYPERMIND_LEXER_H
 
-#include <hypermind.h>
+#include <cstdlib>
 #include <deque>
-#include <vm.h>
-#include <buffer.h>
+#include "hypermind.h"
+#include "vm.h"
+#include "buffer.h"
 #include "obj/value.h"
 #define NEXT_CHAR mSource[mPosition + 1]
 

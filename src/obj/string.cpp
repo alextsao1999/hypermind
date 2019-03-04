@@ -6,7 +6,7 @@
 #include "utils.h"
 #include <iostream>
 namespace hypermind {
-    HMHash HMString::hash() {
+    HM_OBJ_HASH(String) {
         return hashCode;
     }
 

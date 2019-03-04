@@ -26,8 +26,30 @@ namespace hypermind {
 
     // 字面量Dump
     AST_DUMP(ASTLiteral) {
-        os << mValue.dbval << std::endl;
-
+        switch (mValue.type) {
+            case ValueType::Integer:
+                os << "[" << mValue.intval << "]";
+                
+                break;
+            case ValueType::Object:
+                mValue.objval->dump();
+                break;
+            case ValueType::Double:
+                os << mValue.dbval;
+                break;
+            case ValueType::Undefined:
+                os << "[undefined]";
+                break;
+            case ValueType::Null:
+                os << "[null]";
+                break;
+            case ValueType::True:
+                os << "[true]";
+                break;
+            case ValueType::False:
+                os << "[false]";
+                break;
+        }
     }
     AST_DUMP(ASTVariable) {
         // 字面量Dump
