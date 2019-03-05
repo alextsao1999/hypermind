@@ -18,143 +18,143 @@ namespace hypermind {
         return (ch >= _HM_C('a') && ch <= _HM_C('z')) || (ch >= _HM_C('A') && ch <= _HM_C('Z'));
     }
     bool IsCodeChar(HMChar ch) {
-        return IsAlpha(ch) || ch == _HM_C('_');
+        // 汉字范围 [\u4e00-\u9fa5]
+        return IsAlpha(ch) || ch == _HM_C('_') || (ch >= _HM_C('\u4e00') && ch <= _HM_C('\u9fa5'));
     }
-
-    void Token::dump(std::ostream &os) {
+    
+    void Token::dump(Ostream &os) {
         String name;
         switch (mType) {
             case TokenType::End:
-                name = "<结束>";
+                name = _HM_C("<结束>");
                 break;
             case TokenType::Delimiter:
-                name = "<行结束> \n";
+                name = _HM_C("<行结束>");
                 break;
             case TokenType::Add:
-                name = "+";
+                name = _HM_C("+");
                 break;
             case TokenType::Sub:
-                name = "-";
+                name = _HM_C("-");
                 break;
             case TokenType::Mul:
-                name = "*";
+                name = _HM_C("*");
                 break;
             case TokenType::Div:
-                name = "/";
+                name = _HM_C("/");
                 break;
             case TokenType::Identifier:
             case TokenType::Number:
-                name = String(mStart, mLength * sizeof(HMChar));
+                name = String(mStart, mLength);
                 break;
             case TokenType::String:
                 break;
             case TokenType::Dot:
-                name = ".";
+                name = _HM_C(".");
                 break;
             case TokenType::Comma:
-                name = ",";
+                name = _HM_C(",");
                 break;
             case TokenType::LeftParen:
-                name = "(";
+                name = _HM_C("(");
                 break;
             case TokenType::RightParen:
-                name = ")";
+                name = _HM_C(")");
                 break;
             case TokenType::LeftBracket:
-                name = "[";
+                name = _HM_C("[");
                 break;
             case TokenType::RightBracket:
-                name = "]";
+                name = _HM_C("]");
                 break;
             case TokenType::LeftBrace:
-                name = "{";
+                name = _HM_C("{");
                 break;
             case TokenType::RightBrace:
-                name = "}";
+                name = _HM_C("}");
                 break;
             case TokenType::Increase:
-                name = "++";
+                name = _HM_C("++");
                 break;
             case TokenType::Decrease:
-                name = "--";
+                name = _HM_C("--");
                 break;
             case TokenType::Assign:
-                name = "=";
+                name = _HM_C("=");
                 break;
             case TokenType::AddAssign:
-                name = "+=";
+                name = _HM_C("+=");
                 break;
             case TokenType::SubAssign:
-                name = "-=";
+                name = _HM_C("-=");
                 break;
             case TokenType::MulAssign:
-                name = "*=";
+                name = _HM_C("*=");
                 break;
             case TokenType::DivAssign:
-                name = "/=";
+                name = _HM_C("/=");
                 break;
             case TokenType::ModAssign:
-                name = "%=";
+                name = _HM_C("%=");
                 break;
             case TokenType::AndAssign:
-                name = "&=";
+                name = _HM_C("&=");
                 break;
             case TokenType::OrAssign:
-                name = "|=";
+                name = _HM_C("|=");
                 break;
             case TokenType::XorAssign:
-                name = "^=";
+                name = _HM_C("^=");
                 break;
             case TokenType::Arrow:
-                name = "->";
+                name = _HM_C("->");
                 break;
             case TokenType::Not:
-                name = "!";
+                name = _HM_C("!");
                 break;
             case TokenType::Equal:
-                name = "==";
+                name = _HM_C("==");
                 break;
             case TokenType::NotEqual:
-                name = "!=";
+                name = _HM_C("!=");
                 break;
             case TokenType::Greater:
-                name = ">";
+                name = _HM_C(">");
                 break;
             case TokenType::Less:
-                name = "<";
+                name = _HM_C("<");
                 break;
             case TokenType::GreaterEqual:
-                name = ">=";
+                name = _HM_C(">=");
                 break;
             case TokenType::LessEqual:
-                name = "<=";
+                name = _HM_C("<=");
                 break;
             case TokenType::Or:
-                name = "|";
+                name = _HM_C("|");
                 break;
             case TokenType::LogicOr:
-                name = "||";
+                name = _HM_C("||");
                 break;
             case TokenType::And:
-                name = "&";
+                name = _HM_C("&");
                 break;
             case TokenType::LogicAnd:
-                name = "&&";
+                name = _HM_C("&&");
                 break;
             case TokenType::Mod:
-                name = "%";
+                name = _HM_C("%");
                 break;
             case TokenType::At:
-                name = "@";
+                name = _HM_C("@");
                 break;
             case TokenType::Colon:
-                name = ":";
+                name = _HM_C(":");
                 break;
             default:
-                name = "<未知>";
-
+                name = _HM_C("<未知>");
         }
-        os << " " << name << " " ;
+        os << name ;
     }
 
     // 读取一个Token
@@ -249,8 +249,8 @@ namespace hypermind {
                 break;
             case _HM_C('\0'):
                 mEof = true;
-                TOKEN(TokenType::Delimiter, CURRENT_POS, 0, CURRENT_LINE);
-                break;
+                TOKEN(TokenType::End, CURRENT_POS, 0, CURRENT_LINE);
+                return;
             default:
                 if (IsCodeChar(CURRENT_CHAR)) {
                     ParseIdentifier();
@@ -309,7 +309,7 @@ namespace hypermind {
         } while (IsNumber(CURRENT_CHAR) || CURRENT_CHAR == _HM_C('.'));
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
         mCurrentToken.mValue.type = ValueType::Integer;
-        mCurrentToken.mValue.intval = (int) strtod(mCurrentToken.mStart, nullptr);
+        mCurrentToken.mValue.intval = (int) wtoll(mCurrentToken.mStart);
 
     }
     void Lexer::ParseString() {
@@ -322,28 +322,28 @@ namespace hypermind {
                 NEXT();
                 switch (CURRENT_CHAR) {
                     case _HM_C('n'):
-                        strbuf.Append('\n');
+                        strbuf.Append(_HM_C('\n'));
                         break;
                     case _HM_C('\''):
-                        strbuf.Append('\'');
+                        strbuf.Append(_HM_C('\''));
                         break;
                     case _HM_C('\"'):
-                        strbuf.Append('"');
+                        strbuf.Append(_HM_C('"'));
                         break;
                     case _HM_C('\\'):
-                        strbuf.Append('\\');
+                        strbuf.Append(_HM_C('\\'));
                         break;
                     case _HM_C('a'):
-                        strbuf.Append('\a');
+                        strbuf.Append(_HM_C('\a'));
                         break;
                     case _HM_C('b'):
-                        strbuf.Append('\b');
+                        strbuf.Append(_HM_C('\b'));
                         break;
                     case _HM_C('f'):
-                        strbuf.Append('\f');
+                        strbuf.Append(_HM_C('\f'));
                         break;
                     case _HM_C('r'):
-                        strbuf.Append('\r');
+                        strbuf.Append(_HM_C('\r'));
                         break;
                     default:
                         // 不存在

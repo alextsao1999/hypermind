@@ -4,6 +4,7 @@
 #ifndef HYPERMIND_AST_H
 #define HYPERMIND_AST_H
 
+#include "hypermind.h"
 #include <memory>
 #include "obj/value.h"
 #include "lexer.h"
@@ -20,11 +21,11 @@
     struct n;  \
     using p = std::shared_ptr<n>;  \
     struct n : public ASTExpr
-#define AST_DECL_CODEGEN() void codegen(){};void dump(std::ostream &os, int ind);
-#define AST_DUMP(n) void n::dump(std::ostream &os, int ind)
+#define AST_DECL_CODEGEN() void codegen(){};void dump(Ostream &os, int ind);
+#define AST_DUMP(n) void n::dump(Ostream &os, int ind)
 namespace hypermind {
     struct ASTNode {
-        virtual void dump(std::ostream &os, int ind){};
+        virtual void dump(Ostream &os, int ind){};
         virtual void codegen(){};
     };
     using ASTNodePtr = std::shared_ptr<ASTNode>;
@@ -43,7 +44,7 @@ namespace hypermind {
     // 语法块Node
     AST_NODE(ASTBlock, ASTBlockPtr) {
         std::vector<ASTStmtPtr> stmts;
-        inline void addStmt(const ASTStmtPtr &np) {
+        inline void addStmt(ASTStmtPtr &&np) {
             stmts.push_back(np);
         }
         AST_DECL_CODEGEN();

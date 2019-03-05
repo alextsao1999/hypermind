@@ -11,19 +11,19 @@
 #include <cstdint>
 // 字符宏
 
-#define _HM_C(ch) ch
+#define _HM_C(ch) L##ch
 // 字符通用字符类型
-typedef char HMChar;
+typedef wchar_t HMChar;
 // 数据类型
 typedef char HMByte;
 typedef int HMInteger;
 typedef uint32_t HMUINT32;
 typedef double HMDouble;
 typedef float HMFloat;
-typedef std::string String;
+typedef std::wstring String;
 typedef HMUINT32 HMHash;
 typedef bool HMBool;
-typedef std::string String;
+typedef std::wostream Ostream;
 
 namespace hypermind {
     struct HMClass;

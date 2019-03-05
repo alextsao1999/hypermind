@@ -15,20 +15,20 @@ namespace hypermind {
     // 二元表达式Dump
     AST_DUMP(ASTBinary) {
         for (int i = 0; i < ind * 4; ++i) {
-            os << " ";
+            os << _HM_C(" ");
         }
-        os << "binary { " ;
+        os << _HM_C("binary { ");
         mLHS->dump(os, 0);
         op.dump(os);
         mRHS->dump(os, 0);
-        os << " } " ;
+        os << _HM_C(" } ") ;
     }
 
     // 字面量Dump
     AST_DUMP(ASTLiteral) {
         switch (mValue.type) {
             case ValueType::Integer:
-                os << "[inval : " << mValue.intval << "]";
+                os << _HM_C("[inval : ") << mValue.intval << _HM_C("]");
                 break;
             case ValueType::Object:
                 mValue.objval->dump(os);
@@ -37,16 +37,16 @@ namespace hypermind {
                 os << mValue.dbval;
                 break;
             case ValueType::Undefined:
-                os << "[undefined]";
+                os << _HM_C("[undefined]");
                 break;
             case ValueType::Null:
-                os << "[null]";
+                os << _HM_C("[null]");
                 break;
             case ValueType::True:
-                os << "[true]";
+                os << _HM_C("[true]");
                 break;
             case ValueType::False:
-                os << "[false]";
+                os << _HM_C("[false]");
                 break;
         }
     }
