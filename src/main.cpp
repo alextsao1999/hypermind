@@ -17,32 +17,13 @@ int main() {
     auto a = L"啊";
 
 
-    auto *source = const_cast<HMChar *>(_HM_C("a=111+222+333;\n测试=1234"));
+    auto *source = const_cast<HMChar *>(_HM_C("asdf=asdf+1234"));
     VM vm;
     Lexer lexer(&vm, source);
 
-    lexer.Read().dump(wcout);
-    lexer.Read().dump(wcout);
-    lexer.Read().dump(wcout);
-    lexer.Read().dump(wcout);
-    lexer.Read().dump(wcout);
-    lexer.Read().dump(wcout);
-    lexer.Read().dump(wcout);
-    lexer.Read().dump(wcout);
-    lexer.Read().dump(wcout);
-    lexer.Read().dump(wcout);
-    lexer.Read().dump(wcout);
-    lexer.Read().dump(wcout);
-    lexer.Read().dump(wcout);
-    lexer.Read().dump(wcout);
-    lexer.Read().dump(wcout);
-//    lexer.Read().dump(wcout);
-//    lexer.Read().dump(wcout);
-
-
-    //Parser parser("", lexer);
-    //ASTExprPtr ast = parser.ParseExpression();
-    //ast->dump(cout, 0);
+    Parser parser(_HM_C(""), lexer);
+    ASTExprPtr ast = parser.ParseExpression();
+    ast->dump(HMCout, 0);
 
 //    vm.New<HMString>(&vm, source, 37);
 //    vm.New<HMString>(&vm, source, 36);

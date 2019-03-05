@@ -14,7 +14,7 @@
 #define NEXT_CHAR mSource[mPosition + 1]
 
 //当前位置
-#define CURRENT_POS (&mSource[mPosition])
+#define CURRENT_POS &mSource[mPosition]
 #define CURRENT_CHAR mSource[mPosition]
 #define CURRENT_LINE mLine
 #define CURRENT_TOKEN mCurrentToken

@@ -24,7 +24,7 @@ typedef std::wstring String;
 typedef HMUINT32 HMHash;
 typedef bool HMBool;
 typedef std::wostream Ostream;
-
+#define HMCout std::wcout
 namespace hypermind {
     struct HMClass;
     struct HMObject;

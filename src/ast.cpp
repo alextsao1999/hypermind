@@ -17,11 +17,11 @@ namespace hypermind {
         for (int i = 0; i < ind * 4; ++i) {
             os << _HM_C(" ");
         }
-        os << _HM_C("binary { ");
+        os << _HM_C(" { (binary)  ");
         mLHS->dump(os, 0);
         op.dump(os);
         mRHS->dump(os, 0);
-        os << _HM_C(" } ") ;
+        os << _HM_C("  } ") ;
     }
 
     // 字面量Dump

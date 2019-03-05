@@ -5,7 +5,7 @@
 #include <iostream>
 #include "lexer.h"
 #include "obj/string.h"
-#include <windows.h>
+//#include <windows.h>
 namespace hypermind {
 
     bool IsSpace(HMChar ch){
@@ -21,7 +21,7 @@ namespace hypermind {
         // 汉字范围 [\u4e00-\u9fa5]
         return IsAlpha(ch) || ch == _HM_C('_') || (ch >= _HM_C('\u4e00') && ch <= _HM_C('\u9fa5'));
     }
-    
+
     void Token::dump(Ostream &os) {
         String name;
         switch (mType) {
@@ -303,14 +303,14 @@ namespace hypermind {
     }
 
     void Lexer::ParseNumber() {
+        // TODO 浮点数的支持
         TOKEN(TokenType::Number, CURRENT_POS, 0, CURRENT_LINE);
         do {
             NEXT();
         } while (IsNumber(CURRENT_CHAR) || CURRENT_CHAR == _HM_C('.'));
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
         mCurrentToken.mValue.type = ValueType::Integer;
-        mCurrentToken.mValue.intval = (int) wtoll(mCurrentToken.mStart);
-
+        mCurrentToken.mValue.intval = (int) _wtoi(mCurrentToken.mStart);
     }
     void Lexer::ParseString() {
         Buffer<HMChar> strbuf(mVM);
@@ -362,11 +362,11 @@ namespace hypermind {
          // 当函数闭包没有引用时会释放constants的对象
         //new(objString) HMString(mVM, strbuf.GetData(), strbuf.GetSize());
         auto *objString = mVM->New<HMString>(mVM, strbuf.GetData(), strbuf.GetCount());
-
         TOKEN_VALUE.type = ValueType::Object;
         TOKEN_VALUE.objval = objString;
         strbuf.Clear();
     }
+
     void Lexer::ParseIdentifier() {
         TOKEN(TokenType::Identifier, CURRENT_POS, 0, CURRENT_LINE);
         do {
