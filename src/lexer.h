@@ -138,7 +138,7 @@ namespace hypermind {
         TokenType PeekTokenType();
         void Consume();
         Token Peek(HMInteger i = 1);
-        bool Match(TokenType tokenKind);
+        bool Match(TokenType tokenType);
 
         HMChar *GetSource() {
             return mSource;

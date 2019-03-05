@@ -3,7 +3,7 @@
 //
 
 #include "table.h"
-
+#include <map>
 namespace hypermind {
 
 }

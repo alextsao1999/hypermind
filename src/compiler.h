@@ -6,6 +6,10 @@
 #define HYPERMIND_COMPILER_H
 
 namespace hypermind {
+    class CompilerUnit {
+
+
+    };
 
 }
 

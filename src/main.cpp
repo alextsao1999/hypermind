@@ -14,9 +14,6 @@ using namespace hypermind;
 using namespace std;
 
 int main() {
-    auto a = L"啊";
-
-
     auto *source = const_cast<HMChar *>(_HM_C("asdf=asdf+1234"));
     VM vm;
     Lexer lexer(&vm, source);

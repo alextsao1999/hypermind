@@ -21,7 +21,7 @@
     struct n;  \
     using p = std::shared_ptr<n>;  \
     struct n : public ASTExpr
-#define AST_DECL_CODEGEN() void codegen(){};void dump(Ostream &os, int ind);
+#define AST_DECL() void codegen(){};void dump(Ostream &os, int ind);
 #define AST_DUMP(n) void n::dump(Ostream &os, int ind)
 namespace hypermind {
     struct ASTNode {
@@ -47,18 +47,18 @@ namespace hypermind {
         inline void addStmt(ASTStmtPtr &&np) {
             stmts.push_back(np);
         }
-        AST_DECL_CODEGEN();
+        AST_DECL();
     };
 
     AST_EXPR(ASTVariable, ASTVariablePtr){
         Token mVar;
-        AST_DECL_CODEGEN();
+        AST_DECL();
     };
 
     // 值的字面量
     AST_EXPR(ASTLiteral, ASTLiteralPtr){
         Value mValue{};
-        AST_DECL_CODEGEN();
+        AST_DECL();
     };
 
     // 二元表达式
@@ -67,7 +67,7 @@ namespace hypermind {
         ASTExprPtr mLHS; // 产生式左边
         ASTExprPtr mRHS; // 产生式右边
         //ASTBinary(const Token &op, const ASTExprPtr &mLHS, const ASTExprPtr &mRHS);
-        AST_DECL_CODEGEN();
+        AST_DECL();
     };
 
     // If 语句
@@ -75,7 +75,7 @@ namespace hypermind {
         ASTExprPtr mCondition; // 条件
         ASTBlockPtr mThen;
         ASTBlockPtr mElse;
-        AST_DECL_CODEGEN();
+        AST_DECL();
     };
 
 

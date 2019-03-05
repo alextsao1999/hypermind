@@ -6,10 +6,9 @@
 #define HYPERMIND_TABLE_H
 
 namespace hypermind {
-    struct HMTable {
+    class HMSymbolTable {
 
     };
-
 }
 
 

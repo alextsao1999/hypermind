@@ -11,7 +11,8 @@
 
 #define HM_OBJECT(name) \
 struct HM##name : public HMObject
-#define HM_OBJ_DECL() HMHash hash() override; \
+#define HM_OBJ_DECL() using HMObject::HMObject; \
+HMHash hash() override; \
 void dump(Ostream &os) override; \
 HMBool free(VM *vm) override;
 #define HM_OBJ_HASH(obj)  HMHash HM##obj::hash()
