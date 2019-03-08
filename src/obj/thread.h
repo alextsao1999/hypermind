@@ -13,8 +13,8 @@ namespace hypermind {
         Value *sp{};
 
         HMUINT32 stackCapacity{};
-        HMUINT32 usedFrameNum{};   //已使用的frame数量
-        HMUINT32 frameCapacity{};  //frame容量
+        HMUINT32 usedFrameNum{};   // 已使用的frame数量
+        HMUINT32 frameCapacity{};  // frame容量
 
         // 调用者
         HMThread *caller{};

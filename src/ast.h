@@ -73,8 +73,9 @@ namespace hypermind {
     // If 语句
     AST_STMT(ASTIfStmt, ASTIfStmtPtr) {
         ASTExprPtr mCondition; // 条件
-        ASTBlockPtr mThen;
-        ASTBlockPtr mElse;
+        // Block or Expr
+        ASTNodePtr mThen;
+        ASTNodePtr mElse;
         AST_DECL();
     };
 

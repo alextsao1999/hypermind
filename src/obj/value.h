@@ -26,7 +26,18 @@ namespace hypermind {
             HMDouble dbval;
             HMObject *objval;
         };
+        HMHash hash();
+
     };
+
+    HMHash Value::hash() {
+        if (type == ValueType::Object) {
+            return objval->hash();
+        } else {
+            // 先用intval表示hash
+            return (HMHash) intval;
+        }
+    }
 }
 
 

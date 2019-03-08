@@ -26,6 +26,7 @@ namespace hypermind {
     }
 
     HM_OBJ_HASH(Instance) {
+
         return 0;
     }
     HM_OBJ_FREE(Instance) {

@@ -22,18 +22,7 @@ int main() {
     ASTExprPtr ast = parser.ParseExpression();
     ast->dump(HMCout, 0);
 
-//    vm.New<HMString>(&vm, source, 37);
-//    vm.New<HMString>(&vm, source, 36);
-//    vm.New<HMString>(&vm, source, 35);
-//    vm.New<HMString>(&vm, source, 34);
-//    vm.New<HMString>(&vm, source, 22);
-//    vm.New<HMString>(&vm, source, 11);
-//    cout << " allocated bytes: "  << vm.GetAllocatedBytes() << endl;
-//
-//
-//    cout << "size of Object : " << sizeof(HMObject) << endl;
-//
-//    vm.DumpAllObjects();
+    //    vm.DumpAllObjects();
 
 
     return 0;

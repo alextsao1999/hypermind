@@ -12,7 +12,6 @@
 #include "object.h"
 
 namespace hypermind {
-    struct HMObject;
     // 函数对象
     HM_OBJECT(Function) {
         Buffer<HMByte> instructions; // 指令流
@@ -43,6 +42,7 @@ namespace hypermind {
         HM_OBJ_DECL();
     };
 
+    // 函数调用栈帧CallInfo
     struct Frame {
         // 指向下一条指令
         HMByte *ip;

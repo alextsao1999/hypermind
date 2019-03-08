@@ -5,10 +5,11 @@
 #ifndef HYPERMIND_TABLE_H
 #define HYPERMIND_TABLE_H
 
+#include "hypermind.h"
+#include <map>
 namespace hypermind {
-    class HMSymbolTable {
 
-    };
+
 }
 
 

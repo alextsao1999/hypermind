@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 #include <deque>
+#include <map>
 #include "hypermind.h"
 #include "vm.h"
 #include "buffer.h"
@@ -99,7 +100,17 @@ namespace hypermind {
 
         At,  // @
 
-        Colon  //冒号 :
+        Colon,  //冒号 :
+
+        KeywordIf,
+        KeywordElse,
+        KeywordWhile,
+        KeywordBreak,
+        KeywordFor,
+        keyWordClass,
+        KeywordFunction,
+        KeywordNew,
+
     };
 
     struct Token {
