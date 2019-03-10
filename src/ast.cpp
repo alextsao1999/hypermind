@@ -19,7 +19,7 @@ namespace hypermind {
         }
         os << _HM_C(" { (binary)  ");
         mLHS->dump(os, 0);
-        op.dump(os);
+        mOp.dump(os);
         mRHS->dump(os, 0);
         os << _HM_C("  } ") ;
     }

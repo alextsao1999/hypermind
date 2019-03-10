@@ -5,7 +5,7 @@
 #include <iostream>
 #include "lexer.h"
 #include "obj/string.h"
-//#include <windows.h>
+
 namespace hypermind {
 
     bool IsSpace(HMChar ch){
@@ -373,6 +373,13 @@ namespace hypermind {
             NEXT();
         } while (IsCodeChar(CURRENT_CHAR) || IsNumber(CURRENT_CHAR));
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
+        HMChar identifierBuffer[255] = {_HM_C('\0')};
+        memcpy(identifierBuffer, mCurrentToken.mStart, mCurrentToken.mLength * sizeof(HMChar));
+        TokenType tok = HMKeywords[identifierBuffer];
+        if (tok != TokenType::End) {
+            TOKEN_TYPE(tok);
+        }
+
     }
 
     Lexer::~Lexer() = default;

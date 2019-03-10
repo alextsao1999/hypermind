@@ -42,7 +42,7 @@ namespace hypermind{
                 break;
             mLexer.Consume();
             ASTBinaryPtr lhsBin = make_ptr(ASTBinary);
-            lhsBin->op.mType = op;
+            lhsBin->mOp.mType = op;
             lhsBin->mLHS = lhs;
             lhsBin->mRHS = ParseBinaryOp(ParseUnary(), nextOp.association ? nextOp.prec + 1 : nextOp.prec);
             lhs = lhsBin;

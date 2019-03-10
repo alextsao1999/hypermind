@@ -68,7 +68,23 @@ namespace hypermind {
             // #
             /*Mod*/  PREC(12, true), // % remainder 取余
             /*At*/  UNPREC,  // @
-            /*Colon*/  UNPREC //冒号 :
+            /*Colon*/  UNPREC, //冒号 :
+           /*KeywordIf*/ UNPREC,
+           /*KeywordElse*/ UNPREC,
+           /*KeywordWhile*/ UNPREC,
+           /*KeywordBreak*/ UNPREC,
+           /*KeywordContinue*/ UNPREC,
+           /*KeywordFor*/ UNPREC,
+           /*keywordClass*/ UNPREC,
+           /*KeywordFunction*/ UNPREC,
+           /*KeywordNew*/ UNPREC,
+           /*KeywordReturn*/ UNPREC,
+           /*KeywordVar*/ UNPREC,
+           /*KeywordThis*/ UNPREC,
+           /*KeywordSuper*/ UNPREC,
+           /*KeywordTrue*/ UNPREC,
+           /*KeywordFalse*/ UNPREC,
+           /*KeywordStatic*/ UNPREC,
     };
     class Parser {
     protected:
@@ -82,6 +98,16 @@ namespace hypermind {
         Parser(const HMChar *mFileName, Lexer &mLexer) : mFileName(mFileName), mLexer(mLexer) {}
 
         ASTExprPtr ParseExpression();
+        inline ASTStmtPtr ParseVarStmt();
+        inline ASTStmtPtr ParseFunctionStmt();
+        inline ASTStmtPtr ParseIfStmt();
+        inline ASTStmtPtr ParseWhileStmt();
+        inline ASTStmtPtr ParseBreakStmt();
+        inline ASTStmtPtr ParseContinueStmt();
+        inline ASTStmtPtr ParseReturnStmt();
+        inline ASTStmtPtr ParseClassStmt();
+        inline ASTBlockPtr ParseBlock();
+
 
     };
 

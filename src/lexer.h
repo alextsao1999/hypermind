@@ -106,10 +106,37 @@ namespace hypermind {
         KeywordElse,
         KeywordWhile,
         KeywordBreak,
+        KeywordContinue,
         KeywordFor,
-        keyWordClass,
+        keywordClass,
         KeywordFunction,
         KeywordNew,
+        KeywordReturn,
+        KeywordVar,
+        KeywordThis,
+        KeywordSuper,
+        KeywordTrue,
+        KeywordFalse,
+        KeywordStatic,
+    };
+
+    static std::map<String, TokenType> HMKeywords = {
+            {_HM_C("if"),       TokenType::KeywordIf},
+            {_HM_C("else"),     TokenType::KeywordElse},
+            {_HM_C("while"),    TokenType::KeywordWhile},
+            {_HM_C("break"),    TokenType::KeywordBreak},
+            {_HM_C("continue"),    TokenType::KeywordContinue},
+            {_HM_C("for"),      TokenType::KeywordFor},
+            {_HM_C("class"),    TokenType::keywordClass},
+            {_HM_C("function"), TokenType::KeywordFunction},
+            {_HM_C("new"),      TokenType::KeywordNew},
+            {_HM_C("return"),   TokenType::KeywordReturn},
+            {_HM_C("var"),   TokenType::KeywordVar},
+            {_HM_C("this"),   TokenType::KeywordThis},
+            {_HM_C("super"),   TokenType::KeywordSuper},
+            {_HM_C("true"),   TokenType::KeywordTrue},
+            {_HM_C("false"),   TokenType::KeywordFalse},
+            {_HM_C("static"),   TokenType::KeywordStatic},
 
     };
 
