@@ -42,8 +42,10 @@ namespace hypermind {
 
     // 语法块Node
     AST_NODE(ASTBlock, ASTBlockPtr) {
-        std::vector<ASTStmtPtr> stmts;
-        inline void addStmt(ASTStmtPtr &&np) {
+        std::vector<ASTNodePtr> stmts;
+
+        inline void addStmt(ASTNodePtr &&np) {
+            // 添加语句 Block/Stmt/Expr
             stmts.push_back(np);
         }
         AST_DECL();
@@ -110,7 +112,7 @@ namespace hypermind {
     };
 
     // AST函数声明
-    AST_STMT(ASTFunctionStmt, ASTFunctionStmtPtr) {
+    AST_NODE(ASTFunctionStmt, ASTFunctionStmtPtr) {
         Token mName; // 函数名称
         ASTNodePtr mParams; // 形式参数
         ASTBlockPtr mBody; // 函数体
@@ -118,7 +120,7 @@ namespace hypermind {
     };
 
     // AST类声明
-    AST_STMT(ASTClassStmt, ASTClassStmtPtr) {
+    AST_NODE(ASTClassStmt, ASTClassStmtPtr) {
         Token mName; // 类名称
         ASTListPtr mClassBody;
 

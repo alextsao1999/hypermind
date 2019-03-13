@@ -5,8 +5,14 @@
 #ifndef HYPERMIND_COMPILER_H
 #define HYPERMIND_COMPILER_H
 
+#include "vm.h"
 namespace hypermind {
     class CompilerUnit {
+    public:
+        explicit CompilerUnit(VM *mVm);
+
+    protected:
+        VM *mVm;
 
 
     };

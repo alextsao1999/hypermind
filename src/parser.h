@@ -107,7 +107,7 @@ namespace hypermind {
         inline ASTStmtPtr ParseReturnStmt();
         inline ASTStmtPtr ParseClassStmt();
         inline ASTBlockPtr ParseBlock();
-
+        inline ASTNodePtr ParseProgram();
 
     };
 

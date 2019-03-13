@@ -6,4 +6,8 @@
 
 namespace hypermind {
 
+    CompilerUnit::CompilerUnit(VM *mVm) : mVm(mVm) {
+
+    }
+
 }

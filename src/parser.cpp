@@ -50,4 +50,92 @@ namespace hypermind{
         return lhs;
     }
 
+    ASTStmtPtr Parser::ParseVarStmt() {
+        return hypermind::ASTStmtPtr();
+    }
+
+    ASTStmtPtr Parser::ParseFunctionStmt() {
+        return hypermind::ASTStmtPtr();
+    }
+
+    ASTStmtPtr Parser::ParseIfStmt() {
+        return hypermind::ASTStmtPtr();
+    }
+
+    ASTStmtPtr Parser::ParseWhileStmt() {
+        return hypermind::ASTStmtPtr();
+    }
+
+    ASTStmtPtr Parser::ParseBreakStmt() {
+        return hypermind::ASTStmtPtr();
+    }
+
+    ASTStmtPtr Parser::ParseContinueStmt() {
+        return hypermind::ASTStmtPtr();
+    }
+
+    ASTStmtPtr Parser::ParseReturnStmt() {
+        return hypermind::ASTStmtPtr();
+    }
+
+    ASTStmtPtr Parser::ParseClassStmt() {
+        return hypermind::ASTStmtPtr();
+    }
+
+    ASTBlockPtr Parser::ParseBlock() {
+        ASTBlockPtr blockPtr = make_ptr(ASTBlock);
+        if (mLexer.PeekTokenType() == TokenType::LeftBrace) {
+            mLexer.Consume();
+            ASTNodePtr stmt;
+            while ((stmt = ParseProgram()) != nullptr) {
+
+                blockPtr->addStmt(std::move(stmt));
+                if (mLexer.PeekTokenType() == TokenType::RightBrace)
+                    break;
+            }
+            
+        } else {
+
+        }
+
+        return blockPtr;
+    }
+
+    ASTNodePtr Parser::ParseProgram() {
+        TokenType tok = mLexer.ReadTokenType();
+        switch (tok) {
+            case TokenType::KeywordIf:
+                return ParseIfStmt();
+            case TokenType::KeywordWhile:
+                return ParseWhileStmt();
+            case TokenType::KeywordBreak:
+                break;
+            case TokenType::KeywordContinue:
+                break;
+            case TokenType::KeywordFor:
+                break;
+            case TokenType::keywordClass:
+                break;
+            case TokenType::KeywordFunction:
+                break;
+            case TokenType::KeywordReturn:
+                break;
+            case TokenType::KeywordVar:
+                break;
+            case TokenType::KeywordThis:
+                break;
+            case TokenType::KeywordSuper:
+                break;
+            case TokenType::KeywordTrue:
+                break;
+            case TokenType::KeywordFalse:
+                break;
+            case TokenType::KeywordStatic:
+                break;
+            default:
+                // 错误
+                break;
+        }
+    }
+
 }
