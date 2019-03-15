@@ -97,6 +97,10 @@ namespace hypermind {
     public:
         Parser(const HMChar *mFileName, Lexer &mLexer) : mFileName(mFileName), mLexer(mLexer) {}
 
+        /**
+         * Expr ::= Primary {"Op" Primary }
+         * @return
+         */
         ASTExprPtr ParseExpression();
         ASTStmtPtr ParseVarStmt();
         ASTStmtPtr ParseFunctionStmt();
@@ -106,6 +110,12 @@ namespace hypermind {
         ASTStmtPtr ParseContinueStmt();
         ASTStmtPtr ParseReturnStmt();
         ASTStmtPtr ParseClassStmt();
+
+        /**
+         * Parse Block
+         * block ::= "{" { Stmt | Expr } "}"
+         * @return
+         */
         ASTBlockPtr ParseBlock();
         ASTNodePtr ParseProgram();
 

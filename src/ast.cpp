@@ -7,20 +7,22 @@
 namespace hypermind {
     // 语法块Dump
     AST_DUMP(ASTBlock) {
+        os << _HM_C("  {  ") << std::endl;
         for (auto &stmt : stmts) {
-            stmt->dump(os, ind);
+            os << "    " ;
+            stmt->dump(os);
+            os << std::endl;
         }
+        os << _HM_C(" } ");
+
     }
 
     // 二元表达式Dump
     AST_DUMP(ASTBinary) {
-        for (int i = 0; i < ind * 4; ++i) {
-            os << _HM_C(" ");
-        }
         os << _HM_C(" { (binary)  ");
-        mLHS->dump(os, 0);
+        mLHS->dump(os);
         mOp.dump(os);
-        mRHS->dump(os, 0);
+        mRHS->dump(os);
         os << _HM_C("  } ") ;
     }
 
@@ -58,6 +60,14 @@ namespace hypermind {
     }
 
     AST_DUMP(ASTIfStmt) {
+        os << _HM_C("if  condition : ");
+        mCondition->dump(os);
+        os << std::endl;
+        mThen->dump(os);
+        if (mElse != nullptr) {
+            os << _HM_C(" else ");
+            mElse->dump(os);
+        }
 
     }
 
@@ -69,14 +79,13 @@ namespace hypermind {
     }
     AST_DUMP(ASTVarStmt) {
 
-        os << _HM_C(" { define var : ") ;
+        os << _HM_C(" define var : ") ;
         mIdentifier.dump(os);
         if (mValue != nullptr) {
             os << _HM_C("  value : ");
-            mValue->dump(os, 0);
+            mValue->dump(os);
         }
-        os << _HM_C("  } ");
-
+        os << _HM_C("  ") << std::endl;
 
     }
     AST_DUMP(ASTList) {

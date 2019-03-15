@@ -65,7 +65,22 @@ namespace hypermind{
     }
 
     ASTStmtPtr Parser::ParseIfStmt() {
-        return hypermind::ASTStmtPtr();
+        mLexer.Consume(); // Consume If
+        ASTIfStmtPtr ast = make_ptr(ASTIfStmt);
+
+        if (!mLexer.Match(TokenType::LeftParen)) {
+            // TODO ErrorReport 缺少左括号
+        }
+        ast->mCondition = ParseExpression();
+        if (!mLexer.Match(TokenType::RightParen)) {
+            // TODO ErrorReport 缺少右括号
+        }
+        ast->mThen = ParseBlock();
+        if (mLexer.Match(TokenType::KeywordElse)) {
+            ast->mElse = ParseBlock();
+        }
+
+        return ast;
     }
 
     ASTStmtPtr Parser::ParseWhileStmt() {
@@ -95,7 +110,9 @@ namespace hypermind{
             ASTNodePtr stmt;
             while ((stmt = ParseProgram()) != nullptr) {
                 blockPtr->addStmt(std::move(stmt));
-                if (mLexer.PeekTokenType() == TokenType::RightBrace)
+                blockPtr->stmts.back()->dump(HMCout);
+
+                if (mLexer.Match(TokenType::RightBrace))
                     break;
             }
         } else {

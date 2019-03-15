@@ -21,11 +21,11 @@
     struct n;  \
     using p = std::shared_ptr<n>;  \
     struct n : public ASTExpr
-#define AST_DECL() void codegen(){};void dump(Ostream &os, int ind);
-#define AST_DUMP(n) void n::dump(Ostream &os, int ind)
+#define AST_DECL() void codegen(){};void dump(Ostream &os);
+#define AST_DUMP(n) void n::dump(Ostream &os)
 namespace hypermind {
     struct ASTNode {
-        virtual void dump(Ostream &os, int ind){};
+        virtual void dump(Ostream &os){};
         virtual void codegen(){};
     };
     using ASTNodePtr = std::shared_ptr<ASTNode>;
@@ -43,7 +43,6 @@ namespace hypermind {
     // 语法块Node
     AST_NODE(ASTBlock, ASTBlockPtr) {
         std::vector<ASTNodePtr> stmts;
-
         inline void addStmt(ASTNodePtr &&np) {
             // 添加语句 Block/Stmt/Expr
             stmts.push_back(np);

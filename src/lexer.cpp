@@ -284,8 +284,8 @@ namespace hypermind {
     }
 
     bool Lexer::Match(TokenType type) {
-        Token token = Peek(1);
-        if (token.mType == type) {
+        TokenType tok = PeekTokenType();
+        if (tok == type) {
             mTokens.pop_front();
             return true;
         }
