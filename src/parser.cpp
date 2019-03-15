@@ -4,7 +4,7 @@
 
 #include "parser.h"
 
-namespace hypermind{
+namespace hypermind {
 
     // Unary ::= Primary |  ! Primary | ++ Primary | Primary ++
     ASTExprPtr Parser::ParseUnary() {
@@ -61,7 +61,18 @@ namespace hypermind{
     }
 
     ASTStmtPtr Parser::ParseFunctionStmt() {
-        return hypermind::ASTStmtPtr();
+        mLexer.Consume(); // Consume function
+        ASTFunctionStmtPtr ast = make_ptr(ASTFunctionStmt);
+        ast->mName = mLexer.Read();
+        if (!mLexer.Match(TokenType::LeftParen)) {
+            // TODO ErrorReport 缺少左括号
+        }
+        ast->mParams = ParseParamList();
+        if (!mLexer.Match(TokenType::RightParen)) {
+            // TODO ErrorReport 缺少右括号
+        }
+        ast->mBody = ParseBlock();
+        return ast;
     }
 
     ASTStmtPtr Parser::ParseIfStmt() {
@@ -84,19 +95,34 @@ namespace hypermind{
     }
 
     ASTStmtPtr Parser::ParseWhileStmt() {
-        return hypermind::ASTStmtPtr();
+        mLexer.Consume(); // Consume while
+        ASTWhileStmtPtr ast = make_ptr(ASTWhileStmt);
+        if (!mLexer.Match(TokenType::LeftParen)) {
+            // TODO ErrorReport 缺少左括号
+        }
+        ast->mCondition = ParseExpression();
+        if (!mLexer.Match(TokenType::RightParen)) {
+            // TODO ErrorReport 缺少右括号
+        }
+        ast->mBlock = ParseBlock();
+        return ast;
     }
 
     ASTStmtPtr Parser::ParseBreakStmt() {
-        return hypermind::ASTStmtPtr();
+        mLexer.Consume();
+        return make_ptr(ASTBreakStmt);
     }
 
     ASTStmtPtr Parser::ParseContinueStmt() {
-        return hypermind::ASTStmtPtr();
+        mLexer.Consume();
+        return make_ptr(ASTContinueStmt);
     }
 
     ASTStmtPtr Parser::ParseReturnStmt() {
-        return hypermind::ASTStmtPtr();
+        ASTReturnStmtPtr ast = make_ptr(ASTReturnStmt);
+        // FIXME  注意! 可能是空返回值
+        ast->mRetval = ParseExpression();
+        return ast;
     }
 
     ASTStmtPtr Parser::ParseClassStmt() {
@@ -110,8 +136,6 @@ namespace hypermind{
             ASTNodePtr stmt;
             while ((stmt = ParseProgram()) != nullptr) {
                 blockPtr->addStmt(std::move(stmt));
-                blockPtr->stmts.back()->dump(HMCout);
-
                 if (mLexer.Match(TokenType::RightBrace))
                     break;
             }
@@ -159,6 +183,22 @@ namespace hypermind{
         while (mLexer.PeekTokenType() == TokenType::Delimiter)
             mLexer.Consume();
         return ptr;
+    }
+
+    ASTNodePtr Parser::ParseParamList() {
+        ASTListPtr list = make_ptr(ASTList);
+        if (mLexer.PeekTokenType() == TokenType::RightParen)
+            return list;
+        do {
+            ASTVarStmtPtr &&var = make_ptr(ASTVarStmt);
+            var->mIdentifier = mLexer.Read();
+            list->elements.push_back(var);
+        } while (mLexer.Match(TokenType::Comma));
+        return list;
+    }
+
+    ASTNodePtr Parser::ParseArgList() {
+        return hypermind::ASTNodePtr();
     }
 
 }

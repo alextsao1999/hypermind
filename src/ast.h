@@ -97,6 +97,13 @@ namespace hypermind {
         AST_DECL();
     };
 
+    // return 语句
+    AST_STMT(ASTReturnStmt, ASTReturnStmtPtr) {
+        // 返回值
+        ASTExprPtr mRetval;
+        AST_DECL();
+    };
+
     // 变量声明语句
     AST_STMT(ASTVarStmt, ASTVarStmtPtr) {
         Token mIdentifier;
@@ -111,7 +118,7 @@ namespace hypermind {
     };
 
     // AST函数声明
-    AST_NODE(ASTFunctionStmt, ASTFunctionStmtPtr) {
+    AST_STMT(ASTFunctionStmt, ASTFunctionStmtPtr) {
         Token mName; // 函数名称
         ASTNodePtr mParams; // 形式参数
         ASTBlockPtr mBody; // 函数体
@@ -119,7 +126,7 @@ namespace hypermind {
     };
 
     // AST类声明
-    AST_NODE(ASTClassStmt, ASTClassStmtPtr) {
+    AST_STMT(ASTClassStmt, ASTClassStmtPtr) {
         Token mName; // 类名称
         ASTListPtr mClassBody;
 

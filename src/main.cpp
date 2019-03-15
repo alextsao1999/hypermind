@@ -11,7 +11,7 @@ using namespace hypermind;
 using namespace std;
 
 int main() {
-    auto *source = const_cast<HMChar *>(_HM_C("if (a=1234) {b = 234;if(d=123) {e = 444;k=6666} else pp = 1234;c=5312}"));
+    auto *source = const_cast<HMChar *>(_HM_C("function test(a, b, c) {aa = 444}"));
     VM vm;
     Lexer lexer(&vm, source);
     Parser parser(_HM_C(""), lexer);

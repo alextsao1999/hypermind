@@ -119,6 +119,10 @@ namespace hypermind {
         ASTBlockPtr ParseBlock();
         ASTNodePtr ParseProgram();
 
+        ASTNodePtr ParseParamList();
+        ASTNodePtr ParseArgList();
+
+
     };
 
 }

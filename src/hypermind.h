@@ -9,8 +9,11 @@
 #include <string>
 #include <cstdio>
 #include <cstdint>
-// 字符宏
 
+// 最大标识符长度
+#define MAX_IDENTIFIER_LENTH 255
+
+// 字符宏
 #define _HM_C(ch) L##ch
 // 字符通用字符类型
 typedef wchar_t HMChar;
