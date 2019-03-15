@@ -14,11 +14,11 @@ using namespace hypermind;
 using namespace std;
 
 int main() {
-    auto *source = const_cast<HMChar *>(_HM_C("var a = 1;"));
+    auto *source = const_cast<HMChar *>(_HM_C("var a = 1234+321;"));
     VM vm;
     Lexer lexer(&vm, source);
     Parser parser(_HM_C(""), lexer);
-    ASTExprPtr ast = parser.ParseExpression();
+    ASTNodePtr ast = parser.ParseProgram();
     ast->dump(HMCout, 0);
 
     //    vm.DumpAllObjects();

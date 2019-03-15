@@ -51,7 +51,13 @@ namespace hypermind{
     }
 
     ASTStmtPtr Parser::ParseVarStmt() {
-        return hypermind::ASTStmtPtr();
+        mLexer.Consume();
+        ASTVarStmtPtr ast = make_ptr(ASTVarStmt);
+        ast->mIdentifier = mLexer.Read();
+        if (mLexer.Match(TokenType::Assign)) {
+            ast->mValue = ParseExpression();
+        }
+        return ast;
     }
 
     ASTStmtPtr Parser::ParseFunctionStmt() {
@@ -88,54 +94,54 @@ namespace hypermind{
             mLexer.Consume();
             ASTNodePtr stmt;
             while ((stmt = ParseProgram()) != nullptr) {
-
                 blockPtr->addStmt(std::move(stmt));
                 if (mLexer.PeekTokenType() == TokenType::RightBrace)
                     break;
             }
-            
         } else {
-
+            blockPtr->addStmt(std::move(ParseProgram()));
         }
-
         return blockPtr;
     }
 
     ASTNodePtr Parser::ParseProgram() {
-        TokenType tok = mLexer.ReadTokenType();
+        TokenType tok = mLexer.PeekTokenType();
+        ASTNodePtr ptr;
         switch (tok) {
             case TokenType::KeywordIf:
-                return ParseIfStmt();
+                ptr = ParseIfStmt();
+                break;
             case TokenType::KeywordWhile:
-                return ParseWhileStmt();
+                ptr = ParseWhileStmt();
+                break;
             case TokenType::KeywordBreak:
+                ptr = ParseBreakStmt();
                 break;
             case TokenType::KeywordContinue:
+                ptr = ParseContinueStmt();
                 break;
             case TokenType::KeywordFor:
                 break;
             case TokenType::keywordClass:
+                ptr = ParseClassStmt();
                 break;
             case TokenType::KeywordFunction:
+                ptr = ParseFunctionStmt();
                 break;
             case TokenType::KeywordReturn:
+                ptr = ParseReturnStmt();
                 break;
             case TokenType::KeywordVar:
-                break;
-            case TokenType::KeywordThis:
-                break;
-            case TokenType::KeywordSuper:
-                break;
-            case TokenType::KeywordTrue:
-                break;
-            case TokenType::KeywordFalse:
+                ptr = ParseVarStmt();
                 break;
             case TokenType::KeywordStatic:
                 break;
             default:
-                // 错误
-                break;
+                ptr = ParseExpression();
         }
+        while (mLexer.PeekTokenType() == TokenType::Delimiter)
+            mLexer.Consume();
+        return ptr;
     }
 
 }

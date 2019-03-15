@@ -57,4 +57,36 @@ namespace hypermind {
 
     }
 
+    AST_DUMP(ASTIfStmt) {
+
+    }
+
+    AST_DUMP(ASTWhileStmt) {
+
+    }
+    AST_DUMP(ASTContinueStmt) {
+
+    }
+    AST_DUMP(ASTVarStmt) {
+
+        os << _HM_C(" { define var : ") ;
+        mIdentifier.dump(os);
+        if (mValue != nullptr) {
+            os << _HM_C("  value : ");
+            mValue->dump(os, 0);
+        }
+        os << _HM_C("  } ");
+
+
+    }
+    AST_DUMP(ASTList) {
+
+    }
+    AST_DUMP(ASTFunctionStmt) {
+
+    }
+    AST_DUMP(ASTClassStmt) {
+
+    }
+
 }

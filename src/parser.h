@@ -98,16 +98,16 @@ namespace hypermind {
         Parser(const HMChar *mFileName, Lexer &mLexer) : mFileName(mFileName), mLexer(mLexer) {}
 
         ASTExprPtr ParseExpression();
-        inline ASTStmtPtr ParseVarStmt();
-        inline ASTStmtPtr ParseFunctionStmt();
-        inline ASTStmtPtr ParseIfStmt();
-        inline ASTStmtPtr ParseWhileStmt();
-        inline ASTStmtPtr ParseBreakStmt();
-        inline ASTStmtPtr ParseContinueStmt();
-        inline ASTStmtPtr ParseReturnStmt();
-        inline ASTStmtPtr ParseClassStmt();
-        inline ASTBlockPtr ParseBlock();
-        inline ASTNodePtr ParseProgram();
+        ASTStmtPtr ParseVarStmt();
+        ASTStmtPtr ParseFunctionStmt();
+        ASTStmtPtr ParseIfStmt();
+        ASTStmtPtr ParseWhileStmt();
+        ASTStmtPtr ParseBreakStmt();
+        ASTStmtPtr ParseContinueStmt();
+        ASTStmtPtr ParseReturnStmt();
+        ASTStmtPtr ParseClassStmt();
+        ASTBlockPtr ParseBlock();
+        ASTNodePtr ParseProgram();
 
     };
 
