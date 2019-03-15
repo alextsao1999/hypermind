@@ -6,14 +6,45 @@
 #define HYPERMIND_COMPILER_H
 
 #include "vm.h"
+#include "ast.h"
+#include "obj/function.h"
 namespace hypermind {
-    class CompilerUnit {
+    class CompileUnit {
+        friend ASTFunctionStmt;
     public:
-        explicit CompilerUnit(VM *mVm);
+        explicit CompileUnit(VM *mVm);
+
+        /**
+         * 声明变量
+         * @param mIdentifier
+         */
+        void DeclareVariable(Token &mIdentifier) {
+
+        };
+        /**
+         * 在栈中压入
+         */
+        void Push(){
+
+        };
 
     protected:
+        // 作用域深度
+        HMUINT32 mScopeDepth;
+
+        // 所属虚拟机
         VM *mVm;
 
+        // 当前正在编译的函数
+        HMFunction *mFn;
+
+        // 符号表
+        std::map<String, HMUINT32> mSymbolTable;
+
+        HMUINT32 mStackSlotNum;
+
+        // 外层编译单元
+        CompileUnit *mOuter;
 
     };
 

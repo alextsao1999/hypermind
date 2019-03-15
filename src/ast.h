@@ -4,8 +4,8 @@
 #ifndef HYPERMIND_AST_H
 #define HYPERMIND_AST_H
 
-#include "hypermind.h"
 #include <memory>
+#include "hypermind.h"
 #include "obj/value.h"
 #include "lexer.h"
 
@@ -21,12 +21,14 @@
     struct n;  \
     using p = std::shared_ptr<n>;  \
     struct n : public ASTExpr
-#define AST_DECL() void codegen(){};void dump(Ostream &os);
+#define AST_DECL() void compile(CompileUnit *cu);void dump(Ostream &os);
 #define AST_DUMP(n) void n::dump(Ostream &os)
+#define AST_COMPILE(n) void n::compile(CompileUnit *cu)
 namespace hypermind {
+    class CompileUnit;
     struct ASTNode {
         virtual void dump(Ostream &os){};
-        virtual void codegen(){};
+        virtual void compile(CompileUnit *cu){};
     };
     using ASTNodePtr = std::shared_ptr<ASTNode>;
 

@@ -11,6 +11,7 @@ namespace hypermind {
     public:
         HMObject *mAllObjects{nullptr};
         HMClass *mStringClass{nullptr};
+        HMClass *mFunctionClass{nullptr};
         HMClass *mMethodClass{nullptr};
         HMClass *mMetaClass{nullptr};
         HMClass *mMapClass{nullptr};
