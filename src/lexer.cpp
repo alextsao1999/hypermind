@@ -374,6 +374,7 @@ namespace hypermind {
         } while (IsCodeChar(CURRENT_CHAR) || IsNumber(CURRENT_CHAR));
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
         HMChar identifierBuffer[MAX_IDENTIFIER_LENTH] = {_HM_C('\0')};
+        // TODO 用strcpy
         memcpy(identifierBuffer, mCurrentToken.mStart, mCurrentToken.mLength * sizeof(HMChar));
         TokenType tok = HMKeywords[identifierBuffer];
         if (tok != TokenType::End) {

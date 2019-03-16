@@ -6,24 +6,38 @@
 
 namespace hypermind {
 
-    // Unary ::= Primary |  ! Primary | ++ Primary | Primary ++
+    // Unary ::= Primary |  "!" Primary | "++" Primary | Primary "++"
     ASTExprPtr Parser::ParseUnary() {
         return ParsePrimary();
     }
 
-    // Primary ::= Literal | Varible
+    // Primary ::= Literal | Varible | true | false
     ASTExprPtr Parser::ParsePrimary() {
         Token tok = mLexer.Read();
         if (tok.mType == TokenType::Identifier) {
             ASTVariablePtr astVariablePtr = make_ptr(ASTVariable);
             astVariablePtr->mVar = tok;
             return astVariablePtr;
-        } else {
+        } else if (tok.mType == TokenType::String) {
             ASTLiteralPtr astLiteralPtr = make_ptr(ASTLiteral);
             astLiteralPtr->mValue = tok.mValue;
             return astLiteralPtr;
+        } else if (tok.mType == TokenType::KeywordTrue) {
+            ASTLiteralPtr astLiteralPtr = make_ptr(ASTLiteral);
+            astLiteralPtr->mValue.type = ValueType::True;
+            return astLiteralPtr;
+        } else if (tok.mType == TokenType::KeywordFalse) {
+            ASTLiteralPtr astLiteralPtr = make_ptr(ASTLiteral);
+            astLiteralPtr->mValue.type = ValueType::False;
+            return astLiteralPtr;
+        } else if (tok.mType == TokenType::Number) {
+            ASTLiteralPtr astLiteralPtr = make_ptr(ASTLiteral);
+            astLiteralPtr->mValue = tok.mValue;
+            return astLiteralPtr;
+        } else {
+            // TODO 不存在的Primary ??
+            return nullptr;
         }
-
     }
 
     ASTExprPtr Parser::ParseExpression() {

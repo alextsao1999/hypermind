@@ -68,12 +68,13 @@ namespace hypermind {
 
     // 编译字面量
     AST_COMPILE(ASTLiteral) {
-
+        HMUINT32 &&idx = cu->AddConstant(mValue);
+        cu->EmitLoadConstant(idx);
     }
 
     // 编译变量
     AST_COMPILE(ASTVariable) {
-
+        cu->EmitLoadVariable(mVar);
     }
 
     // 编译IF
@@ -83,6 +84,7 @@ namespace hypermind {
 
     // 编译While
     AST_COMPILE(ASTWhileStmt) {
+
     }
 
     // 编译Continue
@@ -106,9 +108,18 @@ namespace hypermind {
             element->compile(cu);
     }
 
-    // 编译变量声明
+    /**
+     * 编译变量声明
+     * 声明变量的时候 如果初始值为空 则压入Null值 如果 初始值不为空 则 压入初始值
+     * @param cu
+     */
     AST_COMPILE(ASTVarStmt) {
-
+        if (mValue == nullptr) {
+            cu->EmitPushValue(VT_TO_VALUE(ValueType::Null));
+        } else {
+            mValue->compile(cu);
+        }
+        cu->DeclareVariable(mIdentifier);
     }
 
     // 编译函数

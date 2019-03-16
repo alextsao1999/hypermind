@@ -8,6 +8,9 @@
 #include "vm.h"
 #include "ast.h"
 #include "obj/function.h"
+
+#define VT_TO_VALUE(VT) {VT, 0}
+
 namespace hypermind {
     class CompileUnit {
         friend ASTFunctionStmt;
@@ -18,16 +21,36 @@ namespace hypermind {
          * 声明变量
          * @param mIdentifier
          */
-        void DeclareVariable(Token &mIdentifier) {
+        void DeclareVariable(const Token &id) {
 
         };
+
         /**
-         * 在栈中压入
+         * 添加常量
+         * @param value
+         * @return  索引值
          */
-        void Push(){
+        HMUINT32 AddConstant(const Value &value) {
 
         };
 
+        /**
+         * 压入字面量
+         */
+        void EmitPushValue(const Value &value) {
+
+        };
+
+        /**
+         * 栈中压入变量
+         */
+        void EmitLoadVariable(const Token &id){
+
+        };
+
+        void EmitLoadConstant(HMUINT32 index) {
+
+        }
     protected:
         // 作用域深度
         HMUINT32 mScopeDepth;
