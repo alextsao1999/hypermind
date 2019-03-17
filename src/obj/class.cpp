@@ -36,7 +36,8 @@ namespace hypermind {
 
     }
 
-    HMMethod::HMMethod(VM *vm, MethodType methodType, HMClosure *fn) : HMObject(vm, ObjectType::Method, vm->mMethodClass) {
+    HMMethod::HMMethod(VM *vm, MethodType methodType, HMClosure *fn) : HMObject(vm, ObjectType::Method,
+                                                                                vm->mMethodClass) {
 
     }
 

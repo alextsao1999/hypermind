@@ -9,8 +9,15 @@
 namespace hypermind {
     class VM {
     public:
+        /**
+         * 链接的所有对象
+         */
         HMObject *mAllObjects{nullptr};
+
+        HMClass *mBooleanClass{nullptr};
         HMClass *mStringClass{nullptr};
+        HMClass *mIntegerClass{nullptr};
+        HMClass *mDoubleClass{nullptr};
         HMClass *mFunctionClass{nullptr};
         HMClass *mMethodClass{nullptr};
         HMClass *mMetaClass{nullptr};
@@ -35,19 +42,20 @@ namespace hypermind {
          * @return
          */
         template <typename T>
-        T *Allocate(HMUINT32 extraSize = 0){
-            return (T *) MemManger(nullptr, 0, sizeof(T) + extraSize);
+        T *Allocate(HMUINT32 count = 0){
+            return (T *) MemManger(nullptr, 0, sizeof(T) * count);
         };
 
         void *Allocate(HMUINT32 size) {
             return MemManger(nullptr, 0, size);
         }
+
         void *Allocate(HMUINT32 elementSize, HMUINT32 count) {
             return MemManger(nullptr, 0, elementSize * count);
         }
 
         void *Deallocate(void *ptr, HMUINT32 size){
-            return nullptr;
+            return MemManger(ptr, size, 0);
         };
 
         void LinkObject(HMObject *obj);

@@ -8,6 +8,8 @@
 #include "buffer.h"
 #include "function.h"
 #include "value.h"
+#include "string.h"
+
 namespace hypermind {
     // 原生函数指针
     typedef bool (*HMPrimitive)(VM *vm, Value *args);
@@ -35,6 +37,7 @@ namespace hypermind {
         HMClass *superClass;  // 父类
         HMUINT32 fieldNumer;
         Buffer<HMMethod> methods;
+        HMString *name; // 类名
         HM_OBJ_DECL();
     };
 

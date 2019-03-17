@@ -12,16 +12,24 @@
 #include "object.h"
 
 namespace hypermind {
+    // 调试结构
+    struct FunctionDebug {
+        String name;  // 函数名称
+        Vector<HMUINT32> line;  // 所在行号
+        explicit FunctionDebug(const String &name);
+    };
+
     // 函数对象
     HM_OBJECT(Function) {
         Buffer<HMByte> instructions; // 指令流
         Buffer<Value> constants;  // 所有常量
-        HMModule *module;   // 所属模块
+        HMModule *module{};   // 所属模块
         HMUINT32 maxStackNumber{};  // 最大栈空间
+        HMFunction(VM *vm, HMModule *module);
         HMUINT32 upvalueNumber{}; // upval 数量
         HM_OBJ_DECL();
 #ifdef DEBUG
-        FunctionDebug *debug;
+        FunctionDebug *debug{};
 #endif
     };
 
@@ -49,12 +57,6 @@ namespace hypermind {
         // 指向的闭包对象
         HMClosure *closure;
         Value *stackStart;
-    };
-
-    // 调试结构
-    struct FunctionDebug {
-        HMChar *name;  // 函数名称
-        Buffer<HMInteger>line;  // 所在行号
     };
 
 }

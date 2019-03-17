@@ -8,13 +8,13 @@ namespace hypermind {
     // 编译语法块
     AST_COMPILE(ASTBlock) {
         for (auto &stmt : stmts)
-            stmt->compile(cu);
+            stmt->compile(cu, false);
     }
 
     // 编译二元表达式
     AST_COMPILE(ASTBinary) {
-        mLHS->compile(cu);
-        mRHS->compile(cu);
+        mLHS->compile(cu, false);
+        mRHS->compile(cu, false);
 
         // 根据Op 编译相应的Opcode
         switch (mOp.mType) {
@@ -68,13 +68,14 @@ namespace hypermind {
 
     // 编译字面量
     AST_COMPILE(ASTLiteral) {
-        HMUINT32 &&idx = cu->AddConstant(mValue);
+        HMUINT32 idx = cu->AddConstant(mValue);
         cu->EmitLoadConstant(idx);
     }
 
     // 编译变量
     AST_COMPILE(ASTVariable) {
-        cu->EmitLoadVariable(mVar);
+
+        cu->EmitLoadVariable();
     }
 
     // 编译IF
@@ -105,7 +106,7 @@ namespace hypermind {
     // 编译List
     AST_COMPILE(ASTList) {
         for (auto &element : elements)
-            element->compile(cu);
+            element->compile(cu, false);
     }
 
     /**
@@ -115,11 +116,12 @@ namespace hypermind {
      */
     AST_COMPILE(ASTVarStmt) {
         if (mValue == nullptr) {
-            cu->EmitPushValue(VT_TO_VALUE(ValueType::Null));
+            cu->EmitPushNull();
         } else {
-            mValue->compile(cu);
+            mValue->compile(cu, false);
         }
-        cu->DeclareVariable(mIdentifier);
+        cu->DeclareLocalVariable(mIdentifier);
+
     }
 
     // 编译函数
@@ -128,9 +130,14 @@ namespace hypermind {
             // TODO 错误 : 已经存在正在编译的函数
         }
         // 在当前虚拟机中创建一个函数对象
-        cu->mFn = cu->mVm->New<HMFunction>(cu->mVm, cu->mVm->mFunctionClass);
-        mParams->compile(cu); // 声明变量
-        mBody->compile(cu); // 编译函数实体
+        // TODO 当前模块变量为nullptr 编译类的时候需要
+        cu->mFn = cu->mVM->New<HMFunction>(cu->mVM, nullptr);
+
+#ifdef DEBUG
+        cu->mFn->debug = cu->mVM->New<FunctionDebug>(String(mName.mStart, mName.mLength));
+#endif
+        mParams->compile(cu, false); // 声明变量
+        mBody->compile(cu, false); // 编译函数实体
     }
 
     // 编译类
@@ -138,7 +145,7 @@ namespace hypermind {
 
     }
 
-    CompileUnit::CompileUnit(VM *mVm) : mVm(mVm) {
+    CompileUnit::CompileUnit(VM *mVm) : mVM(mVm) {
 
     }
     

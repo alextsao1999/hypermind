@@ -43,9 +43,6 @@ namespace hypermind {
         HMClass *classObj{};
         HMObject *next{}; // 链接下一个Object
 
-        HMObject() = default;
-        HMObject(ObjectType type, HMClass *classObj) : type(type), classObj(classObj) {};
-
         /**
          * 自动将对象链接到虚拟机中
          * @param vm

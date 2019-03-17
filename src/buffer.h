@@ -21,9 +21,9 @@ namespace hypermind {
         ~Buffer();
 
         void Fill(const T &data, HMUINT32 count);
-        void Append(const T &data);
+        HMUINT32 Append(const T &data);
         HMUINT32 GetCount();
-        T* GetData();
+        T* GetBuffer();
         /**
          *  注意: 删除时会调用析构函数
          * @param index
@@ -59,8 +59,9 @@ namespace hypermind {
     }
 
     template<typename T>
-    void Buffer<T>::Append(const T &data) {
+    HMUINT32 Buffer<T>::Append(const T &data) {
         Fill(data, 1);
+        return mCount - 1;
     }
 
     template<typename T>
@@ -101,7 +102,7 @@ namespace hypermind {
     }
 
     template<typename T>
-    T *Buffer<T>::GetData() {
+    T *Buffer<T>::GetBuffer() {
         return mData;
     }
 

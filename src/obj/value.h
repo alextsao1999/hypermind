@@ -26,7 +26,7 @@ namespace hypermind {
             HMDouble dbval;
             HMObject *objval;
         };
-        HMHash hash(){
+        HMHash hash() const {
             if (type == ValueType::Object) {
                 return objval->hash();
             } else {
@@ -35,6 +35,53 @@ namespace hypermind {
             }
         };
 
+        void dump(Ostream &os) {
+            switch (type) {
+                case ValueType::Integer:
+                    os << _HM_C("[inval : ") << intval << _HM_C("]");
+                    break;
+                case ValueType::Object:
+                    objval->dump(os);
+                    break;
+                case ValueType::Double:
+                    os << dbval;
+                    break;
+                case ValueType::Undefined:
+                    os << _HM_C("[undefined]");
+                    break;
+                case ValueType::Null:
+                    os << _HM_C("[null]");
+                    break;
+                case ValueType::True:
+                    os << _HM_C("[true]");
+                    break;
+                case ValueType::False:
+                    os << _HM_C("[false]");
+                    break;
+            }
+
+        }
+
+        HMClass *GetClass(const VM *vm) const {
+            switch (type) {
+                case ValueType::Integer:
+                    return vm->mIntegerClass;
+                case ValueType::Double:
+                    return vm->mDoubleClass;
+                case ValueType::Undefined:
+                case ValueType::Null:
+                    break;
+                case ValueType::Object:
+                    return objval->classObj;
+                case ValueType::True:
+                case ValueType::False:
+                    return vm->mBooleanClass;
+                default:
+                    break;
+            }
+            return vm->mMetaClass;
+
+        }
     };
 }
 

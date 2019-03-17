@@ -25,4 +25,15 @@ namespace hypermind {
 
     }
 
+    HMFunction::HMFunction(VM *vm, HMModule *module) : HMObject(vm,
+                                                                                                                 ObjectType::Function,
+                                                                                                                 vm->mFunctionClass),
+                                                                                                        instructions(Buffer<HMByte>(vm)),
+                                                                                                        constants(Buffer<Value>(vm)) {
+
+    }
+
+    FunctionDebug::FunctionDebug(const String &name) : name(name), line(Vector<HMUINT32>()) {
+
+    }
 }

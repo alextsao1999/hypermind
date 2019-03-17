@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <cstring>
 #include "lexer.h"
 #include "obj/string.h"
 
@@ -357,11 +358,7 @@ namespace hypermind {
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
         // 当前字符为 " ' 跳过   获取下一个字符
         NEXT();
-        //auto *objString = mVM->Allocate<HMString>();
-         // 此时的HMString 会储存在Token.mValue 中函数编译完成后 会储存到constants 中
-         // 当函数闭包没有引用时会释放constants的对象
-        //new(objString) HMString(mVM, strbuf.GetData(), strbuf.GetSize());
-        auto *objString = mVM->New<HMString>(mVM, strbuf.GetData(), strbuf.GetCount());
+        auto *objString = mVM->New<HMString>(mVM, strbuf.GetBuffer(), strbuf.GetCount());
         TOKEN_VALUE.type = ValueType::Object;
         TOKEN_VALUE.objval = objString;
         strbuf.Clear();
@@ -374,8 +371,7 @@ namespace hypermind {
         } while (IsCodeChar(CURRENT_CHAR) || IsNumber(CURRENT_CHAR));
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
         HMChar identifierBuffer[MAX_IDENTIFIER_LENTH] = {_HM_C('\0')};
-        // TODO 用strcpy
-        memcpy(identifierBuffer, mCurrentToken.mStart, mCurrentToken.mLength * sizeof(HMChar));
+        hm_memcpy(identifierBuffer, mCurrentToken.mStart, mCurrentToken.mLength);
         TokenType tok = HMKeywords[identifierBuffer];
         if (tok != TokenType::End) {
             TOKEN_TYPE(tok);

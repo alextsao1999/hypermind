@@ -21,20 +21,26 @@
     struct n;  \
     using p = std::shared_ptr<n>;  \
     struct n : public ASTExpr
-#define AST_DECL() void compile(CompileUnit *cu);void dump(Ostream &os);
+#define AST_DECL() void compile(CompileUnit *cu, bool isAssign);void dump(Ostream &os);
 #define AST_DUMP(n) void n::dump(Ostream &os)
-#define AST_COMPILE(n) void n::compile(CompileUnit *cu)
+#define AST_COMPILE(n) void n::compile(CompileUnit *cu, bool isAssign)
 namespace hypermind {
     class CompileUnit;
     struct ASTNode {
         virtual void dump(Ostream &os){};
-        virtual void compile(CompileUnit *cu){};
+        virtual void compile(CompileUnit *cu, bool isAssign){};
     };
     using ASTNodePtr = std::shared_ptr<ASTNode>;
 
     // 语句Node
     AST_NODE(ASTStmt, ASTStmtPtr) {
 
+    };
+
+    // AST列表
+    AST_NODE(ASTList, ASTListPtr) {
+        std::vector<ASTNodePtr> elements;
+        AST_DECL();
     };
 
     // 表达式Node
@@ -55,6 +61,7 @@ namespace hypermind {
     // 表达式中的变量
     AST_EXPR(ASTVariable, ASTVariablePtr){
         Token mVar;
+        ASTListPtr mPostfix;
         AST_DECL();
     };
 
@@ -113,12 +120,6 @@ namespace hypermind {
         AST_DECL();
     };
 
-    // AST列表
-    AST_NODE(ASTList, ASTListPtr) {
-        std::vector<ASTNodePtr> elements;
-        AST_DECL();
-    };
-
     // AST函数声明
     AST_STMT(ASTFunctionStmt, ASTFunctionStmtPtr) {
         Token mName; // 函数名称
@@ -132,6 +133,15 @@ namespace hypermind {
         Token mName; // 类名称
         ASTListPtr mClassBody;
 
+        AST_DECL();
+    };
+
+    AST_NODE(ASTArgPostfix, ASTArgPostfixPtr) {
+
+        AST_DECL();
+    };
+
+    AST_NODE(ASTDotPostfix, ASTDotPostfixPtr) {
         AST_DECL();
     };
 

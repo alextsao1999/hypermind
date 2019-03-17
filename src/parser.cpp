@@ -199,6 +199,10 @@ namespace hypermind {
         return ptr;
     }
 
+    /**
+     * ParamList ::= ID {"," ID}
+     * @return
+     */
     ASTNodePtr Parser::ParseParamList() {
         ASTListPtr list = make_ptr(ASTList);
         if (mLexer.PeekTokenType() == TokenType::RightParen)
@@ -212,7 +216,14 @@ namespace hypermind {
     }
 
     ASTNodePtr Parser::ParseArgList() {
-        return hypermind::ASTNodePtr();
+        ASTListPtr list = make_ptr(ASTList);
+        if (mLexer.PeekTokenType() == TokenType::RightParen)
+            return list;
+        do {
+            ASTExprPtr &&ptr = ParseExpression();
+            list->elements.push_back(ptr);
+        } while (mLexer.Match(TokenType::Comma));
+        return list;
     }
 
 }
