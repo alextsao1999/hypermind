@@ -21,14 +21,14 @@
     struct n;  \
     using p = std::shared_ptr<n>;  \
     struct n : public ASTExpr
-#define AST_DECL() void compile(CompileUnit *cu, bool isAssign);void dump(Ostream &os);
+#define AST_DECL() void compile(Compiler *compiler, bool isAssign);void dump(Ostream &os);
 #define AST_DUMP(n) void n::dump(Ostream &os)
-#define AST_COMPILE(n) void n::compile(CompileUnit *cu, bool isAssign)
+#define AST_COMPILE(n) void n::compile(Compiler *compiler, bool isAssign)
 namespace hypermind {
-    class CompileUnit;
+    class Compiler;
     struct ASTNode {
         virtual void dump(Ostream &os){};
-        virtual void compile(CompileUnit *cu, bool isAssign){};
+        virtual void compile(Compiler *compiler, bool isAssign){};
     };
     using ASTNodePtr = std::shared_ptr<ASTNode>;
 

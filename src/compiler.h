@@ -30,7 +30,7 @@ namespace hypermind {
 
         //外层函数中局部变量的索引或者外层函数中upvalue的索引
         HMInteger index;
-    };  //upvalue结构
+    };  // upvalue结构
 
     // 变量 表示局部/模块/Upval变量
     struct Variable {
@@ -209,6 +209,9 @@ namespace hypermind {
     private:
 
     public:
+        // 当前虚拟机
+        VM *mVM;
+
         // 当前正在编译的模块
         HMModule *mCurModule;
         // 当前正在编译的函数

@@ -8,13 +8,13 @@ namespace hypermind {
     // 编译语法块
     AST_COMPILE(ASTBlock) {
         for (auto &stmt : stmts)
-            stmt->compile(cu, false);
+            stmt->compile(compiler, false);
     }
 
     // 编译二元表达式
     AST_COMPILE(ASTBinary) {
-        mLHS->compile(cu, false);
-        mRHS->compile(cu, false);
+        mLHS->compile(compiler, false);
+        mRHS->compile(compiler, false);
 
         // 根据Op 编译相应的Opcode
         switch (mOp.mType) {
@@ -69,14 +69,14 @@ namespace hypermind {
 
     // 编译字面量
     AST_COMPILE(ASTLiteral) {
-        HMUINT32 idx = cu->AddConstant(mValue);
-        cu->EmitLoadConstant(idx);
+        HMInteger idx = compiler->mCurCompileUnit->AddConstant(mValue);
+        compiler->mCurCompileUnit->EmitLoadConstant(idx);
     }
 
     // 编译变量
     AST_COMPILE(ASTVariable) {
-        Variable var = cu->FindVariable(mVar);
-        cu->EmitLoadVariable(var);
+        Variable var = compiler->mCurCompileUnit->FindVariable(mVar);
+        compiler->mCurCompileUnit->EmitLoadVariable(var);
 
     }
 
@@ -108,7 +108,7 @@ namespace hypermind {
     // 编译List
     AST_COMPILE(ASTList) {
         for (auto &element : elements)
-            element->compile(cu, false);
+            element->compile(compiler, false);
     }
 
     /**
@@ -118,28 +118,30 @@ namespace hypermind {
      */
     AST_COMPILE(ASTVarStmt) {
         if (mValue == nullptr) {
-            cu->EmitPushNull();
+            compiler->mCurCompileUnit->EmitPushNull();
         } else {
-            mValue->compile(cu, false);
+            mValue->compile(compiler, false);
         }
-        cu->DeclareLocalVariable(mIdentifier);
+        compiler->mCurCompileUnit->DeclareLocalVariable(mIdentifier);
 
     }
 
     // 编译函数
     AST_COMPILE(ASTFunctionStmt) {
-        if (cu->mFn != nullptr) {
+        if (compiler->mCurCompileUnit->mFn != nullptr) {
             // TODO 错误 : 已经存在正在编译的函数
         }
         // 在当前虚拟机中创建一个函数对象
         // TODO 当前模块变量为nullptr 编译类的时候需要
-        cu->mFn = cu->mVM->New<HMFunction>(cu->mVM, nullptr);
+        compiler->mCurCompileUnit->mFn = compiler->mCurCompileUnit->mVM->New<HMFunction>(compiler->mVM, nullptr);
 
 #ifdef DEBUG
-        cu->mFn->debug = cu->mVM->New<FunctionDebug>(String(mName.mStart, mName.mLength));
+        compiler->mCurCompileUnit->mFn->debug = compiler->mVM->New<FunctionDebug>(String(mName.mStart, mName.mLength));
+
 #endif
-        mParams->compile(cu, false); // 声明变量
-        mBody->compile(cu, false); // 编译函数实体
+        mParams->compile(compiler, false); // 声明变量
+        mBody->compile(compiler, false); // 编译函数实体
+
     }
 
     // 编译类
