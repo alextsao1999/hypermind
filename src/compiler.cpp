@@ -31,6 +31,7 @@ namespace hypermind {
             case TokenType::Decrease:
                 break;
             case TokenType::Assign:
+
                 break;
             case TokenType::AddAssign:
                 break;
@@ -74,8 +75,9 @@ namespace hypermind {
 
     // 编译变量
     AST_COMPILE(ASTVariable) {
+        Variable var = cu->FindVariable(mVar);
+        cu->EmitLoadVariable(var);
 
-        cu->EmitLoadVariable();
     }
 
     // 编译IF

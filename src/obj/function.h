@@ -10,7 +10,7 @@
 #include "value.h"
 #include "module.h"
 #include "object.h"
-
+#include "opcode.h"
 namespace hypermind {
     // 调试结构
     struct FunctionDebug {
@@ -28,6 +28,25 @@ namespace hypermind {
         HMFunction(VM *vm, HMModule *module);
         HMUINT32 upvalueNumber{}; // upval 数量
         HM_OBJ_DECL();
+
+        /**
+         * 写入操作码
+         * @param opcode
+         */
+        void WriteOpcode(Opcode opcode);
+
+        /**
+         * 写入 short 操作数 小端字节序
+         * @param operand
+         */
+        void WriteShortOperand(int operand);
+
+        /**
+         * 写入 Int 操作数 小端字节序
+         * @param operand
+         */
+        void WriteIntOperand(int operand);
+
 #ifdef DEBUG
         FunctionDebug *debug{};
 #endif

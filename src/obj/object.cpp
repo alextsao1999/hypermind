@@ -22,7 +22,7 @@ namespace hypermind {
     void VM::DumpAllObjects() {
         HMObject *nextObj = mAllObjects;
         while (nextObj != nullptr) {
-            nextObj->dump(HMCout);
+            nextObj->dump(hm_cout);
             nextObj = nextObj->next;
         }
     }

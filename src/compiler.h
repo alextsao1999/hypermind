@@ -9,6 +9,10 @@
 #include "vm.h"
 #include "ast.h"
 #include "obj/function.h"
+#include "opcode.h"
+
+// 操作栈改变 影响栈的深度
+#define STACK_CHANGE(num) {mStackSlotNum += num;}
 
 #define VT_TO_VALUE(VT) {VT, 0}
 
@@ -25,7 +29,7 @@ namespace hypermind {
         bool isOuterLocalVar;
 
         //外层函数中局部变量的索引或者外层函数中upvalue的索引
-        uint32_t index;
+        HMInteger index;
     };  //upvalue结构
 
     // 变量 表示局部/模块/Upval变量
@@ -33,7 +37,7 @@ namespace hypermind {
         // 作用域深度
         ScopeType scopeType;
         // 索引
-        HMUINT32 index;
+        HMInteger index;
     };
 
     // 局部变量
@@ -44,8 +48,11 @@ namespace hypermind {
         bool isUpvalue;
     };
 
+
     class CompileUnit {
         friend ASTFunctionStmt;
+        friend ASTVarStmt;
+        friend ASTVariable;
     protected:
         // 所属虚拟机
         VM *mVM;
@@ -55,11 +62,13 @@ namespace hypermind {
         // 当前正在编译的函数
         HMFunction *mFn;
 
-        Upvalue upvalues[MAX_UPVALUE_NUMBER];
-        LocalVariable localVariable[MAX_LOCAL_VAR_NUMBER];
-        HMUINT32 localVarNumber; // 局部变量个数
+        Upvalue mUpvalues[MAX_UPVALUE_NUMBER];
+        HMUINT32 mUpvalueNumber; // Upval 个数
 
-        // 最大栈数量
+        LocalVariable mLocalVariables[MAX_LOCAL_VAR_NUMBER];
+        HMUINT32 mLocalVarNumber; // 局部变量个数
+
+        // 最大操作栈数量
         HMUINT32 mStackSlotNum;
 
         // 外层编译单元
@@ -73,21 +82,21 @@ namespace hypermind {
          * @param id
          * @return 返回索引
          */
-        HMUINT32 DeclareLocalVariable(const Token &id) {
-            for (HMUINT32 i = 0; i < localVarNumber; ++i) {
-                if (id.mLength == localVariable[i].length &&
-                    hm_memcmp(localVariable[i].name, id.mStart, id.mLength) != 0) {
+        HMInteger DeclareLocalVariable(const Token &id) {
+            for (HMUINT32 i = 0; i < mLocalVarNumber; ++i) {
+                if (id.mLength == mLocalVariables[i].length &&
+                    hm_memcmp(mLocalVariables[i].name, id.mStart, id.mLength) != 0) {
                     return i;
                 }
             }
-            if (localVarNumber >= MAX_LOCAL_VAR_NUMBER) {
+            if (mLocalVarNumber >= MAX_LOCAL_VAR_NUMBER) {
                 // TODO 错误 变量数目大于最大局部变量
             }
-            localVariable[localVarNumber].name = id.mStart;
-            localVariable[localVarNumber].length = id.mLength;
-            localVariable[localVarNumber].scopeDepth = mScopeDepth;
-            localVariable[localVarNumber].isUpvalue = false;
-            return localVarNumber++;
+            mLocalVariables[mLocalVarNumber].name = id.mStart;
+            mLocalVariables[mLocalVarNumber].length = id.mLength;
+            mLocalVariables[mLocalVarNumber].scopeDepth = mScopeDepth;
+            mLocalVariables[mLocalVarNumber].isUpvalue = false;
+            return mLocalVarNumber++;
         };
 
         /**
@@ -102,6 +111,23 @@ namespace hypermind {
             return var;
         };
 
+        HMInteger AddUpval(bool isEnclosingLocalVar, HMInteger index) {
+            for (HMInteger i = 0; i < mUpvalueNumber; ++i) {
+                if (mUpvalues[i].index == index)
+                    return i;
+            }
+            return -1;
+        };
+
+        /**
+         * 设置变量为Upval
+         * @param index
+         */
+        void SetLocalVariableUpval(HMInteger index) {
+            mLocalVariables[index].isUpvalue = true;
+        };
+
+
         // 进入作用域
         void EnterScope() {
             mScopeDepth++;
@@ -109,8 +135,8 @@ namespace hypermind {
 
         // 离开作用域
         void LeaveScope() {
-
             mScopeDepth--;
+
         }
 
         /**
@@ -118,7 +144,7 @@ namespace hypermind {
          * @param value
          * @return  索引值
          */
-        HMUINT32 AddConstant(const Value &value) {
+        HMInteger AddConstant(const Value &value) {
             // TODO 现在直接将value存到constants中了相同的文本或者数值会造成资源重复 可以先取hash
             return mFn->constants.Append(value);
         };
@@ -127,14 +153,41 @@ namespace hypermind {
          * 操作栈中压入Null
          */
         void EmitPushNull() {
-
+            STACK_CHANGE(1);
+            mFn->WriteOpcode(Opcode::PushNull);
         };
+
+        /**
+         * 栈中压入True
+         */
+        void EmitPushTrue() {
+            STACK_CHANGE(1);
+            mFn->WriteOpcode(Opcode::PushNull);
+        };
+
+        /**
+         * 栈中压入False
+         */
+        void EmitPushFalse() {
+            STACK_CHANGE(1);
+            mFn->WriteOpcode(Opcode::PushFalse);
+        };
+
+        /**
+         * 弹出栈顶参数
+         * @param argNum
+         */
+        void EmitCall(HMUINT32 argNum) {
+            STACK_CHANGE(argNum);
+
+        }
 
         /**
          * 操作栈中压入变量
          * @param var 变量信息(作用域和索引)
          */
         void EmitLoadVariable(const Variable &var) {
+            STACK_CHANGE(1);
 
         };
 
@@ -142,9 +195,24 @@ namespace hypermind {
          * 操作栈中压入常量
          * @param index
          */
-        void EmitLoadConstant(HMUINT32 index) {
+        void EmitLoadConstant(HMInteger index) {
+            STACK_CHANGE(1);
+            mFn->WriteOpcode(Opcode::LoadConstant);
+            mFn->WriteShortOperand(index);
 
         }
+
+    };
+
+    class Compiler {
+
+    private:
+
+    public:
+        // 当前正在编译的模块
+        HMModule *mCurModule;
+        // 当前正在编译的函数
+        CompileUnit *mCurCompileUnit;
 
     };
 

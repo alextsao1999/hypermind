@@ -16,7 +16,7 @@ int main() {
     Lexer lexer(&vm, source);
     Parser parser(_HM_C(""), lexer);
     ASTNodePtr ast = parser.ParseProgram();
-    ast->dump(HMCout);
+    ast->dump(hm_cout);
 
     //    vm.DumpAllObjects();
 

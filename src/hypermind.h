@@ -31,7 +31,7 @@ typedef bool HMBool;
 typedef std::wostream Ostream;
 #define Vector std::vector
 
-#define HMCout std::wcout
+#define hm_cout std::wcout
 #define hm_memcpy wmemcpy
 #define hm_memcmp wmemcmp
 namespace hypermind {
