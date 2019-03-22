@@ -5,9 +5,7 @@
 #ifndef HYPERMIND_FUNCTION_H
 #define HYPERMIND_FUNCTION_H
 
-#include "hypermind.h"
 #include "buffer.h"
-#include "value.h"
 #include "module.h"
 #include "object.h"
 #include "opcode.h"
@@ -25,8 +23,13 @@ namespace hypermind {
         Buffer<Value> constants;  // 所有常量
         HMModule *module{};   // 所属模块
         HMUINT32 maxStackNumber{};  // 最大栈空间
-        HMFunction(VM *vm, HMModule *module);
+
         HMUINT32 upvalueNumber{}; // upval 数量
+        HM_OBJ_CONSTRUTOR(Function, HMModule *module), constants(Buffer<Value>(vm)), instructions(Buffer<HMByte>(vm)),
+                                                       module(module) {
+
+        };
+
         HM_OBJ_DECL();
 
         /**
@@ -46,6 +49,8 @@ namespace hypermind {
          * @param operand
          */
         void WriteIntOperand(int operand);
+
+        void DumpInstruction(int start);
 
 #ifdef DEBUG
         FunctionDebug *debug{};

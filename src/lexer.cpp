@@ -311,7 +311,7 @@ namespace hypermind {
         } while (IsNumber(CURRENT_CHAR) || CURRENT_CHAR == _HM_C('.'));
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
         mCurrentToken.mValue.type = ValueType::Integer;
-        mCurrentToken.mValue.intval = (int) _wtoi(mCurrentToken.mStart);
+        mCurrentToken.mValue.intval = (int) hm_strtoi(mCurrentToken.mStart);
     }
     void Lexer::ParseString() {
         Buffer<HMChar> strbuf(mVM);
@@ -358,7 +358,7 @@ namespace hypermind {
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
         // 当前字符为 " ' 跳过   获取下一个字符
         NEXT();
-        auto *objString = mVM->New<HMString>(mVM, strbuf.GetBuffer(), strbuf.GetCount());
+        auto *objString = mVM->NewObject<HMString>(strbuf.GetBuffer(), strbuf.GetCount());
         TOKEN_VALUE.type = ValueType::Object;
         TOKEN_VALUE.objval = objString;
         strbuf.Clear();

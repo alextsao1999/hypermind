@@ -6,6 +6,7 @@
 #define HYPERMIND_VM_H
 
 #include "hypermind.h"
+
 namespace hypermind {
     class VM {
     public:
@@ -13,7 +14,6 @@ namespace hypermind {
          * 链接的所有对象
          */
         HMObject *mAllObjects{nullptr};
-
         HMClass *mBooleanClass{nullptr};
         HMClass *mStringClass{nullptr};
         HMClass *mIntegerClass{nullptr};
@@ -64,6 +64,11 @@ namespace hypermind {
         template<typename T, typename ...Args>
         T *New(Args&&...args) {
             return new(MemManger(nullptr, 0, sizeof(T))) T(std::forward<Args>(args)...);
+        }
+
+        template<typename T, typename ...Args>
+        T *NewObject(Args&&...args) {
+            return new(MemManger(nullptr, 0, sizeof(T))) T(this, std::forward<Args>(args)...);
         }
 
     protected:

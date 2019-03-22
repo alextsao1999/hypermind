@@ -1,5 +1,5 @@
 //
-// Created by ≤‹À≥ on 2019/3/21.
+// Created by ÊõπÈ°∫ on 2019/3/21.
 //
 
 #ifndef HYPERMIND_OPCODE_H
@@ -23,6 +23,7 @@ namespace hypermind {
         PushNull,
         PushTrue,
         PushFalse,
+
         Call,
         Call0,
         Call1,
@@ -32,6 +33,7 @@ namespace hypermind {
         Call5,
         Call6,
         Call7,
+
         Super,
         Super0,
         Super1,
@@ -41,26 +43,31 @@ namespace hypermind {
         Super5,
         Super6,
         Super7,
+
         Jump,
         Loop,
         JumpIfFalse,
         JumpIfTrue,
+
         /**
-         *   ˝—ß‘ÀÀ„
+         *  Êï∞Â≠¶ËøêÁÆó
          */
          Add,
          Sub,
          Mul,
          Div,
-        And,
-        Or,
-        CreateClosure,
-        CloseUpval,
-        Return,
-        CreateClass,
-        Constructor,
-        InstanceMethod,
-        StaticMethod,
+         And,
+         Or,
+
+
+         CreateClosure,
+         CloseUpval,
+         Return,
+
+         CreateClass,
+         Constructor,
+         InstanceMethod,
+         StaticMethod,
 
     };
 }

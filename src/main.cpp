@@ -5,6 +5,7 @@
 #include "buffer.h"
 #include "obj/value.h"
 #include "obj/string.h"
+#include "compiler.h"
 
 using namespace hypermind;
 
@@ -16,9 +17,18 @@ int main() {
     Lexer lexer(&vm, source);
     Parser parser(_HM_C(""), lexer);
     ASTNodePtr ast = parser.ParseProgram();
-    ast->dump(hm_cout);
+    Compiler compiler(&vm);
+    CompileUnit cu(&vm);
 
-    //    vm.DumpAllObjects();
+    auto *str = vm.NewObject<HMString>(_HM_C("test\0"), 5);
+    compiler.mCurModule = vm.NewObject<HMModule>(str);
+    compiler.mCurCompileUnit = &cu;
+//    ast->dump(hm_cout);
+
+    ast->compile(&compiler, false);
+
+//    ast->dump(hm_cout);
+        vm.DumpAllObjects();
 
 
     return 0;

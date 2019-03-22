@@ -47,20 +47,34 @@ namespace hypermind {
                 break;
             case TokenType::OrAssign:
                 break;
-            case TokenType::XorAssign:break;
-            case TokenType::Arrow:break;
-            case TokenType::Not:break;
-            case TokenType::Equal:break;
-            case TokenType::NotEqual:break;
-            case TokenType::Greater:break;
-            case TokenType::Less:break;
-            case TokenType::GreaterEqual:break;
-            case TokenType::LessEqual:break;
-            case TokenType::Or:break;
-            case TokenType::LogicOr:break;
-            case TokenType::And:break;
-            case TokenType::LogicAnd:break;
-            case TokenType::Mod:break;
+            case TokenType::XorAssign:
+                break;
+            case TokenType::Arrow:
+                break;
+            case TokenType::Not:
+                break;
+            case TokenType::Equal:
+                break;
+            case TokenType::NotEqual:
+                break;
+            case TokenType::Greater:
+                break;
+            case TokenType::Less:
+                break;
+            case TokenType::GreaterEqual:
+                break;
+            case TokenType::LessEqual:
+                break;
+            case TokenType::Or:
+                break;
+            case TokenType::LogicOr:
+                break;
+            case TokenType::And:
+                break;
+            case TokenType::LogicAnd:
+                break;
+            case TokenType::Mod:
+                break;
             default:
                 break;
         }
@@ -129,18 +143,21 @@ namespace hypermind {
     // 编译函数
     AST_COMPILE(ASTFunctionStmt) {
         if (compiler->mCurCompileUnit->mFn != nullptr) {
-            // TODO 错误 : 已经存在正在编译的函数
+            // TODO
         }
         // 在当前虚拟机中创建一个函数对象
-        // TODO 当前模块变量为nullptr 编译类的时候需要
-        compiler->mCurCompileUnit->mFn = compiler->mCurCompileUnit->mVM->New<HMFunction>(compiler->mVM, nullptr);
-
-#ifdef DEBUG
-        compiler->mCurCompileUnit->mFn->debug = compiler->mVM->New<FunctionDebug>(String(mName.mStart, mName.mLength));
-
-#endif
+        compiler->mCurCompileUnit->mFn =
+                compiler->mCurCompileUnit->mVM->NewObject<HMFunction>(compiler->mCurModule);
+        // 进入作用域
+        compiler->mCurCompileUnit->EnterScope();
         mParams->compile(compiler, false); // 声明变量
         mBody->compile(compiler, false); // 编译函数实体
+        // 离开作用域
+        compiler->mCurCompileUnit->LeaveScope();
+#ifdef DEBUG
+        compiler->mCurCompileUnit->mFn->debug =
+                compiler->mVM->New<FunctionDebug>(String(mName.mStart, mName.mLength));
+#endif
 
     }
 
@@ -152,5 +169,8 @@ namespace hypermind {
     CompileUnit::CompileUnit(VM *mVm) : mVM(mVm) {
 
     }
-    
+
+    Compiler::Compiler(VM *mVM) : mVM(mVM) {
+
+    }
 }

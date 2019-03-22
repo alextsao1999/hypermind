@@ -9,36 +9,59 @@
 #include <string>
 #include <cstdio>
 #include <cstdint>
+
 #define DEBUG
 // 最大标识符长度
 #define MAX_IDENTIFIER_LENTH 255
 // 最大局部变量个数
 #define MAX_LOCAL_VAR_NUMBER 128
 #define MAX_UPVALUE_NUMBER 128
-// 字符宏
-#define _HM_C(ch) L##ch
-// 字符通用字符类型
-typedef wchar_t HMChar;
+
 // 数据类型
 typedef char HMByte;
 typedef int HMInteger;
 typedef uint32_t HMUINT32;
 typedef double HMDouble;
 typedef float HMFloat;
-typedef std::wstring String;
 typedef HMUINT32 HMHash;
 typedef bool HMBool;
-typedef std::wostream Ostream;
 #define Vector std::vector
 
+#ifndef HMUNICODE
+
+#define _HM_C(ch) ch
+
+#include <cstring>
+typedef char HMChar;
+typedef std::string String;
+typedef std::ostream Ostream;
+#define hm_cout std::cout
+#define hm_memcpy memcpy
+#define hm_memcmp memcmp
+#define hm_strtoi atoi
+#endif
+
+#ifdef HMUNICODE
+
+// 字符通用字符类型
+#define _HM_C(ch) L##ch
+typedef wchar_t HMChar;
+typedef std::wstring String;
+typedef std::wostream Ostream;
 #define hm_cout std::wcout
 #define hm_memcpy wmemcpy
 #define hm_memcmp wmemcmp
+#define hm_strtoi _wtoi
+
+#endif
+
 namespace hypermind {
     struct HMClass;
     struct HMObject;
 }
 #define UNUSED __attribute__ ((unused))
+
+#define MEMRY_ERROR(C)
 
 #ifdef DEBUG
     #define ASSERT(condition, err) \

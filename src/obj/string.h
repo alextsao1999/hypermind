@@ -12,18 +12,21 @@
 #include <memory>
 namespace hypermind {
     HM_OBJECT(String) {
-        HMHash hashCode{};
-        HMUINT32 length{};
-        HMChar *charSequence{nullptr};
-
-        explicit HMString(VM *vm, const HMChar *str, HMUINT32 length) : HMObject(vm, ObjectType::String,
-                                                                                 vm->mStringClass), length(length) {
+        HMHash hashCode;
+        HMUINT32 length;
+        HMChar *charSequence;
+        HM_OBJ_CONSTRUTOR(String, const HMChar *str, HMUINT32 len), length(len) {
             // 计算文本hash
             charSequence = vm->Allocate<HMChar>(length);
-            hashCode = hashString(charSequence, length);
-            hm_memcpy(charSequence, str, length);
-        };
+            if (charSequence != nullptr) {
+                hashCode = hashString(charSequence, length);
+                hm_memcpy(charSequence, str, length);
+            } else {
+                MEMRY_ERROR("创建文本对象失败");
+            }
+        }
         HM_OBJ_DECL();
+
     };
 
 }

@@ -6,7 +6,6 @@
 #define HYPERMIND_COMPILER_H
 
 #include "hypermind.h"
-#include "vm.h"
 #include "ast.h"
 #include "obj/function.h"
 #include "opcode.h"
@@ -17,6 +16,8 @@
 #define VT_TO_VALUE(VT) {VT, 0}
 
 namespace hypermind {
+    class VM;
+
     enum class ScopeType {
         Invalid,
         Module,  // 模块变量
@@ -55,25 +56,24 @@ namespace hypermind {
         friend ASTVariable;
     protected:
         // 所属虚拟机
-        VM *mVM;
+        VM *mVM{nullptr};
         // 作用域深度
-        HMInteger mScopeDepth;
+        HMInteger mScopeDepth{-1};
 
         // 当前正在编译的函数
         HMFunction *mFn;
 
         Upvalue mUpvalues[MAX_UPVALUE_NUMBER];
-        HMUINT32 mUpvalueNumber; // Upval 个数
+        HMUINT32 mUpvalueNumber{0}; // Upval 个数
 
         LocalVariable mLocalVariables[MAX_LOCAL_VAR_NUMBER];
-        HMUINT32 mLocalVarNumber; // 局部变量个数
+        HMUINT32 mLocalVarNumber{0}; // 局部变量个数
 
         // 最大操作栈数量
-        HMUINT32 mStackSlotNum;
+        HMUINT32 mStackSlotNum{0};
 
         // 外层编译单元
-        CompileUnit *mOuter;
-
+        CompileUnit *mOuter{nullptr};
     public:
         explicit CompileUnit(VM *mVm);
 
@@ -136,6 +136,10 @@ namespace hypermind {
         // 离开作用域
         void LeaveScope() {
             mScopeDepth--;
+
+        }
+
+        void DiscardVariable() {
 
         }
 
@@ -216,6 +220,8 @@ namespace hypermind {
         HMModule *mCurModule;
         // 当前正在编译的函数
         CompileUnit *mCurCompileUnit;
+
+        Compiler(VM *mVM);
 
     };
 

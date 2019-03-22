@@ -23,7 +23,7 @@ namespace hypermind {
         ValueType type;
         union {
             HMInteger intval;
-            HMDouble dbval;
+            HMFloat dbval;
             HMObject *objval;
         };
         HMHash hash() const {
