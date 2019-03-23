@@ -17,7 +17,7 @@ namespace hypermind {
 
     HM_OBJ_DUMP(String) {
         String str(charSequence, length);
-        os << " { string(" << sizeof(HMString) << ")   " << str << "   hash : " << hashCode << "  } " << std::endl;
+        os << " { HMString(" << sizeof(HMString) << ")   " << str << "   hash : " << hashCode << "  } ";
 
     }
 

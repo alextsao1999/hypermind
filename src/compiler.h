@@ -39,6 +39,8 @@ namespace hypermind {
         ScopeType scopeType;
         // 索引
         HMInteger index;
+        explicit Variable(ScopeType type, HMInteger index) : scopeType(type), index(index) {};
+        Variable() = default;
     };
 
     // 局部变量
@@ -49,10 +51,30 @@ namespace hypermind {
         bool isUpvalue;
     };
 
+    // 方法签名
+    struct MethodSignature {
+        enum class SignatureType {
+            Method,
+            Getter,
+            Setter,
+            Subscript,
+            SubscriptSetter
+        };
+        MethodSignature(SignatureType type, const HMChar *name, HMUINT32 length, HMInteger argNum) : type(type),
+                                                                                                     name(name), length(length), argNum(argNum) {
+
+        };
+        MethodSignature() = default;
+
+        SignatureType type;
+        const HMChar *name;
+        HMUINT32 length;
+        HMInteger argNum;
+
+    };
+
     class CompileUnit {
-        friend ASTFunctionStmt;
-        friend ASTVarStmt;
-        friend ASTVariable;
+        friend Compiler;
     protected:
         // 所属虚拟机
         VM *mVM{nullptr};
@@ -71,10 +93,11 @@ namespace hypermind {
         // 最大操作栈数量
         HMUINT32 mStackSlotNum{0};
 
-        // 外层编译单元
-        CompileUnit *mOuter{nullptr};
     public:
         explicit CompileUnit(VM *mVm);
+
+        // 外层编译单元
+        CompileUnit *mOuter{nullptr};
 
         /**
          * 当前作用域声明局部变量 存在返回索引 不存在添加后返回索引
@@ -82,12 +105,10 @@ namespace hypermind {
          * @return 返回索引
          */
         HMInteger DeclareLocalVariable(const Token &id) {
-            for (HMUINT32 i = 0; i < mLocalVarNumber; ++i) {
-                if (id.mLength == mLocalVariables[i].length &&
-                    hm_memcmp(mLocalVariables[i].name, id.mStart, id.mLength) != 0) {
-                    return i;
-                }
-            }
+            HMInteger idx = FindLocal(id);
+            // 此时变量已经存在了 返回存在的索引
+            if (idx != -1)
+                return idx;
             if (mLocalVarNumber >= MAX_LOCAL_VAR_NUMBER) {
                 // TODO 错误 变量数目大于最大局部变量
             }
@@ -99,7 +120,7 @@ namespace hypermind {
         };
 
         /**
-         * 根据作用域声明变量
+         * 根据作用域声明变量/参数
          * @return
          */
         HMInteger DeclareVariable(const Token &id) {
@@ -110,7 +131,7 @@ namespace hypermind {
         }
 
         /**
-         * 变量设置初始值
+         * 定义变量   变量设置初始值
          * @param index
          */
         void DefineVariable(HMInteger index) {
@@ -128,11 +149,20 @@ namespace hypermind {
         HMInteger FindLocal(const Token &id) {
             for (HMUINT32 i = 0; i < mLocalVarNumber; ++i) {
                 if (id.mLength == mLocalVariables[i].length &&
-                    hm_memcmp(mLocalVariables[i].name, id.mStart, id.mLength) != 0) {
+                    hm_memcmp(mLocalVariables[i].name, id.mStart, id.mLength) == 0) {
                     return i;
                 }
             }
             return -1;
+        }
+
+        // 查找局部变量 或者 Upvalue
+        Variable FindLocalOrUpvalue(const Token &id) {
+            // TODO 现在只是从局部变量中查找
+            Variable var{};
+            var.scopeType = ScopeType::Local;
+            var.index = FindLocal(id);
+            return var;
         }
 
         /**
@@ -141,14 +171,14 @@ namespace hypermind {
          * @return
          */
         Variable FindVariable(const Token &id) {
-            // TODO 现在只是从局部变量中查找 之后增加模块变量
+            // TODO 现在只是从局部变量中查找 之后增加模块变量和Upvalue
             Variable var{};
             var.scopeType = ScopeType::Local;
             var.index = FindLocal(id);
             return var;
         };
 
-        HMInteger AddUpval(bool isEnclosingLocalVar, HMInteger index) {
+        HMInteger AddUpvalue(bool isEnclosingLocalVar, HMInteger index) {
             for (HMInteger i = 0; i < mUpvalueNumber; ++i) {
                 if (mUpvalues[i].index == index)
                     return i;
@@ -171,8 +201,8 @@ namespace hypermind {
 
         // 离开作用域
         void LeaveScope() {
+            DiscardLocalVariable();
             mScopeDepth--;
-
         }
 
         /**
@@ -188,7 +218,8 @@ namespace hypermind {
          * @return  索引值
          */
         HMInteger AddConstant(const Value &value) {
-            // TODO 现在直接将value存到constants中了相同的文本或者数值会造成资源重复 可以先取hash
+            // TODO 现在直接将value存到constants中了
+            //  相同的文本或者数值会造成资源重复 可以先取hash
             return mFn->constants.Append(value);
         };
 
@@ -324,7 +355,11 @@ namespace hypermind {
 
         explicit Compiler(VM *mVM);
 
+#ifdef HMDebug
+        CompileUnit CreateCompileUnit(FunctionDebug *debug);
+#else
         CompileUnit CreateCompileUnit();
+#endif
 
     };
 

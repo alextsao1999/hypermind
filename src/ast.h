@@ -120,6 +120,13 @@ namespace hypermind {
         AST_DECL();
     };
 
+    // 参数声明语句
+    AST_STMT(ASTParamStmt, ASTParamStmtPtr) {
+        Token mIdentifier;
+        ASTExprPtr mValue; // 初始值表达式
+        AST_DECL();
+    };
+
     // AST函数声明
     AST_STMT(ASTFunctionStmt, ASTFunctionStmtPtr) {
         Token mName; // 函数名称

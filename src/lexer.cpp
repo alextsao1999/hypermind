@@ -23,7 +23,7 @@ namespace hypermind {
         return IsAlpha(ch) || ch == _HM_C('_') || (ch >= _HM_C('\u4e00') && ch <= _HM_C('\u9fa5'));
     }
 
-    void Token::dump(Ostream &os) {
+    void Token::dump(Ostream &os) const {
         String name;
         switch (mType) {
             case TokenType::End:

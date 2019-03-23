@@ -79,6 +79,15 @@ namespace hypermind {
         os << _HM_C("  ") << std::endl;
     }
 
+    AST_DUMP(ASTParamStmt) {
+        os << _HM_C(" param : ") ;
+        mIdentifier.dump(os);
+        if (mValue != nullptr) {
+            os << _HM_C(" = ");
+            mValue->dump(os);
+        }
+    }
+
     AST_DUMP(ASTList) {
         os << _HM_C("  ( ");
         for (auto &element : elements) {
@@ -94,6 +103,7 @@ namespace hypermind {
         mName.dump(os);
         mParams->dump(os);
         mBody->dump(os);
+        os << std::endl;
 
     }
 

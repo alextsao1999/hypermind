@@ -18,7 +18,7 @@ namespace hypermind {
         HMString *mModuleName;
 
         Buffer<Value> mModuleVariables;
-#ifdef DEBUG
+#ifdef HMDebug
         Vector<String> mModuleVarNames;
 #endif
         HM_OBJ_CONSTRUTOR_CLASS(Module, nullptr, HMString *name), mModuleName(name), mModuleVariables(Buffer<Value>(vm)) {

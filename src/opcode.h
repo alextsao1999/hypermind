@@ -70,6 +70,8 @@ namespace hypermind {
          InstanceMethod,
          StaticMethod,
 
+         End
+
     };
 }
 

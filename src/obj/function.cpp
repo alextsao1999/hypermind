@@ -22,13 +22,23 @@ namespace hypermind {
         return false;
     }
     HM_OBJ_DUMP(Function) {
-        os << _HM_C(" { func name : ") << debug->name << "  } " << std::endl;
-
+        os << _HM_C(" { HMFunction(" << sizeof(HMFunction) << ") name : ") << debug->name << _HM_C("  opcode : { ");
+        for (int i = 0; i < instructions.GetCount(); ++i) {
+            if (i == 0) {
+                os <<(int) instructions[i];
+            } else {
+                os << _HM_C(", ") << (int) instructions[i];
+            }
+        }
+        os << _HM_C(" }") << std::endl << _HM_C("   opcode dump : ") << std::endl;
+        DumpAllInstructions(os);
+        os << " } ";
     }
 
     void HMFunction::WriteOpcode(Opcode opcode) {
         instructions.Append((HMByte) opcode);
     }
+
     void HMFunction::WriteOpcode(HMByte opcode) {
         instructions.Append(opcode);
     }
@@ -48,58 +58,47 @@ namespace hypermind {
     void HMFunction::DumpInstruction(int i) {
         HMByte *code = instructions.GetBuffer();
         String str;
+#define Instruction(v)                 str = _HM_C(v);break;
 #define ReadByte() (code[i++])
         // 小端字节序
-#define ReadShort() (i += 2,  (code[i - 1] << 8) | code[i - 2])
-#define ReadInt() (i += 4, (code[i - 1] << 24) | (code[i - 2] << 16) | (code[i - 3] << 8) | code[i - 4])
+#define ReadShort() (i += 2,  (code[i] << 8) | (code[i - 1]))
+#define ReadInt() (i += 4, (code[i] << 24) | (code[i - 1] << 16) | (code[i - 2] << 8) | code[i - 3])
         switch ((Opcode) code[i]) {
             case Opcode::LoadConstant:
-                str = _HM_C("LoadConstant");
+                str = _HM_C("Load_Constant");
+                str += _HM_C("_") + std::to_string(ReadShort());
                 break;
             case Opcode::LoadLocalVariable:
-                str = _HM_C("LoadLocalVariable");
-                break;
+                Instruction("Load_Local_Variable");
             case Opcode::StoreLocalVariable:
-                str = _HM_C("StoreLocalVariable");
-                break;
+                Instruction("Store_Local_Variable");
             case Opcode::LoadModuleVariable:
-                str = _HM_C("LoadModuleVariable");
-                break;
+                Instruction("Load_Module_Variable");
             case Opcode::StoreModuleVariable:
-                str = _HM_C("Store Module Varible");
-                break;
+                Instruction("Store_Module_Varible");
             case Opcode::LoadUpvalue:
-                str = _HM_C("Load Upvalue");
-                break;
+                Instruction("Load_Upvalue");
             case Opcode::StoreUpvalue:
-                str = _HM_C("Store Upvalue");
-                break;
+                Instruction("Store_Upvalue");
             case Opcode::LoadThisField:
-                str = _HM_C("Load This Field");
-                break;
+                Instruction("Load_This_Field");
             case Opcode::StoreThisField:
-                str = _HM_C("Store This Field");
-                break;
+                Instruction("Store_This_Field");
             case Opcode::LoadField:
-                str = _HM_C("Load Field");
-                break;
+                Instruction("Load_Field");
             case Opcode::StoreField:
-                str = _HM_C("Store Field");
-                break;
+                Instruction("Store_Field");
             case Opcode::Pop:
-                str = _HM_C("Pop");
-                break;
+                Instruction("Pop");
             case Opcode::PushNull:
-                str = _HM_C("Push Null");
-                break;
+                Instruction("Push_Null");
             case Opcode::PushTrue:
-                str = _HM_C("Push True");
-                break;
+                Instruction("Push_True");
             case Opcode::PushFalse:
-                str = _HM_C("Push False");
-                break;
+                Instruction("Push_False");
             case Opcode::Call:
                 str = _HM_C("Call");
+                str += _HM_C("_") + std::to_string(ReadShort()) + _HM_C("_") + std::to_string(ReadShort());
                 break;
             case Opcode::Call0:
             case Opcode::Call1:
@@ -127,59 +126,215 @@ namespace hypermind {
                 str += (std::to_string(code[i] - (HMByte) Opcode::Super0));
                 break;
             case Opcode::Jump:
-                str = _HM_C("Jump");
-                break;
+                Instruction("Jump");
             case Opcode::Loop:
-                str = _HM_C("Loop");
-                break;
+                Instruction("Loop");
             case Opcode::JumpIfFalse:
-                str = _HM_C("Jump If False");
-                break;
+                Instruction("Jump_If_False");
             case Opcode::JumpIfTrue:
-                str = _HM_C("Jump If True");
-                break;
+                Instruction("Jump_If_True");
             case Opcode::Add:
-                str = _HM_C("Add");
-                break;
+                Instruction("Add");
             case Opcode::Sub:
-                str = _HM_C("Sub");
-                break;
+                Instruction("Sub");
             case Opcode::Mul:
-                str = _HM_C("Mul");
-                break;
+                Instruction("Mul");
             case Opcode::Div:
-                str = _HM_C("Div");
-                break;
+                Instruction("Div");
             case Opcode::And:
-                str = _HM_C("And");
-                break;
+                Instruction("And");
             case Opcode::Or:
-                str = _HM_C("Or");
-                break;
+                Instruction("Or");
             case Opcode::CreateClosure:
-                str = _HM_C("Create Closure");
-                break;
+                Instruction("Create_Closure");
             case Opcode::CloseUpval:
-                str = _HM_C("Close Upval");
-                break;
+                Instruction("Close_Upval");
             case Opcode::Return:
-                str = _HM_C("Return");
-                break;
+                Instruction("Return");
             case Opcode::CreateClass:
-                str = _HM_C("Create Class");
-                break;
+                Instruction("Create_Class");
             case Opcode::Constructor:
-                str = _HM_C("Constructor");
-                break;
+                Instruction("Constructor");
             case Opcode::InstanceMethod:
-                str = _HM_C("Instance Method");
-                break;
+                Instruction("Instance_Method");
             case Opcode::StaticMethod:
-                str = _HM_C("Static Method");
-                break;
+                Instruction("Static_Method");
+        }
+        hm_cout << str << std::endl;
+#undef Instruction
+#undef ReadByte
+#undef ReadShort
+#undef ReadInt
+    }
+
+    void HMFunction::DumpAllInstructions(Ostream &os) {
+        HMByte *code = instructions.GetBuffer();
+        HMInteger index;
+        // 使用小端字节序
+#define ReadByte() (code[i++])
+#define ReadShort() (i += 2,  (code[i] << 8) | (code[i - 1]))
+#define ReadInt() (i += 4, (code[i] << 24) | (code[i - 1] << 16) | (code[i - 2] << 8) | code[i - 3])
+#define Instruction(v) os << v;
+#define ShortArg() os << _HM_C("_") << (int) ReadShort();
+#define Finish() os << std::endl; break;
+        int i = 0;
+        while (i < instructions.GetCount()) {
+            os << _HM_C("     ");
+            switch ((Opcode) code[i]) {
+                case Opcode::LoadConstant:
+                    Instruction("Load_Constant");
+                    index = ReadShort();
+                    os << _HM_C("_") << index << _HM_C(" -> ");
+                    constants[index].dump(os);
+                    Finish();
+                case Opcode::LoadLocalVariable:
+                    Instruction("Load_Local_Variable");
+                    ShortArg();
+                    Finish();
+                case Opcode::StoreLocalVariable:
+                    Instruction("Store_Local_Variable");
+                    ShortArg();
+                    Finish();
+                case Opcode::LoadModuleVariable:
+                    Instruction("Load_Module_Variable");
+                    ShortArg();
+                    Finish();
+                case Opcode::StoreModuleVariable:
+                    Instruction("Store_Module_Varible");
+                    ShortArg();
+                    Finish();
+                case Opcode::LoadUpvalue:
+                    Instruction("Load_Upvalue");
+                    ShortArg();
+                    Finish();
+                case Opcode::StoreUpvalue:
+                    Instruction("Store_Upvalue");
+                    ShortArg();
+                    Finish();
+                case Opcode::LoadThisField:
+                    Instruction("Load_This_Field");
+                    Finish();
+                case Opcode::StoreThisField:
+                    Instruction("Store_This_Field");
+                    Finish();
+                case Opcode::LoadField:
+                    Instruction("Load_Field");
+                    ShortArg();
+                    Finish();
+                case Opcode::StoreField:
+                    Instruction("Store_Field");
+                    ShortArg();
+                    Finish();
+                case Opcode::Pop:
+                    Instruction("Pop");
+                    Finish();
+                case Opcode::PushNull:
+                    Instruction("Push_Null");
+                    Finish();
+                case Opcode::PushTrue:
+                    Instruction("Push_True");
+                    Finish();
+                case Opcode::PushFalse:
+                    Instruction("Push_False");
+                    Finish();
+                case Opcode::Call:
+                    Instruction("Call");
+                    ShortArg();
+                    ShortArg();
+                    Finish();
+                case Opcode::Call0:
+                case Opcode::Call1:
+                case Opcode::Call2:
+                case Opcode::Call3:
+                case Opcode::Call4:
+                case Opcode::Call5:
+                case Opcode::Call6:
+                case Opcode::Call7:
+                    Instruction("Call");
+                    ShortArg();
+                    Finish();
+                case Opcode::Super:
+                    Instruction("Super");
+                    ShortArg();
+                    ShortArg();
+                    Finish();
+                case Opcode::Super0:
+                case Opcode::Super1:
+                case Opcode::Super2:
+                case Opcode::Super3:
+                case Opcode::Super4:
+                case Opcode::Super5:
+                case Opcode::Super6:
+                case Opcode::Super7:
+                    Instruction("Super");
+                    ShortArg();
+                    Finish();
+                case Opcode::Jump:
+                    Instruction("Jump");
+                    ShortArg();
+                    Finish();
+                case Opcode::Loop:
+                    Instruction("Loop");
+                    Finish();
+                case Opcode::JumpIfFalse:
+                    Instruction("Jump_If_False");
+                    ShortArg();
+                    Finish();
+                case Opcode::JumpIfTrue:
+                    Instruction("Jump_If_True");
+                    ShortArg();
+                    Finish();
+                case Opcode::Add:
+                    Instruction("Add");
+                    Finish();
+                case Opcode::Sub:
+                    Instruction("Sub");
+                    Finish();
+                case Opcode::Mul:
+                    Instruction("Mul");
+                    Finish();
+                case Opcode::Div:
+                    Instruction("Div");
+                    Finish();
+                case Opcode::And:
+                    Instruction("And");
+                    Finish();
+                case Opcode::Or:
+                    Instruction("Or");
+                    Finish();
+                case Opcode::CreateClosure:
+                    Instruction("Create_Closure");
+                    Finish();
+                case Opcode::CloseUpval:
+                    Instruction("Close_Upval");
+                    Finish();
+                case Opcode::Return:
+                    Instruction("Return");
+                    Finish();
+                case Opcode::CreateClass:
+                    Instruction("Create_Class");
+                    Finish();
+                case Opcode::Constructor:
+                    Instruction("Constructor");
+                    Finish();
+                case Opcode::InstanceMethod:
+                    Instruction("Instance_Method");
+                    Finish();
+                case Opcode::StaticMethod:
+                    Instruction("Static_Method");
+                    Finish();
+                case Opcode::End:
+                    Instruction("End");
+                    Finish();
+            }
+            i++;
         }
 
-        hm_cout << str << std::endl;
+#undef Instruction
+#undef ReadByte
+#undef ReadShort
+#undef ReadInt
+
     }
 
     FunctionDebug::FunctionDebug(const String &name) : name(name), line(Vector<HMUINT32>()) {

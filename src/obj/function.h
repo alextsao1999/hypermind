@@ -53,7 +53,9 @@ namespace hypermind {
 
         void DumpInstruction(int start);
 
-#ifdef DEBUG
+        void DumpAllInstructions(Ostream &os);
+
+#ifdef HMDebug
         FunctionDebug *debug{};
 #endif
     };

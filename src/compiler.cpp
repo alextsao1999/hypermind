@@ -107,8 +107,10 @@ namespace hypermind {
     // 编译变量
     AST_COMPILE(ASTVariable) {
         Variable var = compiler->mCurCompileUnit->FindVariable(mVar);
-        compiler->mCurCompileUnit->EmitLoadVariable(var);
-
+        if (isAssign)
+            compiler->mCurCompileUnit->EmitStoreVariable(var);
+        else
+            compiler->mCurCompileUnit->EmitLoadVariable(var);
     }
 
     // 编译IF
@@ -157,29 +159,30 @@ namespace hypermind {
         compiler->mCurCompileUnit->DefineVariable(index);
     }
 
+    AST_COMPILE(ASTParamStmt) {
+        // 声明参数
+        compiler->mCurCompileUnit->DeclareVariable(mIdentifier);
+    }
+
     // 编译函数
     AST_COMPILE(ASTFunctionStmt) {
-        if (compiler->mCurCompileUnit->mFn != nullptr) {
-            // TODO
-        }
         // 创建编译单元
+#ifdef HMDebug
+        //  附上调试信息
+        //        compiler->mCurCompileUnit->mFn->debug =
+        //                compiler->mVM->New<FunctionDebug>(String(mName.mStart, mName.mLength));
+        CompileUnit cu = compiler->CreateCompileUnit(new FunctionDebug(String(mName.mStart, mName.mLength)));
+#else
         CompileUnit cu = compiler->CreateCompileUnit();
-        cu.mOuter = compiler->mCurCompileUnit;
-        compiler->mCurCompileUnit = &cu;
-        cu.mFn = compiler->mVM->NewObject<HMFunction>(compiler->mCurModule);
+#endif
         // 进入作用域
         compiler->mCurCompileUnit->EnterScope();
         mParams->compile(compiler, false); // 声明变量
         mBody->compile(compiler, false); // 编译函数实体
         // 离开作用域
         compiler->mCurCompileUnit->LeaveScope();
-#ifdef DEBUG
-        //  附上调试信息
-        compiler->mCurCompileUnit->mFn->debug =
-                compiler->mVM->New<FunctionDebug>(String(mName.mStart, mName.mLength));
-#endif
+        compiler->mCurCompileUnit = cu.mOuter;
 
-        compiler->mCurCompileUnit = compiler->mCurCompileUnit->mOuter;
     }
 
     // 编译类
@@ -193,8 +196,17 @@ namespace hypermind {
     Compiler::Compiler(VM *mVM) : mVM(mVM) {
     }
 
-    CompileUnit Compiler::CreateCompileUnit() {
-        return CompileUnit(mVM);
+#ifdef HMDebug
+    CompileUnit Compiler::CreateCompileUnit(FunctionDebug *debug)
+#else
+    CompileUnit Compiler::CreateCompileUnit()
+#endif
+    {
+        CompileUnit cu(mVM);
+        cu.mFn = mVM->NewObject<HMFunction>(mCurModule);
+        cu.mFn->debug = debug;
+        cu.mOuter = mCurCompileUnit;
+        return cu;
     }
 
 }

@@ -208,7 +208,7 @@ namespace hypermind {
         if (mLexer.PeekTokenType() == TokenType::RightParen)
             return list;
         do {
-            ASTVarStmtPtr &&var = make_ptr(ASTVarStmt);
+            ASTParamStmtPtr &&var = make_ptr(ASTParamStmt);
             var->mIdentifier = mLexer.Read();
             list->elements.push_back(var);
         } while (mLexer.Match(TokenType::Comma));

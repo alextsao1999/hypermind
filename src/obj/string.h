@@ -22,7 +22,7 @@ namespace hypermind {
                 hashCode = hashString(charSequence, length);
                 hm_memcpy(charSequence, str, length);
             } else {
-                MEMRY_ERROR("创建文本对象失败");
+                MEMRY_ERROR("文本对象申请内存失败");
             }
         }
         HM_OBJ_DECL();

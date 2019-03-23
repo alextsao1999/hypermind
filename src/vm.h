@@ -17,7 +17,7 @@ namespace hypermind {
         HMClass *mBooleanClass{nullptr};
         HMClass *mStringClass{nullptr};
         HMClass *mIntegerClass{nullptr};
-        HMClass *mDoubleClass{nullptr};
+        HMClass *mFloatClass{nullptr};
         HMClass *mFunctionClass{nullptr};
         HMClass *mMethodClass{nullptr};
         HMClass *mMetaClass{nullptr};

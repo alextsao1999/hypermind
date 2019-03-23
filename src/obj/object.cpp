@@ -23,6 +23,7 @@ namespace hypermind {
         HMObject *nextObj = mAllObjects;
         while (nextObj != nullptr) {
             nextObj->dump(hm_cout);
+            hm_cout << std::endl;
             nextObj = nextObj->next;
         }
     }

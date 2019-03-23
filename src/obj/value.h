@@ -14,7 +14,7 @@ namespace hypermind {
         True,
         False,
         Integer,
-        Double,
+        Float,
         Object
     };
 
@@ -23,7 +23,7 @@ namespace hypermind {
         ValueType type;
         union {
             HMInteger intval;
-            HMFloat dbval;
+            HMFloat floatval;
             HMObject *objval;
         };
         HMHash hash() const {
@@ -38,13 +38,13 @@ namespace hypermind {
         void dump(Ostream &os) {
             switch (type) {
                 case ValueType::Integer:
-                    os << _HM_C("[inval : ") << intval << _HM_C("]");
+                    os << _HM_C("[intval : ") << intval << _HM_C("]");
                     break;
                 case ValueType::Object:
                     objval->dump(os);
                     break;
-                case ValueType::Double:
-                    os << dbval;
+                case ValueType::Float:
+                    os << _HM_C("[floatval : ") << floatval << _HM_C("]");
                     break;
                 case ValueType::Undefined:
                     os << _HM_C("[undefined]");
@@ -66,8 +66,8 @@ namespace hypermind {
             switch (type) {
                 case ValueType::Integer:
                     return vm->mIntegerClass;
-                case ValueType::Double:
-                    return vm->mDoubleClass;
+                case ValueType::Float:
+                    return vm->mFloatClass;
                 case ValueType::Undefined:
                 case ValueType::Null:
                     break;

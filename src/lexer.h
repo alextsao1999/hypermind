@@ -149,7 +149,7 @@ namespace hypermind {
 
         Token(TokenType mType, const HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine);
         Token() = default;
-        void dump(Ostream &os);
+        void dump(Ostream &os) const;
 
     };
 

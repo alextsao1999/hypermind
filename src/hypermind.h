@@ -10,7 +10,7 @@
 #include <cstdio>
 #include <cstdint>
 
-#define DEBUG
+#define HMDebug
 // 最大标识符长度
 #define MAX_IDENTIFIER_LENTH 255
 // 最大局部变量个数
@@ -63,7 +63,7 @@ namespace hypermind {
 
 #define MEMRY_ERROR(C)
 
-#ifdef DEBUG
+#ifdef HMDebug
     #define ASSERT(condition, err) \
         do { \
             if (!(condition)) { \
