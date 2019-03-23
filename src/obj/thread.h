@@ -1,5 +1,5 @@
 //
-// Created by ²ÜË³ on 2019/3/5.
+// Created by æ›¹é¡º on 2019/3/5.
 //
 
 #ifndef PROJECT_THREAD_H
@@ -13,12 +13,12 @@ namespace hypermind {
         Value *sp{};
 
         HMUINT32 stackCapacity{};
-        HMUINT32 usedFrameNum{};   // ÒÑÊ¹ÓÃµÄframeÊıÁ¿
-        HMUINT32 frameCapacity{};  // frameÈİÁ¿
+        HMUINT32 usedFrameNum{};   // å·²ä½¿ç”¨çš„frameæ•°é‡
+        HMUINT32 frameCapacity{};  // frameå®¹é‡
 
-        // µ÷ÓÃÕß
+        // è°ƒç”¨è€…
         HMThread *caller{};
-        // ´íÎó¶ÔÏó
+        // é”™è¯¯å¯¹è±¡
         Value errorObj{};
         HM_OBJ_DECL();
 

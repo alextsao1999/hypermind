@@ -21,6 +21,7 @@ namespace hypermind {
     //Tagged union
     struct Value {
         ValueType type;
+
         union {
             HMInteger intval;
             HMFloat floatval;
@@ -41,10 +42,10 @@ namespace hypermind {
                     os << _HM_C("[intval : ") << intval << _HM_C("]");
                     break;
                 case ValueType::Object:
-                    objval->dump(os);
+                    os << _HM_C("[ptrval : ") << static_cast<const void *>(objval) << _HM_C("]");
                     break;
                 case ValueType::Float:
-                    os << _HM_C("[floatval : ") << floatval << _HM_C("]");
+                    os << _HM_C("[floval : ") << floatval << _HM_C("]");
                     break;
                 case ValueType::Undefined:
                     os << _HM_C("[undefined]");

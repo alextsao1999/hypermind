@@ -12,7 +12,7 @@ namespace hypermind {
         return false;
     }
     HM_OBJ_DUMP(Module) {
-        os << _HM_C(" { HMModule(") << sizeof(HMModule) << _HM_C(")") << " name : ";
+        os << _HM_C(" { HMModule(") << sizeof(HMModule) << _HM_C(") ") << static_cast<const void *>(this) << " name : ";
         mModuleName->dump(os);
 
         os << _HM_C(" } ");

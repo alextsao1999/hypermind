@@ -22,7 +22,7 @@ namespace hypermind {
         return false;
     }
     HM_OBJ_DUMP(Function) {
-        os << _HM_C(" { HMFunction(" << sizeof(HMFunction) << ") name : ") << debug->name << _HM_C("  opcode : { ");
+        os << _HM_C(" { HMFunction(" << sizeof(HMFunction) << ") " << static_cast<const void *>(this) << "  name : ") << debug->name << _HM_C("  opcode : { ");
         for (int i = 0; i < instructions.GetCount(); ++i) {
             if (i == 0) {
                 os <<(int) instructions[i];
@@ -176,6 +176,10 @@ namespace hypermind {
 #define ReadInt() (i += 4, (code[i] << 24) | (code[i - 1] << 16) | (code[i - 2] << 8) | code[i - 3])
 #define Instruction(v) os << v;
 #define ShortArg() os << _HM_C("_") << (int) ReadShort();
+#define ConstantShortArg()  index = ReadShort(); \
+os << _HM_C("_") << index << _HM_C(" -> "); \
+constants[index].dump(os);
+
 #define Finish() os << std::endl; break;
         int i = 0;
         while (i < instructions.GetCount()) {
@@ -183,9 +187,7 @@ namespace hypermind {
             switch ((Opcode) code[i]) {
                 case Opcode::LoadConstant:
                     Instruction("Load_Constant");
-                    index = ReadShort();
-                    os << _HM_C("_") << index << _HM_C(" -> ");
-                    constants[index].dump(os);
+                    ConstantShortArg();
                     Finish();
                 case Opcode::LoadLocalVariable:
                     Instruction("Load_Local_Variable");
@@ -304,6 +306,7 @@ namespace hypermind {
                     Finish();
                 case Opcode::CreateClosure:
                     Instruction("Create_Closure");
+                    ConstantShortArg();
                     Finish();
                 case Opcode::CloseUpval:
                     Instruction("Close_Upval");

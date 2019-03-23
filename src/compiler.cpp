@@ -197,11 +197,14 @@ namespace hypermind {
         compiler->mCurCompileUnit = &cu;
         // 进入作用域
         cu.EnterScope();
-        mParams->compile(compiler, false); // 声明变量
+        mParams->compile(compiler, false); // 编译参数声明
         mBody->compile(compiler, false); // 编译函数实体
         // 离开作用域
         cu.LeaveScope();
         compiler->mCurCompileUnit = cu.mOuter;
+
+        HMInteger index = cu.mOuter->AddConstant(OBJ_TO_VALUE(cu.mFn));
+        cu.mOuter->EmitCreateClosure(index);
 
     }
 

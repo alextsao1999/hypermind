@@ -17,7 +17,7 @@ namespace hypermind {
 
     HM_OBJ_DUMP(String) {
         String str(charSequence, length);
-        os << " { HMString(" << sizeof(HMString) << ")   " << str << "   hash : " << hashCode << "  } ";
+        os << _HM_C(" { HMString(") << sizeof(HMString) << _HM_C(") ")  << static_cast<const void *>(this) << "   " << str << "   hash : " << hashCode << "  } ";
 
     }
 

@@ -14,6 +14,12 @@
 #define STACK_CHANGE(num) {mStackSlotNum += num;}
 
 #define VT_TO_VALUE(VT) {VT, 0}
+#define OBJ_TO_VALUE(obj) ({ \
+   Value value; \
+   value.type = ValueType::Object; \
+   value.objval = obj; \
+   value; \
+})
 
 namespace hypermind {
     class VM;
@@ -374,6 +380,11 @@ namespace hypermind {
         void EmitMul() {
             STACK_CHANGE(-1);
             mFn->WriteOpcode(Opcode::Mul);
+        }
+
+        void EmitCreateClosure(HMInteger index) {
+            mFn->WriteOpcode(Opcode::CreateClosure);
+            mFn->WriteShortOperand(index);
         }
 
     };
