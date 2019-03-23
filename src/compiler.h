@@ -22,12 +22,12 @@ namespace hypermind {
         Invalid,
         Module,  // 模块变量
         Local, // 局部变量
-        Upval
+        Upvalue
     };
 
     struct Upvalue {
-        // 是否为外层的局部变量
-        bool isOuterLocalVar;
+        // 是否为外层直接局部变量
+        bool isDirectOuterLocalVar;
 
         //外层函数中局部变量的索引或者外层函数中upvalue的索引
         HMInteger index;
@@ -81,11 +81,8 @@ namespace hypermind {
         // 作用域深度
         HMInteger mScopeDepth{-1};
 
-        // 当前正在编译的函数
-        HMFunction *mFn;
-
         Upvalue mUpvalues[MAX_UPVALUE_NUMBER];
-        HMUINT32 mUpvalueNumber{0}; // Upval 个数
+        HMUINT32 mUpvalueNumber{0}; // Upvalue 个数
 
         LocalVariable mLocalVariables[MAX_LOCAL_VAR_NUMBER];
         HMUINT32 mLocalVarNumber{0}; // 局部变量个数
@@ -95,6 +92,9 @@ namespace hypermind {
 
     public:
         explicit CompileUnit(VM *mVm);
+
+        // 当前正在编译的函数
+        HMFunction *mFn;
 
         // 外层编译单元
         CompileUnit *mOuter{nullptr};
@@ -158,11 +158,19 @@ namespace hypermind {
 
         // 查找局部变量 或者 Upvalue
         Variable FindLocalOrUpvalue(const Token &id) {
-            // TODO 现在只是从局部变量中查找
-            Variable var{};
-            var.scopeType = ScopeType::Local;
-            var.index = FindLocal(id);
-            return var;
+            // 先寻找局部变量
+            HMInteger index = FindLocal(id);
+            if (index != -1) {
+                return Variable(ScopeType::Local, index);
+            }
+
+            // 没找到局部变量 查找Upvalue
+            index = FindUpvalue(id);
+            if (index != -1) {
+                return Variable(ScopeType::Upvalue, index);
+            }
+
+            return Variable(ScopeType::Invalid, 0);
         }
 
         /**
@@ -171,17 +179,47 @@ namespace hypermind {
          * @return
          */
         Variable FindVariable(const Token &id) {
-            // TODO 现在只是从局部变量中查找 之后增加模块变量和Upvalue
-            Variable var{};
-            var.scopeType = ScopeType::Local;
-            var.index = FindLocal(id);
+            Variable var = FindLocalOrUpvalue(id);
+            if (var.scopeType == ScopeType::Invalid) {
+                // TODO 查找模块变量
+            }
             return var;
         };
 
-        HMInteger AddUpvalue(bool isEnclosingLocalVar, HMInteger index) {
+        /**
+         * 添加Upvalue
+         * @param isDirectOuterLocalVar 是否为直接外层局部变量
+         * @param index 索引
+         * @return
+         */
+        HMInteger AddUpvalue(bool isDirectOuterLocalVar, HMInteger index) {
+            // 如果存在就返回索引
             for (HMInteger i = 0; i < mUpvalueNumber; ++i) {
-                if (mUpvalues[i].index == index)
+                if (mUpvalues[i].index == index && mUpvalues[i].isDirectOuterLocalVar == isDirectOuterLocalVar) {
                     return i;
+                }
+            }
+            // 不存在就添加
+            mUpvalues[mUpvalueNumber].index = index;
+            mUpvalues[mUpvalueNumber].isDirectOuterLocalVar = isDirectOuterLocalVar;
+            return mUpvalueNumber++;
+        };
+
+        HMInteger FindUpvalue(const Token &id) {
+            if (mOuter == nullptr) {
+                // 未找到
+                return -1;
+            }
+            HMInteger index = mOuter->FindLocal(id);
+            if (index != -1) {
+                // 找到Upvalue 将局部变量Upvalue
+                mOuter->SetLocalVariableUpvalue(index);
+                return AddUpvalue(true, index);
+            }
+            // 递归查询添加
+            index = mOuter->FindUpvalue(id);
+            if (index != -1) {
+                return AddUpvalue(false, index);
             }
             return -1;
         };
@@ -190,7 +228,7 @@ namespace hypermind {
          * 设置变量为Upval
          * @param index
          */
-        void SetLocalVariableUpval(HMInteger index) {
+        void SetLocalVariableUpvalue(HMInteger index) {
             mLocalVariables[index].isUpvalue = true;
         };
 
@@ -275,7 +313,7 @@ namespace hypermind {
                 case ScopeType::Local:
                     mFn->WriteOpcode(Opcode::LoadLocalVariable);
                     break;
-                case ScopeType::Upval:
+                case ScopeType::Upvalue:
                     mFn->WriteOpcode(Opcode::LoadUpvalue);
                     break;
                 case ScopeType::Invalid:
@@ -298,7 +336,7 @@ namespace hypermind {
                 case ScopeType::Local:
                     mFn->WriteOpcode(Opcode::StoreLocalVariable);
                     break;
-                case ScopeType::Upval:
+                case ScopeType::Upvalue:
                     mFn->WriteOpcode(Opcode::StoreUpvalue);
                     break;
                 case ScopeType::Invalid:

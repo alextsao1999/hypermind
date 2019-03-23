@@ -19,9 +19,7 @@ int main() {
     ASTNodePtr ast = parser.ParseProgram();
     Compiler compiler(&vm);
     CompileUnit cu = compiler.CreateCompileUnit(new FunctionDebug(""));
-
-    auto *str = vm.NewObject<HMString>(_HM_C("test"), 4);
-    compiler.mCurModule = vm.NewObject<HMModule>(str);
+    compiler.mCurModule = vm.NewObject<HMModule>(vm.NewObject<HMString>(_HM_C("test"), 4));
     compiler.mCurCompileUnit = &cu;
     ast->compile(&compiler, false);
 

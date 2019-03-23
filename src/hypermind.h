@@ -27,22 +27,8 @@ typedef HMUINT32 HMHash;
 typedef bool HMBool;
 #define Vector std::vector
 
-#ifndef HMUNICODE
-
-#define _HM_C(ch) ch
-
-#include <cstring>
-typedef char HMChar;
-typedef std::string String;
-typedef std::ostream Ostream;
-#define hm_cout std::cout
-#define hm_memcpy memcpy
-#define hm_memcmp memcmp
-#define hm_strtoi atoi
-#endif
-
 #ifdef HMUNICODE
-
+// Unicode
 // 字符通用字符类型
 #define _HM_C(ch) L##ch
 typedef wchar_t HMChar;
@@ -52,6 +38,17 @@ typedef std::wostream Ostream;
 #define hm_memcpy wmemcpy
 #define hm_memcmp wmemcmp
 #define hm_strtoi _wtoi
+#else
+// ---- Ansi ----
+#define _HM_C(ch) ch
+#include <cstring>
+typedef char HMChar;
+typedef std::string String;
+typedef std::ostream Ostream;
+#define hm_cout std::cout
+#define hm_memcpy memcpy
+#define hm_memcmp memcmp
+#define hm_strtoi atoi
 
 #endif
 

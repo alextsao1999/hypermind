@@ -100,8 +100,25 @@ namespace hypermind {
 
     // 编译字面量
     AST_COMPILE(ASTLiteral) {
-        HMInteger idx = compiler->mCurCompileUnit->AddConstant(mValue);
-        compiler->mCurCompileUnit->EmitLoadConstant(idx);
+        switch (mValue.type) {
+            case ValueType::Undefined:
+                break;
+            case ValueType::Null:
+                compiler->mCurCompileUnit->EmitPushNull();
+                break;
+            case ValueType::True:
+                compiler->mCurCompileUnit->EmitPushTrue();
+                break;
+            case ValueType::False:
+                compiler->mCurCompileUnit->EmitPushFalse();
+                break;
+            case ValueType::Integer:
+            case ValueType::Float:
+            case ValueType::Object:
+                HMInteger idx = compiler->mCurCompileUnit->AddConstant(mValue);
+                compiler->mCurCompileUnit->EmitLoadConstant(idx);
+                break;
+        }
     }
 
     // 编译变量
@@ -156,6 +173,8 @@ namespace hypermind {
             mValue->compile(compiler, false);
         }
         HMInteger index = compiler->mCurCompileUnit->DeclareVariable(mIdentifier);
+        // 局部变量并没有什么变化
+        //  如果是模块变量的话 会把局部变量值弹出 存到模块变量中
         compiler->mCurCompileUnit->DefineVariable(index);
     }
 
@@ -175,12 +194,13 @@ namespace hypermind {
 #else
         CompileUnit cu = compiler->CreateCompileUnit();
 #endif
+        compiler->mCurCompileUnit = &cu;
         // 进入作用域
-        compiler->mCurCompileUnit->EnterScope();
+        cu.EnterScope();
         mParams->compile(compiler, false); // 声明变量
         mBody->compile(compiler, false); // 编译函数实体
         // 离开作用域
-        compiler->mCurCompileUnit->LeaveScope();
+        cu.LeaveScope();
         compiler->mCurCompileUnit = cu.mOuter;
 
     }
@@ -197,16 +217,20 @@ namespace hypermind {
     }
 
 #ifdef HMDebug
-    CompileUnit Compiler::CreateCompileUnit(FunctionDebug *debug)
-#else
-    CompileUnit Compiler::CreateCompileUnit()
-#endif
-    {
+    CompileUnit Compiler::CreateCompileUnit(FunctionDebug *debug) {
         CompileUnit cu(mVM);
         cu.mFn = mVM->NewObject<HMFunction>(mCurModule);
         cu.mFn->debug = debug;
         cu.mOuter = mCurCompileUnit;
         return cu;
     }
+#else
+    CompileUnit Compiler::CreateCompileUnit() {
+        CompileUnit cu(mVM);
+        cu.mFn = mVM->NewObject<HMFunction>(mCurModule);
+        cu.mOuter = mCurCompileUnit;
+        return cu;
+    }
+#endif
 
 }
