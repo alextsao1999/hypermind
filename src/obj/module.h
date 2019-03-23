@@ -17,11 +17,11 @@ namespace hypermind {
     HM_OBJECT(Module) {
         HMString *mModuleName;
 
-        Buffer<Value> mModuleVaribles;
+        Buffer<Value> mModuleVariables;
 #ifdef DEBUG
-//        Vector<String> mModuleVarNames;
+        Vector<String> mModuleVarNames;
 #endif
-        HM_OBJ_CONSTRUTOR_CLASS(Module, nullptr, HMString *name), mModuleName(name), mModuleVaribles(Buffer<Value>(vm)) {
+        HM_OBJ_CONSTRUTOR_CLASS(Module, nullptr, HMString *name), mModuleName(name), mModuleVariables(Buffer<Value>(vm)) {
 
         }
 

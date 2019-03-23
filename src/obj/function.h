@@ -37,6 +37,7 @@ namespace hypermind {
          * @param opcode
          */
         void WriteOpcode(Opcode opcode);
+        void WriteOpcode(HMByte opcode);
 
         /**
          * 写入 short 操作数 小端字节序

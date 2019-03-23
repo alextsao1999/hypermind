@@ -13,33 +13,50 @@ namespace hypermind {
 
     // 编译二元表达式
     AST_COMPILE(ASTBinary) {
+
+        // Σ(っ °Д °;)っ 这是个异类
+        if (mOp.mType == TokenType::Assign) {
+            mRHS->compile(compiler, false);
+            mLHS->compile(compiler, true);
+            return;
+        }
         mLHS->compile(compiler, false);
         mRHS->compile(compiler, false);
-
         // 根据Op 编译相应的Opcode
         switch (mOp.mType) {
             case TokenType::Add:
+                compiler->mCurCompileUnit->EmitAdd();
                 break;
             case TokenType::Sub:
+                compiler->mCurCompileUnit->EmitSub();
                 break;
             case TokenType::Mul:
+                compiler->mCurCompileUnit->EmitMul();
                 break;
             case TokenType::Div:
+                compiler->mCurCompileUnit->EmitDiv();
                 break;
             case TokenType::Increase:
                 break;
             case TokenType::Decrease:
                 break;
             case TokenType::Assign:
-
                 break;
             case TokenType::AddAssign:
+                compiler->mCurCompileUnit->EmitAdd();
+                mLHS->compile(compiler, true);
                 break;
             case TokenType::SubAssign:
+                compiler->mCurCompileUnit->EmitSub();
+                mLHS->compile(compiler, true);
                 break;
             case TokenType::MulAssign:
+                compiler->mCurCompileUnit->EmitMul();
+                mLHS->compile(compiler, true);
                 break;
             case TokenType::DivAssign:
+                compiler->mCurCompileUnit->EmitDiv();
+                mLHS->compile(compiler, true);
                 break;
             case TokenType::ModAssign:
                 break;
@@ -136,8 +153,8 @@ namespace hypermind {
         } else {
             mValue->compile(compiler, false);
         }
-        compiler->mCurCompileUnit->DeclareLocalVariable(mIdentifier);
-
+        HMInteger index = compiler->mCurCompileUnit->DeclareVariable(mIdentifier);
+        compiler->mCurCompileUnit->DefineVariable(index);
     }
 
     // 编译函数
@@ -145,9 +162,11 @@ namespace hypermind {
         if (compiler->mCurCompileUnit->mFn != nullptr) {
             // TODO
         }
-        // 在当前虚拟机中创建一个函数对象
-        compiler->mCurCompileUnit->mFn =
-                compiler->mCurCompileUnit->mVM->NewObject<HMFunction>(compiler->mCurModule);
+        // 创建编译单元
+        CompileUnit cu = compiler->CreateCompileUnit();
+        cu.mOuter = compiler->mCurCompileUnit;
+        compiler->mCurCompileUnit = &cu;
+        cu.mFn = compiler->mVM->NewObject<HMFunction>(compiler->mCurModule);
         // 进入作用域
         compiler->mCurCompileUnit->EnterScope();
         mParams->compile(compiler, false); // 声明变量
@@ -155,10 +174,12 @@ namespace hypermind {
         // 离开作用域
         compiler->mCurCompileUnit->LeaveScope();
 #ifdef DEBUG
+        //  附上调试信息
         compiler->mCurCompileUnit->mFn->debug =
                 compiler->mVM->New<FunctionDebug>(String(mName.mStart, mName.mLength));
 #endif
 
+        compiler->mCurCompileUnit = compiler->mCurCompileUnit->mOuter;
     }
 
     // 编译类
@@ -167,10 +188,13 @@ namespace hypermind {
     }
 
     CompileUnit::CompileUnit(VM *mVm) : mVM(mVm) {
-
     }
 
     Compiler::Compiler(VM *mVM) : mVM(mVM) {
-
     }
+
+    CompileUnit Compiler::CreateCompileUnit() {
+        return CompileUnit(mVM);
+    }
+
 }

@@ -73,7 +73,7 @@ namespace hypermind {
         os << _HM_C(" define var : ") ;
         mIdentifier.dump(os);
         if (mValue != nullptr) {
-            os << _HM_C("  value : ");
+            os << _HM_C(" = ");
             mValue->dump(os);
         }
         os << _HM_C("  ") << std::endl;

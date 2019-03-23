@@ -10,9 +10,9 @@ namespace hypermind {
     enum class Opcode : HMByte {
         LoadConstant,
         LoadLocalVariable,
-        StoreLocalVarible,
+        StoreLocalVariable,
         LoadModuleVariable,
-        StoreModuleVarible,
+        StoreModuleVariable,
         LoadUpvalue,
         StoreUpvalue,
         LoadThisField,
@@ -56,6 +56,7 @@ namespace hypermind {
          Sub,
          Mul,
          Div,
+
          And,
          Or,
 

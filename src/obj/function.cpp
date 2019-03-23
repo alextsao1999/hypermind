@@ -29,6 +29,9 @@ namespace hypermind {
     void HMFunction::WriteOpcode(Opcode opcode) {
         instructions.Append((HMByte) opcode);
     }
+    void HMFunction::WriteOpcode(HMByte opcode) {
+        instructions.Append(opcode);
+    }
 
     void HMFunction::WriteShortOperand(int operand) {
         instructions.Append(static_cast<HMByte>(operand & 0xff)); // 写入 低8位
@@ -56,13 +59,13 @@ namespace hypermind {
             case Opcode::LoadLocalVariable:
                 str = _HM_C("LoadLocalVariable");
                 break;
-            case Opcode::StoreLocalVarible:
-                str = _HM_C("StoreLocalVarible");
+            case Opcode::StoreLocalVariable:
+                str = _HM_C("StoreLocalVariable");
                 break;
             case Opcode::LoadModuleVariable:
                 str = _HM_C("LoadModuleVariable");
                 break;
-            case Opcode::StoreModuleVarible:
+            case Opcode::StoreModuleVariable:
                 str = _HM_C("Store Module Varible");
                 break;
             case Opcode::LoadUpvalue:

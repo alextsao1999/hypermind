@@ -49,7 +49,6 @@ namespace hypermind {
         bool isUpvalue;
     };
 
-
     class CompileUnit {
         friend ASTFunctionStmt;
         friend ASTVarStmt;
@@ -100,14 +99,52 @@ namespace hypermind {
         };
 
         /**
+         * 根据作用域声明变量
+         * @return
+         */
+        HMInteger DeclareVariable(const Token &id) {
+            if (mScopeDepth == -1) {
+                // TODO 模块变量
+            }
+            return DeclareLocalVariable(id);
+        }
+
+        /**
+         * 变量设置初始值
+         * @param index
+         */
+        void DefineVariable(HMInteger index) {
+            if (mScopeDepth == -1) {
+                // 作用域为模块作用域
+            }
+            // 不是模块作用域 不用管
+        }
+
+        /**
+         * 查找局部变量
+         * @param id
+         * @return
+         */
+        HMInteger FindLocal(const Token &id) {
+            for (HMUINT32 i = 0; i < mLocalVarNumber; ++i) {
+                if (id.mLength == mLocalVariables[i].length &&
+                    hm_memcmp(mLocalVariables[i].name, id.mStart, id.mLength) != 0) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        /**
          * 查找变量
          * @param id
          * @return
          */
         Variable FindVariable(const Token &id) {
+            // TODO 现在只是从局部变量中查找 之后增加模块变量
             Variable var{};
             var.scopeType = ScopeType::Local;
-            var.index = DeclareLocalVariable(id);
+            var.index = FindLocal(id);
             return var;
         };
 
@@ -127,7 +164,6 @@ namespace hypermind {
             mLocalVariables[index].isUpvalue = true;
         };
 
-
         // 进入作用域
         void EnterScope() {
             mScopeDepth++;
@@ -139,7 +175,10 @@ namespace hypermind {
 
         }
 
-        void DiscardVariable() {
+        /**
+         * 丢弃作用域内的局部变量
+         */
+        void DiscardLocalVariable() {
 
         }
 
@@ -166,7 +205,7 @@ namespace hypermind {
          */
         void EmitPushTrue() {
             STACK_CHANGE(1);
-            mFn->WriteOpcode(Opcode::PushNull);
+            mFn->WriteOpcode(Opcode::PushTrue);
         };
 
         /**
@@ -181,9 +220,15 @@ namespace hypermind {
          * 弹出栈顶参数
          * @param argNum
          */
-        void EmitCall(HMUINT32 argNum) {
+        void EmitCall(HMUINT32 methodIndex, HMUINT32 argNum) {
             STACK_CHANGE(argNum);
-
+            if (argNum <= 7)
+                mFn->WriteOpcode(static_cast<HMByte>((HMByte) Opcode::Call + argNum));
+            else {
+                mFn->WriteOpcode(Opcode::Call);
+                mFn->WriteShortOperand(methodIndex); // 方法索引
+                mFn->WriteShortOperand(argNum); // 实参数量
+            }
         }
 
         /**
@@ -192,8 +237,45 @@ namespace hypermind {
          */
         void EmitLoadVariable(const Variable &var) {
             STACK_CHANGE(1);
-
+            switch (var.scopeType) {
+                case ScopeType::Module:
+                    mFn->WriteOpcode(Opcode::LoadModuleVariable);
+                    break;
+                case ScopeType::Local:
+                    mFn->WriteOpcode(Opcode::LoadLocalVariable);
+                    break;
+                case ScopeType::Upval:
+                    mFn->WriteOpcode(Opcode::LoadUpvalue);
+                    break;
+                case ScopeType::Invalid:
+                    // FIXME
+                    break;
+            }
+            mFn->WriteShortOperand(var.index);
         };
+
+        /**
+         * 储存变量
+         * @param var
+         */
+        void EmitStoreVariable(const Variable &var) {
+            STACK_CHANGE(-1);
+            switch (var.scopeType) {
+                case ScopeType::Module:
+                    mFn->WriteOpcode(Opcode::StoreModuleVariable);
+                    break;
+                case ScopeType::Local:
+                    mFn->WriteOpcode(Opcode::StoreLocalVariable);
+                    break;
+                case ScopeType::Upval:
+                    mFn->WriteOpcode(Opcode::StoreUpvalue);
+                    break;
+                case ScopeType::Invalid:
+                    // FIXME
+                    break;
+            }
+            mFn->WriteShortOperand(var.index);
+        }
 
         /**
          * 操作栈中压入常量
@@ -203,7 +285,26 @@ namespace hypermind {
             STACK_CHANGE(1);
             mFn->WriteOpcode(Opcode::LoadConstant);
             mFn->WriteShortOperand(index);
+        }
 
+        void EmitAdd() {
+            STACK_CHANGE(-1);
+            mFn->WriteOpcode(Opcode::Add);
+        }
+
+        void EmitSub() {
+            STACK_CHANGE(-1);
+            mFn->WriteOpcode(Opcode::Sub);
+        }
+
+        void EmitDiv() {
+            STACK_CHANGE(-1);
+            mFn->WriteOpcode(Opcode::Div);
+        }
+
+        void EmitMul() {
+            STACK_CHANGE(-1);
+            mFn->WriteOpcode(Opcode::Mul);
         }
 
     };
@@ -221,7 +322,9 @@ namespace hypermind {
         // 当前正在编译的函数
         CompileUnit *mCurCompileUnit;
 
-        Compiler(VM *mVM);
+        explicit Compiler(VM *mVM);
+
+        CompileUnit CreateCompileUnit();
 
     };
 

@@ -41,8 +41,8 @@ namespace hypermind {
     }
 
     ASTExprPtr Parser::ParseExpression() {
-        ASTExprPtr lhs = ParseUnary();
-        return ParseBinaryOp(lhs, 0);
+//        ASTExprPtr lhs = ;
+        return ParseBinaryOp(ParseUnary(), 0);
     }
 
     // BinaryOp ::= ('+'  Unary)
