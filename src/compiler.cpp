@@ -15,15 +15,15 @@ namespace hypermind {
     AST_COMPILE(ASTBinary) {
 
         // Σ(っ °Д °;)っ 这是个异类
-        if (mOp.mType == TokenType::Assign) {
-            mRHS->compile(compiler, false);
-            mLHS->compile(compiler, true);
+        if (op.type == TokenType::Assign) {
+            rhs->compile(compiler, false);
+            lhs->compile(compiler, true);
             return;
         }
-        mLHS->compile(compiler, false);
-        mRHS->compile(compiler, false);
+        lhs->compile(compiler, false);
+        rhs->compile(compiler, false);
         // 根据Op 编译相应的Opcode
-        switch (mOp.mType) {
+        switch (op.type) {
             case TokenType::Add:
                 compiler->mCurCompileUnit->EmitAdd();
                 break;
@@ -44,19 +44,19 @@ namespace hypermind {
                 break;
             case TokenType::AddAssign:
                 compiler->mCurCompileUnit->EmitAdd();
-                mLHS->compile(compiler, true);
+                lhs->compile(compiler, true);
                 break;
             case TokenType::SubAssign:
                 compiler->mCurCompileUnit->EmitSub();
-                mLHS->compile(compiler, true);
+                lhs->compile(compiler, true);
                 break;
             case TokenType::MulAssign:
                 compiler->mCurCompileUnit->EmitMul();
-                mLHS->compile(compiler, true);
+                lhs->compile(compiler, true);
                 break;
             case TokenType::DivAssign:
                 compiler->mCurCompileUnit->EmitDiv();
-                mLHS->compile(compiler, true);
+                lhs->compile(compiler, true);
                 break;
             case TokenType::ModAssign:
                 break;
@@ -100,7 +100,7 @@ namespace hypermind {
 
     // 编译字面量
     AST_COMPILE(ASTLiteral) {
-        switch (mValue.type) {
+        switch (value.type) {
             case ValueType::Undefined:
                 break;
             case ValueType::Null:
@@ -115,7 +115,7 @@ namespace hypermind {
             case ValueType::Integer:
             case ValueType::Float:
             case ValueType::Object:
-                HMInteger idx = compiler->mCurCompileUnit->AddConstant(mValue);
+                HMInteger idx = compiler->mCurCompileUnit->AddConstant(value);
                 compiler->mCurCompileUnit->EmitLoadConstant(idx);
                 break;
         }
@@ -123,11 +123,11 @@ namespace hypermind {
 
     // 编译变量
     AST_COMPILE(ASTVariable) {
-        Variable var = compiler->mCurCompileUnit->FindVariable(mVar);
+        Variable variable = compiler->mCurCompileUnit->FindVariable(var);
         if (isAssign)
-            compiler->mCurCompileUnit->EmitStoreVariable(var);
+            compiler->mCurCompileUnit->EmitStoreVariable(variable);
         else
-            compiler->mCurCompileUnit->EmitLoadVariable(var);
+            compiler->mCurCompileUnit->EmitLoadVariable(variable);
     }
 
     // 编译IF
@@ -167,12 +167,12 @@ namespace hypermind {
      * @param cu
      */
     AST_COMPILE(ASTVarStmt) {
-        if (mValue == nullptr) {
+        if (value == nullptr) {
             compiler->mCurCompileUnit->EmitPushNull();
         } else {
-            mValue->compile(compiler, false);
+            value->compile(compiler, false);
         }
-        HMInteger index = compiler->mCurCompileUnit->DeclareVariable(mIdentifier);
+        HMInteger index = compiler->mCurCompileUnit->AddVariable(identifier);
         // 局部变量并没有什么变化
         //  如果是模块变量的话 会把局部变量值弹出 存到模块变量中
         compiler->mCurCompileUnit->DefineVariable(index);
@@ -180,7 +180,7 @@ namespace hypermind {
 
     AST_COMPILE(ASTParamStmt) {
         // 声明参数
-        compiler->mCurCompileUnit->DeclareVariable(mIdentifier);
+        compiler->mCurCompileUnit->AddVariable(identifier);
     }
 
     // 编译函数
@@ -188,21 +188,24 @@ namespace hypermind {
         // 创建编译单元
 #ifdef HMDebug
         //  附上调试信息
-        //        compiler->mCurCompileUnit->mFn->debug =
-        //                compiler->mVM->New<FunctionDebug>(String(mName.mStart, mName.mLength));
-        CompileUnit cu = compiler->CreateCompileUnit(new FunctionDebug(String(mName.mStart, mName.mLength)));
+        CompileUnit cu = compiler->CreateCompileUnit(new FunctionDebug(String(name.start, name.length)));
 #else
         CompileUnit cu = compiler->CreateCompileUnit();
 #endif
         compiler->mCurCompileUnit = &cu;
-        // 进入作用域
-        cu.EnterScope();
-        mParams->compile(compiler, false); // 编译参数声明
-        mBody->compile(compiler, false); // 编译函数实体
-        // 离开作用域
-        cu.LeaveScope();
-        compiler->mCurCompileUnit = cu.mOuter;
+        if (cu.mOuter != nullptr) {
+            // TODO 如果为 函数 则 添加Null 为 方法就添加This
+            cu.AddLocalVariable(Token(TokenType::Identifier, nullptr, 0, 0));
+            // 进入作用域
+            cu.EnterScope(); // 直接就编译了 不需要离开作用域
+        }
 
+        params->compile(compiler, false); // 编译参数声明
+        body->compile(compiler, false); // 编译函数实体
+        compiler->LeaveCompileUnit(cu);
+        cu.EmitEnd();
+        cu.mFn->upvalues = compiler->mVM->Allocate<Upvalue>(cu.mFn->upvalueNum);
+        memcpy(cu.mFn->upvalues, cu.mUpvalues, sizeof(Upvalue) * cu.mFn->upvalueNum);
         HMInteger index = cu.mOuter->AddConstant(OBJ_TO_VALUE(cu.mFn));
         cu.mOuter->EmitCreateClosure(index);
 
@@ -235,5 +238,9 @@ namespace hypermind {
         return cu;
     }
 #endif
+    void Compiler::LeaveCompileUnit(const CompileUnit &cu) {
+        mCurCompileUnit = cu.mOuter;
+    }
+
 
 }

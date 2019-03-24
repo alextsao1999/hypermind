@@ -21,19 +21,20 @@
 #define CURRENT_TOKEN mCurrentToken
 
 // 设置当前Token
-#define TOKEN(K, S, len, line) { mCurrentToken.mType = K; \
-mCurrentToken.mStart = S;  \
-mCurrentToken.mLength = len; \
-mCurrentToken.mLine = line; \
-mCurrentToken.mValue = {ValueType::Undefined, 0}; }
+#define TOKEN(K, len) { mCurrentToken.type = K; \
+mCurrentToken.start = CURRENT_POS;  \
+mCurrentToken.length = len; \
+mCurrentToken.line = CURRENT_LINE; \
+mCurrentToken.value = {ValueType::Undefined, 0}; }
 
-#define TOKEN_TYPE(K) mCurrentToken.mType = K;
-#define TOKEN_LENGTH(l) {mCurrentToken.mLength = l;}
-#define TOKEN_START mCurrentToken.mStart
-#define TOKEN_VALUE mCurrentToken.mValue
+#define TOKEN_TYPE(K) mCurrentToken.type = K;
+#define TOKEN_LENGTH(l) {mCurrentToken.length = l;}
+#define TOKEN_START mCurrentToken.start
+#define TOKEN_VALUE mCurrentToken.value
 
 //下一个位置
 #define NEXT() {mPosition++;}
+#define NEXT_LINE() {CURRENT_LINE++; mLineStart = mPosition;}
 
 #define LEXER_UNKOWNCHAR(str) std::cout << "词法分析器错误  : 未知字符 -> " << str << "  行号 : " << mLine << std::endl
 
@@ -141,11 +142,11 @@ namespace hypermind {
     };
 
     struct Token {
-        TokenType mType{TokenType::End};
-        const HMChar *mStart{};
-        HMUINT32 mLength{};
-        HMUINT32 mLine{};
-        Value mValue{};
+        TokenType type{TokenType::End};
+        const HMChar *start{};
+        HMUINT32 length{};
+        HMUINT32 line{};
+        Value value{};
 
         Token(TokenType mType, const HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine);
         Token() = default;
@@ -177,6 +178,12 @@ namespace hypermind {
         void Consume();
         Token Peek(HMInteger i = 1);
         bool Match(TokenType tokenType);
+        inline HMUINT32 GetCurrentLineNumber(){
+            return CURRENT_LINE;
+        };
+        inline HMUINT32 GetLineColumn() {
+            return mPosition - mLineStart;
+        };
 
         HMChar *GetSource() {
             return mSource;
@@ -186,6 +193,7 @@ namespace hypermind {
         HMChar *mSource;
         HMUINT32 mPosition{0};
         HMUINT32 mLine{1};
+        HMUINT32 mLineStart{0};
     };
 }
 

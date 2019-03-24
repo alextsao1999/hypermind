@@ -23,8 +23,8 @@ int main() {
     compiler.mCurCompileUnit = &cu;
     ast->compile(&compiler, false);
 
-//    ast->dump(hm_cout);
-    vm.DumpAllObjects();
+    ast->dump(hm_cout);
+//    vm.DumpAllObjects();
 
     return 0;
 }

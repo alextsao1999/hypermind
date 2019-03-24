@@ -21,13 +21,13 @@ namespace hypermind {
     //Tagged union
     struct Value {
         ValueType type;
-
         union {
             HMInteger intval;
             HMFloat floatval;
             HMObject *objval;
         };
-        HMHash hash() const {
+
+        inline HMHash hash() const {
             if (type == ValueType::Object) {
                 return objval->hash();
             } else {
@@ -39,13 +39,13 @@ namespace hypermind {
         void dump(Ostream &os) {
             switch (type) {
                 case ValueType::Integer:
-                    os << _HM_C("[intval : ") << intval << _HM_C("]");
+                    os << _HM_C("[integer : ") << intval << _HM_C("]");
                     break;
                 case ValueType::Object:
-                    os << _HM_C("[ptrval : ") << static_cast<const void *>(objval) << _HM_C("]");
+                    os << _HM_C("[pointer : ") << static_cast<const void *>(objval) << _HM_C("]");
                     break;
                 case ValueType::Float:
-                    os << _HM_C("[floval : ") << floatval << _HM_C("]");
+                    os << _HM_C("[float : ") << floatval << _HM_C("]");
                     break;
                 case ValueType::Undefined:
                     os << _HM_C("[undefined]");
@@ -63,7 +63,7 @@ namespace hypermind {
 
         }
 
-        HMClass *GetClass(const VM *vm) const {
+        inline HMClass *getClass(const VM *vm) const {
             switch (type) {
                 case ValueType::Integer:
                     return vm->mIntegerClass;
@@ -81,8 +81,8 @@ namespace hypermind {
                     break;
             }
             return vm->mMetaClass;
-
         }
+
     };
 }
 

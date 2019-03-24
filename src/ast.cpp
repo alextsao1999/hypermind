@@ -7,6 +7,7 @@
 namespace hypermind {
     // 语法块Dump
     AST_DUMP(ASTBlock) {
+        AST_POSTION();
         os << _HM_C("  {  ") << std::endl;
         for (auto &stmt : stmts) {
             os << _HM_C("    ");
@@ -20,40 +21,40 @@ namespace hypermind {
     // 二元表达式Dump
     AST_DUMP(ASTBinary) {
         os << _HM_C(" { (binary)  ");
-        mLHS->dump(os);
-        mOp.dump(os);
-        mRHS->dump(os);
+        lhs->dump(os);
+        op.dump(os);
+        rhs->dump(os);
         os << _HM_C("  } ") ;
     }
 
     // 字面量Dump
     AST_DUMP(ASTLiteral) {
-        mValue.dump(os);
+        value.dump(os);
     }
 
     AST_DUMP(ASTVariable) {
         // 字面量Dump
-        mVar.dump(os);
+        var.dump(os);
 
     }
 
     AST_DUMP(ASTIfStmt) {
         os << _HM_C("if  condition : ");
-        mCondition->dump(os);
+        condition->dump(os);
         os << std::endl;
-        mThen->dump(os);
-        if (mElse != nullptr) {
+        thenBlock->dump(os);
+        if (elseBlock != nullptr) {
             os << _HM_C(" else ");
-            mElse->dump(os);
+            elseBlock->dump(os);
         }
 
     }
 
     AST_DUMP(ASTWhileStmt) {
         os << _HM_C("while  condition : ");
-        mCondition->dump(os);
+        condition->dump(os);
         os << std::endl;
-        mBlock->dump(os);
+        block->dump(os);
     }
 
     AST_DUMP(ASTContinueStmt) {
@@ -65,26 +66,26 @@ namespace hypermind {
     }
     AST_DUMP(ASTReturnStmt) {
         os << _HM_C("return ");
-        mRetval->dump(os);
+        retvalue->dump(os);
 
     }
 
     AST_DUMP(ASTVarStmt) {
         os << _HM_C(" define var : ") ;
-        mIdentifier.dump(os);
-        if (mValue != nullptr) {
+        identifier.dump(os);
+        if (value != nullptr) {
             os << _HM_C(" = ");
-            mValue->dump(os);
+            value->dump(os);
         }
         os << _HM_C("  ") << std::endl;
     }
 
     AST_DUMP(ASTParamStmt) {
         os << _HM_C(" param : ") ;
-        mIdentifier.dump(os);
-        if (mValue != nullptr) {
+        identifier.dump(os);
+        if (value != nullptr) {
             os << _HM_C(" = ");
-            mValue->dump(os);
+            value->dump(os);
         }
     }
 
@@ -100,9 +101,9 @@ namespace hypermind {
 
     AST_DUMP(ASTFunctionStmt) {
         os << _HM_C(" func  name : ");
-        mName.dump(os);
-        mParams->dump(os);
-        mBody->dump(os);
+        name.dump(os);
+        params->dump(os);
+        body->dump(os);
         os << std::endl;
 
     }

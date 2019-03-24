@@ -25,7 +25,7 @@ namespace hypermind {
 
     void Token::dump(Ostream &os) const {
         String name;
-        switch (mType) {
+        switch (type) {
             case TokenType::End:
                 name = _HM_C("<结束>");
                 break;
@@ -46,7 +46,7 @@ namespace hypermind {
                 break;
             case TokenType::Identifier:
             case TokenType::Number:
-                name = String(mStart, mLength);
+                name = String(start, length);
                 break;
             case TokenType::String:
                 break;
@@ -166,78 +166,79 @@ namespace hypermind {
         SkipSpace();
         switch (CURRENT_CHAR) {
             case _HM_C('\n'):
-                TOKEN(TokenType::Delimiter, CURRENT_POS, 1, CURRENT_LINE++);
+                TOKEN(TokenType::Delimiter, 1);
+                NEXT_LINE();
                 break;
             case _HM_C(';'):
-                TOKEN(TokenType::Delimiter, CURRENT_POS, 1, CURRENT_LINE); 
+                TOKEN(TokenType::Delimiter, 1);
                 break;
             case _HM_C('('):
-                TOKEN(TokenType::LeftParen, CURRENT_POS, 1, CURRENT_LINE);
+                TOKEN(TokenType::LeftParen, 1);
                 break;
             case _HM_C(')'):
-                TOKEN(TokenType::RightParen, CURRENT_POS, 1, CURRENT_LINE);
+                TOKEN(TokenType::RightParen, 1);
                 break;
             case _HM_C('['):
-                TOKEN(TokenType::LeftBracket, CURRENT_POS, 1, CURRENT_LINE);
+                TOKEN(TokenType::LeftBracket, 1);
                 break;
             case _HM_C(']'):
-                TOKEN(TokenType::RightBracket, CURRENT_POS, 1, CURRENT_LINE);
+                TOKEN(TokenType::RightBracket, 1);
                 break;
             case _HM_C('{'):
-                TOKEN(TokenType::LeftBrace, CURRENT_POS, 1, CURRENT_LINE);
+                TOKEN(TokenType::LeftBrace, 1);
                 break;
             case _HM_C('}'):
-                TOKEN(TokenType::RightBrace, CURRENT_POS, 1, CURRENT_LINE);
+                TOKEN(TokenType::RightBrace, 1);
                 break;
             case _HM_C('.'):
-                TOKEN(TokenType::Dot, CURRENT_POS, 1, CURRENT_LINE);
+                TOKEN(TokenType::Dot, 1);
                 break;
             case _HM_C('!'):
                 if (NEXT_CHAR == _HM_C('=')) {
-                    TOKEN(TokenType::NotEqual, CURRENT_POS, 2, CURRENT_LINE);  // != not equal 不相等
+                    TOKEN(TokenType::NotEqual, 2);  // != not equal 不相等
                     NEXT();
                 } else {
-                    TOKEN(TokenType::Not, CURRENT_POS, 1, CURRENT_LINE);  // !
+                    TOKEN(TokenType::Not, 1);  // !
                 }
                 break;
             case _HM_C('+'):
                 if (NEXT_CHAR == _HM_C('+')) {
-                    TOKEN(TokenType::Increase, CURRENT_POS, 2, CURRENT_LINE); // ++
+                    TOKEN(TokenType::Increase, 2); // ++
                     NEXT();
                 } else if (NEXT_CHAR == _HM_C('=')) {
-                    TOKEN(TokenType::AddAssign, CURRENT_POS, 2, CURRENT_LINE); // +=
+                    TOKEN(TokenType::AddAssign, 2); // +=
                     NEXT();
                 } else {
-                    TOKEN(TokenType::Add, CURRENT_POS, 1, CURRENT_LINE); // +
+                    TOKEN(TokenType::Add, 1); // +
                 }
                 break;
             case _HM_C('='):
                 if (NEXT_CHAR == _HM_C('=')) {
-                    TOKEN(TokenType::Equal, CURRENT_POS, 2, CURRENT_LINE); // ==
+                    TOKEN(TokenType::Equal, 2); // ==
                     NEXT();
                 } else {
-                    TOKEN(TokenType::Assign, CURRENT_POS, 1, CURRENT_LINE); // =
+                    TOKEN(TokenType::Assign, 1); // =
                 }
                 break;
             case _HM_C('-'):
                 if (NEXT_CHAR == _HM_C('-')) { // --
-                    TOKEN(TokenType::Decrease, CURRENT_POS, 1, CURRENT_LINE); // 自减
+                    TOKEN(TokenType::Decrease, 1); // 自减
                     NEXT();
                 } else if (NEXT_CHAR == _HM_C('=')) { // -=
-                    TOKEN(TokenType::SubAssign, CURRENT_POS, 1, CURRENT_LINE);
+                    TOKEN(TokenType::SubAssign, 1);
                     NEXT();
                 } else if (NEXT_CHAR == _HM_C('>')) { // -> Arrow 箭头
-                    TOKEN(TokenType::Arrow, CURRENT_POS, 1, CURRENT_LINE);
+                    TOKEN(TokenType::Arrow, 1);
                     NEXT();
                 } else {
-                    TOKEN(TokenType::Sub, CURRENT_POS, 1, CURRENT_LINE); // -
+                    TOKEN(TokenType::Sub, 1); // -
                 }
                 break;
             case _HM_C('*'):
-                TOKEN(TokenType::Mul, CURRENT_POS, 1, CURRENT_LINE);
+                TOKEN(TokenType::Mul, 1);
                 break;
             case _HM_C(','):
-                TOKEN(TokenType::Comma, CURRENT_POS, 1, CURRENT_LINE);
+                TOKEN(TokenType::Comma, 1);
                 break;
             // 可能为注释 或者除号
             case _HM_C('/'):
@@ -245,12 +246,12 @@ namespace hypermind {
                     SkipComment();
                     return GetNextToken(); // 跳过之后继续读取一个token
                 } else {
-                    TOKEN(TokenType::Div, CURRENT_POS, 1, CURRENT_LINE);
+                    TOKEN(TokenType::Div, 1);
                 }
                 break;
             case _HM_C('\0'):
                 mEof = true;
-                TOKEN(TokenType::End, CURRENT_POS, 0, CURRENT_LINE);
+                TOKEN(TokenType::End, 0);
                 return;
             default:
                 if (IsCodeChar(CURRENT_CHAR)) {
@@ -273,7 +274,7 @@ namespace hypermind {
         do {
             NEXT();
         } while (CURRENT_CHAR == _HM_C('\n'));
-        CURRENT_LINE++;
+        NEXT_LINE();
     }
 
     void Lexer::SkipSpace() {
@@ -305,19 +306,20 @@ namespace hypermind {
 
     void Lexer::ParseNumber() {
         // TODO 浮点数的支持
-        TOKEN(TokenType::Number, CURRENT_POS, 0, CURRENT_LINE);
+        TOKEN(TokenType::Number, 0);
         do {
             NEXT();
         } while (IsNumber(CURRENT_CHAR) || CURRENT_CHAR == _HM_C('.'));
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
-        mCurrentToken.mValue.type = ValueType::Integer;
-        mCurrentToken.mValue.intval = (int) hm_strtoi(mCurrentToken.mStart);
+        mCurrentToken.value.type = ValueType::Integer;
+        mCurrentToken.value.intval = (int) hm_strtoi(mCurrentToken.start);
     }
+
     void Lexer::ParseString() {
         Buffer<HMChar> strbuf(mVM);
         HMChar first = CURRENT_CHAR;
         NEXT(); // 跳过 '   "  文本符
-        TOKEN(TokenType::String, CURRENT_POS, 0, CURRENT_LINE);
+        TOKEN(TokenType::String, 0);
         do {
             if (CURRENT_CHAR == _HM_C('\\')) { // 跳过转义符
                 NEXT();
@@ -365,13 +367,13 @@ namespace hypermind {
     }
 
     void Lexer::ParseIdentifier() {
-        TOKEN(TokenType::Identifier, CURRENT_POS, 0, CURRENT_LINE);
+        TOKEN(TokenType::Identifier, 0);
         do {
             NEXT();
         } while (IsCodeChar(CURRENT_CHAR) || IsNumber(CURRENT_CHAR));
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
         HMChar identifierBuffer[MAX_IDENTIFIER_LENTH] = {_HM_C('\0')};
-        hm_memcpy(identifierBuffer, mCurrentToken.mStart, mCurrentToken.mLength);
+        hm_memcpy(identifierBuffer, mCurrentToken.start, mCurrentToken.length);
         TokenType tok = HMKeywords[identifierBuffer];
         if (tok != TokenType::End) {
             TOKEN_TYPE(tok);
@@ -397,7 +399,7 @@ namespace hypermind {
 
     TokenType Lexer::ReadTokenType() {
         GetNextToken();
-        return CURRENT_TOKEN.mType;
+        return CURRENT_TOKEN.type;
     }
 
     TokenType Lexer::PeekTokenType() {
@@ -405,7 +407,7 @@ namespace hypermind {
             GetNextToken();
             mTokens.push_back(mCurrentToken);
         }
-        return mTokens[0].mType;
+        return mTokens[0].type;
     }
 
     void Lexer::Consume() {
@@ -415,10 +417,10 @@ namespace hypermind {
             GetNextToken();
     }
 
-    Token::Token(TokenType mType, const HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine) : mType(mType),
-                                                                                            mStart(mStart),
-                                                                                            mLength(mLength),
-                                                                                            mLine(mLine) {
+    Token::Token(TokenType mType, const HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine) : type(mType),
+                                                                                            start(mStart),
+                                                                                            length(mLength),
+                                                                                            line(mLine) {
 
     }
 

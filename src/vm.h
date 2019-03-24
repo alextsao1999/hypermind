@@ -71,6 +71,8 @@ namespace hypermind {
             return new(MemManger(nullptr, 0, sizeof(T))) T(this, std::forward<Args>(args)...);
         }
 
+
+
     protected:
         // 已经分配的字节数
         HMUINT32 mAllocatedBytes{0};

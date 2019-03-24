@@ -11,7 +11,8 @@
 #include "opcode.h"
 
 // 操作栈改变 影响栈的深度
-#define STACK_CHANGE(num) {mStackSlotNum += num;}
+#define STACK_CHANGE(num) {mStackSlotNum += num;\
+if (mStackSlotNum > mFn->maxStackSlotNum) mFn->maxStackSlotNum = mStackSlotNum;}
 
 #define VT_TO_VALUE(VT) {VT, 0}
 #define OBJ_TO_VALUE(obj) ({ \
@@ -81,6 +82,7 @@ namespace hypermind {
 
     class CompileUnit {
         friend Compiler;
+        friend ASTFunctionStmt;
     protected:
         // 所属虚拟机
         VM *mVM{nullptr};
@@ -88,7 +90,6 @@ namespace hypermind {
         HMInteger mScopeDepth{-1};
 
         Upvalue mUpvalues[MAX_UPVALUE_NUMBER];
-        HMUINT32 mUpvalueNumber{0}; // Upvalue 个数
 
         LocalVariable mLocalVariables[MAX_LOCAL_VAR_NUMBER];
         HMUINT32 mLocalVarNumber{0}; // 局部变量个数
@@ -110,7 +111,7 @@ namespace hypermind {
          * @param id
          * @return 返回索引
          */
-        HMInteger DeclareLocalVariable(const Token &id) {
+        HMInteger AddLocalVariable(const Token &id) {
             HMInteger idx = FindLocal(id);
             // 此时变量已经存在了 返回存在的索引
             if (idx != -1)
@@ -118,8 +119,8 @@ namespace hypermind {
             if (mLocalVarNumber >= MAX_LOCAL_VAR_NUMBER) {
                 // TODO 错误 变量数目大于最大局部变量
             }
-            mLocalVariables[mLocalVarNumber].name = id.mStart;
-            mLocalVariables[mLocalVarNumber].length = id.mLength;
+            mLocalVariables[mLocalVarNumber].name = id.start;
+            mLocalVariables[mLocalVarNumber].length = id.length;
             mLocalVariables[mLocalVarNumber].scopeDepth = mScopeDepth;
             mLocalVariables[mLocalVarNumber].isUpvalue = false;
             return mLocalVarNumber++;
@@ -129,11 +130,11 @@ namespace hypermind {
          * 根据作用域声明变量/参数
          * @return
          */
-        HMInteger DeclareVariable(const Token &id) {
+        HMInteger AddVariable(const Token &id) {
             if (mScopeDepth == -1) {
                 // TODO 模块变量
             }
-            return DeclareLocalVariable(id);
+            return AddLocalVariable(id);
         }
 
         /**
@@ -154,8 +155,8 @@ namespace hypermind {
          */
         HMInteger FindLocal(const Token &id) {
             for (HMUINT32 i = 0; i < mLocalVarNumber; ++i) {
-                if (id.mLength == mLocalVariables[i].length &&
-                    hm_memcmp(mLocalVariables[i].name, id.mStart, id.mLength) == 0) {
+                if (id.length == mLocalVariables[i].length &&
+                    hm_memcmp(mLocalVariables[i].name, id.start, id.length) == 0) {
                     return i;
                 }
             }
@@ -200,15 +201,15 @@ namespace hypermind {
          */
         HMInteger AddUpvalue(bool isDirectOuterLocalVar, HMInteger index) {
             // 如果存在就返回索引
-            for (HMInteger i = 0; i < mUpvalueNumber; ++i) {
+            for (HMInteger i = 0; i < mFn->upvalueNum; ++i) {
                 if (mUpvalues[i].index == index && mUpvalues[i].isDirectOuterLocalVar == isDirectOuterLocalVar) {
                     return i;
                 }
             }
             // 不存在就添加
-            mUpvalues[mUpvalueNumber].index = index;
-            mUpvalues[mUpvalueNumber].isDirectOuterLocalVar = isDirectOuterLocalVar;
-            return mUpvalueNumber++;
+            mUpvalues[mFn->upvalueNum].index = index;
+            mUpvalues[mFn->upvalueNum].isDirectOuterLocalVar = isDirectOuterLocalVar;
+            return mFn->upvalueNum++;
         };
 
         HMInteger FindUpvalue(const Token &id) {
@@ -298,7 +299,7 @@ namespace hypermind {
         void EmitCall(HMUINT32 methodIndex, HMUINT32 argNum) {
             STACK_CHANGE(argNum);
             if (argNum <= 7)
-                mFn->WriteOpcode(static_cast<HMByte>((HMByte) Opcode::Call + argNum));
+                mFn->WriteByte(static_cast<HMByte>((HMByte) Opcode::Call + argNum));
             else {
                 mFn->WriteOpcode(Opcode::Call);
                 mFn->WriteShortOperand(methodIndex); // 方法索引
@@ -387,6 +388,10 @@ namespace hypermind {
             mFn->WriteShortOperand(index);
         }
 
+        void EmitEnd() {
+            mFn->WriteOpcode(Opcode::End);
+        }
+
     };
 
     class Compiler {
@@ -409,6 +414,8 @@ namespace hypermind {
 #else
         CompileUnit CreateCompileUnit();
 #endif
+
+        void LeaveCompileUnit(const CompileUnit &cu);
 
     };
 

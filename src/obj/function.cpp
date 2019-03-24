@@ -22,37 +22,31 @@ namespace hypermind {
         return false;
     }
     HM_OBJ_DUMP(Function) {
-        os << _HM_C(" { HMFunction(" << sizeof(HMFunction) << ") " << static_cast<const void *>(this) << "  name : ") << debug->name << _HM_C("  opcode : { ");
-        for (int i = 0; i < instructions.GetCount(); ++i) {
-            if (i == 0) {
-                os <<(int) instructions[i];
-            } else {
-                os << _HM_C(", ") << (int) instructions[i];
-            }
-        }
-        os << _HM_C(" }") << std::endl << _HM_C("   opcode dump : ") << std::endl;
+        os << _HM_C(" { HMFunction(" << sizeof(HMFunction) << ") " << static_cast<const void *>(this)
+        << "  name : ") << debug->name;
+        os << std::endl << _HM_C("   opcode dump : ") << std::endl;
         DumpAllInstructions(os);
         os << " } ";
     }
 
     void HMFunction::WriteOpcode(Opcode opcode) {
-        instructions.Append((HMByte) opcode);
+        WriteByte((HMByte) opcode);
     }
 
-    void HMFunction::WriteOpcode(HMByte opcode) {
-        instructions.Append(opcode);
+    void HMFunction::WriteByte(HMByte byte) {
+        instructions.Append(byte);
     }
 
     void HMFunction::WriteShortOperand(int operand) {
-        instructions.Append(static_cast<HMByte>(operand & 0xff)); // 写入 低8位
-        instructions.Append(static_cast<HMByte>((operand >> 8) & 0xff)); // 写入 高8位
+        WriteByte(static_cast<HMByte>(operand & 0xff)); // 写入 低8位
+        WriteByte(static_cast<HMByte>((operand >> 8) & 0xff)); // 写入 高8位
     }
 
     void HMFunction::WriteIntOperand(int operand) {
-        instructions.Append(static_cast<HMByte>(operand & 0xff)); // 写入 0~7位
-        instructions.Append(static_cast<HMByte>((operand >> 8) & 0xff)); // 写入 8~15
-        instructions.Append(static_cast<HMByte>((operand >> 16) & 0xff)); // 写入 16~24
-        instructions.Append(static_cast<HMByte>((operand >> 24) & 0xff)); // 写入 25~32
+        WriteByte(static_cast<HMByte>(operand & 0xff)); // 写入 0~7位
+        WriteByte(static_cast<HMByte>((operand >> 8) & 0xff)); // 写入 8~15
+        WriteByte(static_cast<HMByte>((operand >> 16) & 0xff)); // 写入 16~24
+        WriteByte(static_cast<HMByte>((operand >> 24) & 0xff)); // 写入 25~32
     }
 
     void HMFunction::DumpInstruction(int i) {

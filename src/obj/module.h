@@ -15,13 +15,13 @@
 namespace hypermind {
     // 模块对象
     HM_OBJECT(Module) {
-        HMString *mModuleName;
+        HMString *moduleName;
 
-        Buffer<Value> mModuleVariables;
+        Buffer<Value> variables;
 #ifdef HMDebug
-        Vector<String> mModuleVarNames;
+        Vector<String> varNames;
 #endif
-        HM_OBJ_CONSTRUTOR_CLASS(Module, nullptr, HMString *name), mModuleName(name), mModuleVariables(Buffer<Value>(vm)) {
+        HM_OBJ_CONSTRUTOR_CLASS(Module, nullptr, HMString *name), moduleName(name), variables(Buffer<Value>(vm)) {
 
         }
 

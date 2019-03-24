@@ -24,9 +24,12 @@
 #define AST_DECL() void compile(Compiler *compiler, bool isAssign);void dump(Ostream &os);
 #define AST_DUMP(n) void n::dump(Ostream &os)
 #define AST_COMPILE(n) void n::compile(Compiler *compiler, bool isAssign)
+#define AST_POSTION() os << _HM_C("  line :   ") << line << std::endl;
 namespace hypermind {
     class Compiler;
     struct ASTNode {
+        HMUINT32 line{0};
+        HMUINT32 column{0};
         virtual void dump(Ostream &os){};
         virtual void compile(Compiler *compiler, bool isAssign){};
     };
@@ -39,13 +42,13 @@ namespace hypermind {
 
     // AST列表
     AST_NODE(ASTList, ASTListPtr) {
+//        AST_CONSTRUCTOR(ASTList);
         std::vector<ASTNodePtr> elements;
         AST_DECL();
     };
 
     // 表达式Node
     AST_STMT(ASTExpr, ASTExprPtr) {
-
     };
 
     // 语法块Node
@@ -60,39 +63,38 @@ namespace hypermind {
 
     // 表达式中的变量
     AST_EXPR(ASTVariable, ASTVariablePtr){
-        Token mVar;
-        ASTListPtr mPostfix;
+        Token var;
+        ASTListPtr postfix;
         AST_DECL();
     };
 
     // 值的字面量
     AST_EXPR(ASTLiteral, ASTLiteralPtr){
-        Value mValue{};
+        Value value{};
         AST_DECL();
     };
 
     // 二元表达式
     AST_EXPR(ASTBinary, ASTBinaryPtr) {
-        Token mOp;
-        ASTExprPtr mLHS; // 产生式左边
-        ASTExprPtr mRHS; // 产生式右边
-        // ASTBinary(const Token &op, const ASTExprPtr &mLHS, const ASTExprPtr &mRHS);
+        Token op;
+        ASTExprPtr lhs; // 产生式左边
+        ASTExprPtr rhs; // 产生式右边
         AST_DECL();
     };
 
     // If 语句
     AST_STMT(ASTIfStmt, ASTIfStmtPtr) {
-        ASTExprPtr mCondition; // 条件
+        ASTExprPtr condition; // 条件
         // Block or Expr
-        ASTNodePtr mThen;
-        ASTNodePtr mElse;
+        ASTNodePtr thenBlock;
+        ASTNodePtr elseBlock;
         AST_DECL();
     };
 
     // while 语句
     AST_STMT(ASTWhileStmt, ASTWhileStmtPtr) {
-        ASTExprPtr mCondition;
-        ASTNodePtr mBlock;
+        ASTExprPtr condition;
+        ASTNodePtr block;
         AST_DECL();
     };
 
@@ -109,36 +111,36 @@ namespace hypermind {
     // return 语句
     AST_STMT(ASTReturnStmt, ASTReturnStmtPtr) {
         // 返回值
-        ASTExprPtr mRetval;
+        ASTExprPtr retvalue;
         AST_DECL();
     };
 
     // 变量声明语句
     AST_STMT(ASTVarStmt, ASTVarStmtPtr) {
-        Token mIdentifier;
-        ASTExprPtr mValue; // 初始值表达式
+        Token identifier;
+        ASTExprPtr value; // 初始值表达式
         AST_DECL();
     };
 
     // 参数声明语句
     AST_STMT(ASTParamStmt, ASTParamStmtPtr) {
-        Token mIdentifier;
-        ASTExprPtr mValue; // 初始值表达式
+        Token identifier;
+        ASTExprPtr value; // 初始值表达式
         AST_DECL();
     };
 
     // AST函数声明
     AST_STMT(ASTFunctionStmt, ASTFunctionStmtPtr) {
-        Token mName; // 函数名称
-        ASTNodePtr mParams; // 形式参数
-        ASTBlockPtr mBody; // 函数体
+        Token name; // 函数名称
+        ASTNodePtr params; // 形式参数
+        ASTBlockPtr body; // 函数体
         AST_DECL();
     };
 
     // AST类声明
     AST_STMT(ASTClassStmt, ASTClassStmtPtr) {
-        Token mName; // 类名称
-        ASTListPtr mClassBody;
+        Token name; // 类名称
+        ASTListPtr classBody;
 
         AST_DECL();
     };
@@ -149,6 +151,7 @@ namespace hypermind {
     };
 
     AST_NODE(ASTDotPostfix, ASTDotPostfixPtr) {
+
         AST_DECL();
     };
 
