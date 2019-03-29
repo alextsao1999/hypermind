@@ -15,7 +15,7 @@ namespace hypermind {
         HMHash hashCode;
         HMUINT32 length;
         HMChar *charSequence;
-        HM_OBJ_CONSTRUTOR(String, const HMChar *str, HMUINT32 len), length(len) {
+        HM_OBJ_CONSTRUCTOR(String, const HMChar *str, HMUINT32 len), length(len) {
             // 计算文本hash
             charSequence = vm->Allocate<HMChar>(length);
             if (charSequence != nullptr) {

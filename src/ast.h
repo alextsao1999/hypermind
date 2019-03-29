@@ -42,7 +42,6 @@ namespace hypermind {
 
     // AST列表
     AST_NODE(ASTList, ASTListPtr) {
-//        AST_CONSTRUCTOR(ASTList);
         std::vector<ASTNodePtr> elements;
         AST_DECL();
     };

@@ -29,26 +29,6 @@ namespace hypermind {
         os << " } ";
     }
 
-    void HMFunction::WriteOpcode(Opcode opcode) {
-        WriteByte((HMByte) opcode);
-    }
-
-    void HMFunction::WriteByte(HMByte byte) {
-        instructions.Append(byte);
-    }
-
-    void HMFunction::WriteShortOperand(int operand) {
-        WriteByte(static_cast<HMByte>(operand & 0xff)); // 写入 低8位
-        WriteByte(static_cast<HMByte>((operand >> 8) & 0xff)); // 写入 高8位
-    }
-
-    void HMFunction::WriteIntOperand(int operand) {
-        WriteByte(static_cast<HMByte>(operand & 0xff)); // 写入 0~7位
-        WriteByte(static_cast<HMByte>((operand >> 8) & 0xff)); // 写入 8~15
-        WriteByte(static_cast<HMByte>((operand >> 16) & 0xff)); // 写入 16~24
-        WriteByte(static_cast<HMByte>((operand >> 24) & 0xff)); // 写入 25~32
-    }
-
     void HMFunction::DumpInstruction(int i) {
         HMByte *code = instructions.GetBuffer();
         String str;

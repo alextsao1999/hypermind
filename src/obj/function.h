@@ -29,31 +29,12 @@ namespace hypermind {
 #ifdef HMDebug
         FunctionDebug *debug{nullptr};
 #endif
-        HM_OBJ_CONSTRUTOR(Function, HMModule *module), constants(Buffer<Value>(vm)), instructions(Buffer<HMByte>(vm)),
+        HM_OBJ_CONSTRUCTOR(Function, HMModule *module), constants(Buffer<Value>(vm)), instructions(Buffer<HMByte>(vm)),
                                                        module(module) {
 
         };
 
         HM_OBJ_DECL();
-
-        /**
-         * 写入操作码
-         * @param opcode
-         */
-        void WriteOpcode(Opcode opcode);
-        inline void WriteByte(HMByte byte);
-
-        /**
-         * 写入 short 操作数 小端字节序
-         * @param operand
-         */
-        void WriteShortOperand(int operand);
-
-        /**
-         * 写入 Int 操作数 小端字节序
-         * @param operand
-         */
-        void WriteIntOperand(int operand);
 
         void DumpInstruction(int start);
 

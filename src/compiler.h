@@ -58,28 +58,6 @@ namespace hypermind {
         bool isUpvalue;
     };
 
-    // 方法签名
-    struct MethodSignature {
-        enum class SignatureType {
-            Method,
-            Getter,
-            Setter,
-            Subscript,
-            SubscriptSetter
-        };
-        MethodSignature(SignatureType type, const HMChar *name, HMUINT32 length, HMInteger argNum) : type(type),
-                                                                                                     name(name), length(length), argNum(argNum) {
-
-        };
-        MethodSignature() = default;
-
-        SignatureType type;
-        const HMChar *name;
-        HMUINT32 length;
-        HMInteger argNum;
-
-    };
-
     class CompileUnit {
         friend Compiler;
         friend ASTFunctionStmt;
@@ -98,7 +76,7 @@ namespace hypermind {
         HMUINT32 mStackSlotNum{0};
 
     public:
-        explicit CompileUnit(VM *mVm);
+        explicit CompileUnit(VM *mVm) : mVM(mVm) {};
 
         // 当前正在编译的函数
         HMFunction *mFn;
@@ -106,16 +84,50 @@ namespace hypermind {
         // 外层编译单元
         CompileUnit *mOuter{nullptr};
 
+#ifdef HMDebug
+        HMUINT32 mLine;
+        HMUINT32 mColumn;
+#endif
+
+        /**
+         * 写入操作码
+         * @param opcode
+         */
+        void WriteOpcode(Opcode opcode) {
+            WriteByte((HMByte) opcode);
+        };
+
+        inline void WriteByte(HMByte byte) {
+            mFn->instructions.Append(byte);
+        };
+
+        /**
+         * 写入 short 操作数 小端字节序
+         * @param operand
+         */
+        void WriteShortOperand(int operand) {
+            WriteByte(static_cast<HMByte>(operand & 0xff)); // 写入 低8位
+            WriteByte(static_cast<HMByte>((operand >> 8) & 0xff)); // 写入 高8位
+        };
+
+        /**
+         * 写入 Int 操作数 小端字节序
+         * @param operand
+         */
+        void WriteIntOperand(int operand) {
+            WriteByte(static_cast<HMByte>(operand & 0xff)); // 写入 0~7位
+            WriteByte(static_cast<HMByte>((operand >> 8) & 0xff)); // 写入 8~15
+            WriteByte(static_cast<HMByte>((operand >> 16) & 0xff)); // 写入 16~24
+            WriteByte(static_cast<HMByte>((operand >> 24) & 0xff)); // 写入 25~32
+        };
+
+
         /**
          * 当前作用域声明局部变量 存在返回索引 不存在添加后返回索引
          * @param id
          * @return 返回索引
          */
         HMInteger AddLocalVariable(const Token &id) {
-            HMInteger idx = FindLocal(id);
-            // 此时变量已经存在了 返回存在的索引
-            if (idx != -1)
-                return idx;
             if (mLocalVarNumber >= MAX_LOCAL_VAR_NUMBER) {
                 // TODO 错误 变量数目大于最大局部变量
             }
@@ -268,12 +280,17 @@ namespace hypermind {
             return mFn->constants.Append(value);
         };
 
+        void EmitPop() {
+            STACK_CHANGE(-1);
+
+        }
+
         /**
          * 操作栈中压入Null
          */
         void EmitPushNull() {
             STACK_CHANGE(1);
-            mFn->WriteOpcode(Opcode::PushNull);
+            WriteOpcode(Opcode::PushNull);
         };
 
         /**
@@ -281,7 +298,7 @@ namespace hypermind {
          */
         void EmitPushTrue() {
             STACK_CHANGE(1);
-            mFn->WriteOpcode(Opcode::PushTrue);
+            WriteOpcode(Opcode::PushTrue);
         };
 
         /**
@@ -289,7 +306,7 @@ namespace hypermind {
          */
         void EmitPushFalse() {
             STACK_CHANGE(1);
-            mFn->WriteOpcode(Opcode::PushFalse);
+            WriteOpcode(Opcode::PushFalse);
         };
 
         /**
@@ -299,11 +316,11 @@ namespace hypermind {
         void EmitCall(HMUINT32 methodIndex, HMUINT32 argNum) {
             STACK_CHANGE(argNum);
             if (argNum <= 7)
-                mFn->WriteByte(static_cast<HMByte>((HMByte) Opcode::Call + argNum));
+                WriteByte(static_cast<HMByte>((HMByte) Opcode::Call + argNum));
             else {
-                mFn->WriteOpcode(Opcode::Call);
-                mFn->WriteShortOperand(methodIndex); // 方法索引
-                mFn->WriteShortOperand(argNum); // 实参数量
+                WriteOpcode(Opcode::Call);
+                WriteShortOperand(methodIndex); // 方法索引
+                WriteShortOperand(argNum); // 实参数量
             }
         }
 
@@ -315,19 +332,19 @@ namespace hypermind {
             STACK_CHANGE(1);
             switch (var.scopeType) {
                 case ScopeType::Module:
-                    mFn->WriteOpcode(Opcode::LoadModuleVariable);
+                    WriteOpcode(Opcode::LoadModuleVariable);
                     break;
                 case ScopeType::Local:
-                    mFn->WriteOpcode(Opcode::LoadLocalVariable);
+                    WriteOpcode(Opcode::LoadLocalVariable);
                     break;
                 case ScopeType::Upvalue:
-                    mFn->WriteOpcode(Opcode::LoadUpvalue);
+                    WriteOpcode(Opcode::LoadUpvalue);
                     break;
                 case ScopeType::Invalid:
                     // FIXME
                     break;
             }
-            mFn->WriteShortOperand(var.index);
+            WriteShortOperand(var.index);
         };
 
         /**
@@ -335,22 +352,21 @@ namespace hypermind {
          * @param var
          */
         void EmitStoreVariable(const Variable &var) {
-            STACK_CHANGE(-1);
             switch (var.scopeType) {
                 case ScopeType::Module:
-                    mFn->WriteOpcode(Opcode::StoreModuleVariable);
+                    WriteOpcode(Opcode::StoreModuleVariable);
                     break;
                 case ScopeType::Local:
-                    mFn->WriteOpcode(Opcode::StoreLocalVariable);
+                    WriteOpcode(Opcode::StoreLocalVariable);
                     break;
                 case ScopeType::Upvalue:
-                    mFn->WriteOpcode(Opcode::StoreUpvalue);
+                    WriteOpcode(Opcode::StoreUpvalue);
                     break;
                 case ScopeType::Invalid:
                     // FIXME
                     break;
             }
-            mFn->WriteShortOperand(var.index);
+            WriteShortOperand(var.index);
         }
 
         /**
@@ -359,37 +375,37 @@ namespace hypermind {
          */
         void EmitLoadConstant(HMInteger index) {
             STACK_CHANGE(1);
-            mFn->WriteOpcode(Opcode::LoadConstant);
-            mFn->WriteShortOperand(index);
+            WriteOpcode(Opcode::LoadConstant);
+            WriteShortOperand(index);
         }
 
         void EmitAdd() {
             STACK_CHANGE(-1);
-            mFn->WriteOpcode(Opcode::Add);
+            WriteOpcode(Opcode::Add);
         }
 
         void EmitSub() {
             STACK_CHANGE(-1);
-            mFn->WriteOpcode(Opcode::Sub);
+            WriteOpcode(Opcode::Sub);
         }
 
         void EmitDiv() {
             STACK_CHANGE(-1);
-            mFn->WriteOpcode(Opcode::Div);
+            WriteOpcode(Opcode::Div);
         }
 
         void EmitMul() {
             STACK_CHANGE(-1);
-            mFn->WriteOpcode(Opcode::Mul);
+            WriteOpcode(Opcode::Mul);
         }
 
         void EmitCreateClosure(HMInteger index) {
-            mFn->WriteOpcode(Opcode::CreateClosure);
-            mFn->WriteShortOperand(index);
+            WriteOpcode(Opcode::CreateClosure);
+            WriteShortOperand(index);
         }
 
         void EmitEnd() {
-            mFn->WriteOpcode(Opcode::End);
+            WriteOpcode(Opcode::End);
         }
 
     };
@@ -407,15 +423,27 @@ namespace hypermind {
         // 当前正在编译的函数
         CompileUnit *mCurCompileUnit;
 
-        explicit Compiler(VM *mVM);
+        explicit Compiler(VM *mVM) : mVM(mVM) {};
 
 #ifdef HMDebug
-        CompileUnit CreateCompileUnit(FunctionDebug *debug);
+        CompileUnit CreateCompileUnit(FunctionDebug *debug) {
+            CompileUnit cu(mVM);
+            cu.mFn = mVM->NewObject<HMFunction>(mCurModule);
+            cu.mFn->debug = debug;
+            cu.mOuter = mCurCompileUnit;
+            return cu;
+        }
 #else
-        CompileUnit CreateCompileUnit();
+        CompileUnit CreateCompileUnit() {
+        CompileUnit cu(mVM);
+        cu.mFn = mVM->NewObject<HMFunction>(mCurModule);
+        cu.mOuter = mCurCompileUnit;
+        return cu;
+    }
 #endif
-
-        void LeaveCompileUnit(const CompileUnit &cu);
+        void LeaveCompileUnit(const CompileUnit &cu) {
+            mCurCompileUnit = cu.mOuter;
+        };
 
     };
 

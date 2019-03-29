@@ -18,10 +18,10 @@ HMBool free(VM *vm) override;
 #define HM_OBJ_HASH(obj)  HMHash HM##obj::hash()
 #define HM_OBJ_DUMP(obj)  void HM##obj::dump(Ostream &os)
 #define HM_OBJ_FREE(obj)  HMBool HM##obj::free(VM *vm)
-#define HM_OBJ_CONSTRUTOR(obj, args...)  \
+#define HM_OBJ_CONSTRUCTOR(obj, args...)  \
 explicit HM##obj(VM *vm, ##args) : HMObject(vm, ObjectType::obj,vm->m##obj##Class)
 
-#define HM_OBJ_CONSTRUTOR_CLASS(obj, claz, args...)  \
+#define HM_OBJ_CONSTRUCTOR_CLASS(obj, claz, args...)  \
 explicit HM##obj(VM *vm, ##args) : HMObject(vm, ObjectType::obj, claz)
 
 namespace hypermind {

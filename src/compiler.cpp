@@ -4,16 +4,18 @@
 
 #include "compiler.h"
 
+#define AST_ENTER()
 namespace hypermind {
     // 编译语法块
     AST_COMPILE(ASTBlock) {
+        AST_ENTER();
         for (auto &stmt : stmts)
             stmt->compile(compiler, false);
     }
 
     // 编译二元表达式
     AST_COMPILE(ASTBinary) {
-
+        AST_ENTER();
         // Σ(っ °Д °;)っ 这是个异类
         if (op.type == TokenType::Assign) {
             rhs->compile(compiler, false);
@@ -100,6 +102,7 @@ namespace hypermind {
 
     // 编译字面量
     AST_COMPILE(ASTLiteral) {
+        AST_ENTER();
         switch (value.type) {
             case ValueType::Undefined:
                 break;
@@ -123,6 +126,7 @@ namespace hypermind {
 
     // 编译变量
     AST_COMPILE(ASTVariable) {
+        AST_ENTER();
         Variable variable = compiler->mCurCompileUnit->FindVariable(var);
         if (isAssign)
             compiler->mCurCompileUnit->EmitStoreVariable(variable);
@@ -132,31 +136,33 @@ namespace hypermind {
 
     // 编译IF
     AST_COMPILE(ASTIfStmt) {
+        AST_ENTER();
 
     }
 
     // 编译While
     AST_COMPILE(ASTWhileStmt) {
-
+        AST_ENTER();
     }
 
     // 编译Continue
     AST_COMPILE(ASTContinueStmt) {
-
+        AST_ENTER();
     }
 
     // 编译Break
     AST_COMPILE(ASTBreakStmt) {
-
+        AST_ENTER();
     }
 
     // 编译Return
     AST_COMPILE(ASTReturnStmt) {
-
+        AST_ENTER();
     }
 
     // 编译List
     AST_COMPILE(ASTList) {
+        AST_ENTER();
         for (auto &element : elements)
             element->compile(compiler, false);
     }
@@ -167,6 +173,7 @@ namespace hypermind {
      * @param cu
      */
     AST_COMPILE(ASTVarStmt) {
+        AST_ENTER();
         if (value == nullptr) {
             compiler->mCurCompileUnit->EmitPushNull();
         } else {
@@ -179,12 +186,14 @@ namespace hypermind {
     }
 
     AST_COMPILE(ASTParamStmt) {
+        AST_ENTER();
         // 声明参数
         compiler->mCurCompileUnit->AddVariable(identifier);
     }
 
     // 编译函数
     AST_COMPILE(ASTFunctionStmt) {
+        AST_ENTER();
         // 创建编译单元
 #ifdef HMDebug
         //  附上调试信息
@@ -199,6 +208,7 @@ namespace hypermind {
             // 进入作用域
             cu.EnterScope(); // 直接就编译了 不需要离开作用域
         }
+        cu.mFn->maxStackSlotNum = cu.mStackSlotNum;
 
         params->compile(compiler, false); // 编译参数声明
         body->compile(compiler, false); // 编译函数实体
@@ -213,33 +223,8 @@ namespace hypermind {
 
     // 编译类
     AST_COMPILE(ASTClassStmt) {
+        AST_ENTER();
 
-    }
-
-    CompileUnit::CompileUnit(VM *mVm) : mVM(mVm) {
-    }
-
-    Compiler::Compiler(VM *mVM) : mVM(mVM) {
-    }
-
-#ifdef HMDebug
-    CompileUnit Compiler::CreateCompileUnit(FunctionDebug *debug) {
-        CompileUnit cu(mVM);
-        cu.mFn = mVM->NewObject<HMFunction>(mCurModule);
-        cu.mFn->debug = debug;
-        cu.mOuter = mCurCompileUnit;
-        return cu;
-    }
-#else
-    CompileUnit Compiler::CreateCompileUnit() {
-        CompileUnit cu(mVM);
-        cu.mFn = mVM->NewObject<HMFunction>(mCurModule);
-        cu.mOuter = mCurCompileUnit;
-        return cu;
-    }
-#endif
-    void Compiler::LeaveCompileUnit(const CompileUnit &cu) {
-        mCurCompileUnit = cu.mOuter;
     }
 
 

@@ -7,7 +7,6 @@
 namespace hypermind {
     // 语法块Dump
     AST_DUMP(ASTBlock) {
-        AST_POSTION();
         os << _HM_C("  {  ") << std::endl;
         for (auto &stmt : stmts) {
             os << _HM_C("    ");

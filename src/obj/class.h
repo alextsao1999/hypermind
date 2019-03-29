@@ -22,14 +22,12 @@ namespace hypermind {
     };
 
     // Method对象
-    HM_OBJECT(Method) {
+    struct HMMethod {
         MethodType type;
         union {
             HMClosure *fn{};  // 方法引用的函数闭包
             HMPrimitive *pfn; // 指向原生方法
         };
-        HM_OBJ_DECL();
-        HMMethod(VM *vm, MethodType methodType, HMClosure *fn);
     };
 
     // 类对象
