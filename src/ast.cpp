@@ -19,6 +19,8 @@ namespace hypermind {
 
     // 二元表达式Dump
     AST_DUMP(ASTBinary) {
+        os << _HM_C(" line< ") << line << _HM_C("> ");
+
         os << _HM_C(" { (binary)  ");
         lhs->dump(os);
         DumpTokenType(os, op);

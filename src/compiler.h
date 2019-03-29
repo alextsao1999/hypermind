@@ -14,14 +14,6 @@
 #define STACK_CHANGE(num) {mStackSlotNum += num;\
 if (mStackSlotNum > mFn->maxStackSlotNum) mFn->maxStackSlotNum = mStackSlotNum;}
 
-#define VT_TO_VALUE(VT) {VT, 0}
-#define OBJ_TO_VALUE(obj) ({ \
-   Value value; \
-   value.type = ValueType::Object; \
-   value.objval = obj; \
-   value; \
-})
-
 namespace hypermind {
     class VM;
 
@@ -67,9 +59,9 @@ namespace hypermind {
         // 作用域深度
         HMInteger mScopeDepth{-1};
 
-        Upvalue mUpvalues[MAX_UPVALUE_NUMBER];
+        Upvalue mUpvalues[MAX_UPVALUE_NUMBER]{};
 
-        LocalVariable mLocalVariables[MAX_LOCAL_VAR_NUMBER];
+        LocalVariable mLocalVariables[MAX_LOCAL_VAR_NUMBER]{};
         HMUINT32 mLocalVarNumber{0}; // 局部变量个数
 
         // 最大操作栈数量
@@ -79,16 +71,23 @@ namespace hypermind {
         explicit CompileUnit(VM *mVm) : mVM(mVm) {};
 
         // 当前正在编译的函数
-        HMFunction *mFn;
+        HMFunction *mFn{nullptr};
 
         // 外层编译单元
         CompileUnit *mOuter{nullptr};
 
 #ifdef HMDebug
-        HMUINT32 mLine;
-        HMUINT32 mColumn;
+        HMUINT32 mLine{0};
+        HMUINT32 mColumn{0};
 #endif
 
+        inline void WriteByte(HMByte byte) {
+            mFn->instructions.Append(byte);
+#ifdef HMDebug
+            mFn->debug->line.push_back(mLine);
+#endif
+
+        };
         /**
          * 写入操作码
          * @param opcode
@@ -96,11 +95,6 @@ namespace hypermind {
         void WriteOpcode(Opcode opcode) {
             WriteByte((HMByte) opcode);
         };
-
-        inline void WriteByte(HMByte byte) {
-            mFn->instructions.Append(byte);
-        };
-
         /**
          * 写入 short 操作数 小端字节序
          * @param operand
@@ -109,7 +103,6 @@ namespace hypermind {
             WriteByte(static_cast<HMByte>(operand & 0xff)); // 写入 低8位
             WriteByte(static_cast<HMByte>((operand >> 8) & 0xff)); // 写入 高8位
         };
-
         /**
          * 写入 Int 操作数 小端字节序
          * @param operand
@@ -120,7 +113,6 @@ namespace hypermind {
             WriteByte(static_cast<HMByte>((operand >> 16) & 0xff)); // 写入 16~24
             WriteByte(static_cast<HMByte>((operand >> 24) & 0xff)); // 写入 25~32
         };
-
 
         /**
          * 当前作用域声明局部变量 存在返回索引 不存在添加后返回索引
@@ -156,6 +148,8 @@ namespace hypermind {
         void DefineVariable(HMInteger index) {
             if (mScopeDepth == -1) {
                 // 作用域为模块作用域
+                EmitStoreVariable(Variable(ScopeType::Module, index));
+                EmitPop();
             }
             // 不是模块作用域 不用管
         }
@@ -267,6 +261,7 @@ namespace hypermind {
          */
         void DiscardLocalVariable() {
 
+
         }
 
         /**
@@ -282,28 +277,16 @@ namespace hypermind {
 
         void EmitPop() {
             STACK_CHANGE(-1);
-
+            WriteOpcode(Opcode::Pop);
         }
-
-        /**
-         * 操作栈中压入Null
-         */
         void EmitPushNull() {
             STACK_CHANGE(1);
             WriteOpcode(Opcode::PushNull);
         };
-
-        /**
-         * 栈中压入True
-         */
         void EmitPushTrue() {
             STACK_CHANGE(1);
             WriteOpcode(Opcode::PushTrue);
         };
-
-        /**
-         * 栈中压入False
-         */
         void EmitPushFalse() {
             STACK_CHANGE(1);
             WriteOpcode(Opcode::PushFalse);
@@ -383,17 +366,14 @@ namespace hypermind {
             STACK_CHANGE(-1);
             WriteOpcode(Opcode::Add);
         }
-
         void EmitSub() {
             STACK_CHANGE(-1);
             WriteOpcode(Opcode::Sub);
         }
-
         void EmitDiv() {
             STACK_CHANGE(-1);
             WriteOpcode(Opcode::Div);
         }
-
         void EmitMul() {
             STACK_CHANGE(-1);
             WriteOpcode(Opcode::Mul);
@@ -403,7 +383,7 @@ namespace hypermind {
             WriteOpcode(Opcode::CreateClosure);
             WriteShortOperand(index);
         }
-
+        
         void EmitEnd() {
             WriteOpcode(Opcode::End);
         }

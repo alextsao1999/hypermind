@@ -4,6 +4,7 @@
 
 #include "parser.h"
 #include "ast.h"
+#define SkipDelimiter() while (mLexer.PeekTokenType() == TokenType::Delimiter) mLexer.Consume();
 
 namespace hypermind {
 
@@ -139,6 +140,7 @@ namespace hypermind {
 
     ASTBlockPtr Parser::ParseBlock() {
         ASTBlockPtr blockPtr = make_ptr(ASTBlock);
+        SkipDelimiter();
         if (mLexer.PeekTokenType() == TokenType::LeftBrace) {
             mLexer.Consume();
             ASTNodePtr stmt;
@@ -154,6 +156,7 @@ namespace hypermind {
     }
 
     ASTNodePtr Parser::ParseProgram() {
+        SkipDelimiter();
         TokenType tok = mLexer.PeekTokenType();
         ASTNodePtr ptr;
         switch (tok) {
@@ -188,8 +191,7 @@ namespace hypermind {
             default:
                 ptr = ParseExpression();
         }
-        while (mLexer.PeekTokenType() == TokenType::Delimiter)
-            mLexer.Consume();
+        SkipDelimiter();
         return ptr;
     }
 

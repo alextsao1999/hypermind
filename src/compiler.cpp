@@ -4,7 +4,9 @@
 
 #include "compiler.h"
 
-#define AST_ENTER()
+#define AST_ENTER() {compiler->mCurCompileUnit->mLine = line; \
+compiler->mCurCompileUnit->mColumn = column;}
+
 namespace hypermind {
     // 编译语法块
     AST_COMPILE(ASTBlock) {
@@ -216,7 +218,7 @@ namespace hypermind {
         cu.EmitEnd();
         cu.mFn->upvalues = compiler->mVM->Allocate<Upvalue>(cu.mFn->upvalueNum);
         memcpy(cu.mFn->upvalues, cu.mUpvalues, sizeof(Upvalue) * cu.mFn->upvalueNum);
-        HMInteger index = cu.mOuter->AddConstant(OBJ_TO_VALUE(cu.mFn));
+        HMInteger index = cu.mOuter->AddConstant(Value(cu.mFn));
         cu.mOuter->EmitCreateClosure(index);
 
     }

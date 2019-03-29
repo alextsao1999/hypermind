@@ -22,10 +22,14 @@ namespace hypermind {
     struct Value {
         ValueType type;
         union {
-            HMInteger intval;
+            HMInteger intval{0};
             HMFloat floatval;
             HMObject *objval;
         };
+
+        Value() : type(ValueType::Undefined) {};
+        Value(ValueType type) : type(type) {};
+        Value(HMObject *obj) : type(ValueType::Object), objval(obj) {};
 
         inline HMHash hash() const {
             if (type == ValueType::Object) {

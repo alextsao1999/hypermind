@@ -25,7 +25,7 @@
 mCurrentToken.start = CURRENT_POS;  \
 mCurrentToken.length = len; \
 mCurrentToken.line = CURRENT_LINE; \
-mCurrentToken.value = {ValueType::Undefined, 0}; }
+mCurrentToken.value = {ValueType::Undefined}; }
 
 #define TOKEN_TYPE(K) mCurrentToken.type = K;
 #define TOKEN_LENGTH(l) {mCurrentToken.length = l;}
@@ -145,11 +145,10 @@ namespace hypermind {
 
     struct Token {
         TokenType type{TokenType::End};
-        const HMChar *start{};
-        HMUINT32 length{};
-        HMUINT32 line{};
-        Value value{};
-
+        const HMChar *start{nullptr};
+        HMUINT32 length{0};
+        HMUINT32 line{0};
+        Value value{ValueType::Undefined};
         Token(TokenType mType, const HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine);
         Token() = default;
         void dump(Ostream &os) const;
