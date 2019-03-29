@@ -35,19 +35,10 @@ namespace hypermind {
     };
     using ASTNodePtr = std::shared_ptr<ASTNode>;
 
-    // 语句Node
-    AST_NODE(ASTStmt, ASTStmtPtr) {
-
-    };
-
     // AST列表
     AST_NODE(ASTList, ASTListPtr) {
         std::vector<ASTNodePtr> elements;
         AST_DECL();
-    };
-
-    // 表达式Node
-    AST_STMT(ASTExpr, ASTExprPtr) {
     };
 
     // 语法块Node
@@ -61,29 +52,29 @@ namespace hypermind {
     };
 
     // 表达式中的变量
-    AST_EXPR(ASTVariable, ASTVariablePtr){
+    AST_NODE(ASTVariable, ASTVariablePtr){
         Token var;
         ASTListPtr postfix;
         AST_DECL();
     };
 
     // 值的字面量
-    AST_EXPR(ASTLiteral, ASTLiteralPtr){
+    AST_NODE(ASTLiteral, ASTLiteralPtr){
         Value value{};
         AST_DECL();
     };
 
     // 二元表达式
-    AST_EXPR(ASTBinary, ASTBinaryPtr) {
+    AST_NODE(ASTBinary, ASTBinaryPtr) {
         Token op;
-        ASTExprPtr lhs; // 产生式左边
-        ASTExprPtr rhs; // 产生式右边
+        ASTNodePtr lhs; // 产生式左边
+        ASTNodePtr rhs; // 产生式右边
         AST_DECL();
     };
 
     // If 语句
-    AST_STMT(ASTIfStmt, ASTIfStmtPtr) {
-        ASTExprPtr condition; // 条件
+    AST_NODE(ASTIfStmt, ASTIfStmtPtr) {
+        ASTNodePtr condition; // 条件
         // Block or Expr
         ASTNodePtr thenBlock;
         ASTNodePtr elseBlock;
@@ -91,55 +82,55 @@ namespace hypermind {
     };
 
     // while 语句
-    AST_STMT(ASTWhileStmt, ASTWhileStmtPtr) {
-        ASTExprPtr condition;
+    AST_NODE(ASTWhileStmt, ASTWhileStmtPtr) {
+        ASTNodePtr condition;
         ASTNodePtr block;
         AST_DECL();
     };
 
     // break 语句
-    AST_STMT(ASTBreakStmt, ASTBreakStmtPtr) {
+    AST_NODE(ASTBreakStmt, ASTBreakStmtPtr) {
         AST_DECL();
     };
 
     // continue 语句
-    AST_STMT(ASTContinueStmt, ASTContinueStmtPtr) {
+    AST_NODE(ASTContinueStmt, ASTContinueStmtPtr) {
         AST_DECL();
     };
 
     // return 语句
-    AST_STMT(ASTReturnStmt, ASTReturnStmtPtr) {
+    AST_NODE(ASTReturnStmt, ASTReturnStmtPtr) {
         // 返回值
-        ASTExprPtr retvalue;
+        ASTNodePtr retvalue;
         AST_DECL();
     };
 
     // 变量声明语句
-    AST_STMT(ASTVarStmt, ASTVarStmtPtr) {
+    AST_NODE(ASTVarStmt, ASTVarStmtPtr) {
         Token identifier;
-        ASTExprPtr value; // 初始值表达式
+        ASTNodePtr value; // 初始值表达式
         AST_DECL();
     };
 
     // 参数声明语句
-    AST_STMT(ASTParamStmt, ASTParamStmtPtr) {
+    AST_NODE(ASTParamStmt, ASTParamStmtPtr) {
         Token identifier;
-        ASTExprPtr value; // 初始值表达式
+        ASTNodePtr value; // 初始值表达式
         AST_DECL();
     };
 
     // AST函数声明
-    AST_STMT(ASTFunctionStmt, ASTFunctionStmtPtr) {
+    AST_NODE(ASTFunctionStmt, ASTFunctionStmtPtr) {
         Token name; // 函数名称
         ASTNodePtr params; // 形式参数
-        ASTBlockPtr body; // 函数体
+        ASTNodePtr body; // 函数体
         AST_DECL();
     };
 
     // AST类声明
-    AST_STMT(ASTClassStmt, ASTClassStmtPtr) {
+    AST_NODE(ASTClassStmt, ASTClassStmtPtr) {
         Token name; // 类名称
-        ASTListPtr classBody;
+        ASTNodePtr classBody;
 
         AST_DECL();
     };

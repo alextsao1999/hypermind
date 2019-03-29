@@ -92,9 +92,9 @@ namespace hypermind {
     protected:
         const HMChar *mFileName{};
         Lexer &mLexer;
-        inline ASTExprPtr ParsePrimary();
-        inline ASTExprPtr ParseUnary();
-        inline ASTExprPtr ParseBinaryOp(ASTExprPtr lhs, HMInteger prec);
+        inline ASTNodePtr ParsePrimary();
+        inline ASTNodePtr ParseUnary();
+        inline ASTNodePtr ParseBinaryOp(ASTNodePtr lhs, HMInteger prec);
 
     public:
         Parser(const HMChar *mFileName, Lexer &mLexer) : mFileName(mFileName), mLexer(mLexer) {}
@@ -103,15 +103,15 @@ namespace hypermind {
          * Expr ::= Primary {"Op" Primary }
          * @return
          */
-        ASTExprPtr ParseExpression();
-        ASTStmtPtr ParseVarStmt();
-        ASTStmtPtr ParseFunctionStmt();
-        ASTStmtPtr ParseIfStmt();
-        ASTStmtPtr ParseWhileStmt();
-        ASTStmtPtr ParseBreakStmt();
-        ASTStmtPtr ParseContinueStmt();
-        ASTStmtPtr ParseReturnStmt();
-        ASTStmtPtr ParseClassStmt();
+        ASTNodePtr ParseExpression();
+        ASTNodePtr ParseVarStmt();
+        ASTNodePtr ParseFunctionStmt();
+        ASTNodePtr ParseIfStmt();
+        ASTNodePtr ParseWhileStmt();
+        ASTNodePtr ParseBreakStmt();
+        ASTNodePtr ParseContinueStmt();
+        ASTNodePtr ParseReturnStmt();
+        ASTNodePtr ParseClassStmt();
 
         /**
          * Parse Block
