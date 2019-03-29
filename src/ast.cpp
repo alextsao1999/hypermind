@@ -21,7 +21,7 @@ namespace hypermind {
     AST_DUMP(ASTBinary) {
         os << _HM_C(" { (binary)  ");
         lhs->dump(os);
-        op.dump(os);
+        DumpTokenType(os, op);
         rhs->dump(os);
         os << _HM_C("  } ") ;
     }
@@ -80,7 +80,7 @@ namespace hypermind {
     }
 
     AST_DUMP(ASTParamStmt) {
-        os << _HM_C(" param : ") ;
+        os << _HM_C("param : ") ;
         identifier.dump(os);
         if (value != nullptr) {
             os << _HM_C(" = ");

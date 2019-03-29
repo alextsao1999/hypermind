@@ -17,7 +17,7 @@ namespace hypermind {
     AST_COMPILE(ASTBinary) {
         AST_ENTER();
         // Σ(っ °Д °;)っ 这是个异类
-        if (op.type == TokenType::Assign) {
+        if (op == TokenType::Assign) {
             rhs->compile(compiler, false);
             lhs->compile(compiler, true);
             return;
@@ -25,7 +25,7 @@ namespace hypermind {
         lhs->compile(compiler, false);
         rhs->compile(compiler, false);
         // 根据Op 编译相应的Opcode
-        switch (op.type) {
+        switch (op) {
             case TokenType::Add:
                 compiler->mCurCompileUnit->EmitAdd();
                 break;

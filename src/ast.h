@@ -1,3 +1,9 @@
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
 //
 // Created by 曹顺 on 2019/3/1.
 //
@@ -13,23 +19,16 @@
     struct n;  \
     using p = std::shared_ptr<n>;  \
     struct n : public ASTNode
-#define AST_STMT(n, p) \
-    struct n;  \
-    using p = std::shared_ptr<n>;  \
-    struct n : public ASTStmt
-#define AST_EXPR(n, p) \
-    struct n;  \
-    using p = std::shared_ptr<n>;  \
-    struct n : public ASTExpr
-#define AST_DECL() void compile(Compiler *compiler, bool isAssign);void dump(Ostream &os);
+#define AST_DECL() void compile(Compiler *compiler, bool isAssign);void dump(Ostream &os);using ASTNode::ASTNode;
 #define AST_DUMP(n) void n::dump(Ostream &os)
 #define AST_COMPILE(n) void n::compile(Compiler *compiler, bool isAssign)
-#define AST_POSTION() os << _HM_C("  line :   ") << line << std::endl;
 namespace hypermind {
     class Compiler;
     struct ASTNode {
         HMUINT32 line{0};
         HMUINT32 column{0};
+        ASTNode(HMUINT32 line, HMUINT32 column) : line(line), column(column) {};
+        ASTNode() = default;
         virtual void dump(Ostream &os){};
         virtual void compile(Compiler *compiler, bool isAssign){};
     };
@@ -55,20 +54,25 @@ namespace hypermind {
     AST_NODE(ASTVariable, ASTVariablePtr){
         Token var;
         ASTListPtr postfix;
+
         AST_DECL();
     };
 
     // 值的字面量
     AST_NODE(ASTLiteral, ASTLiteralPtr){
-        Value value{};
+        Value value;
+        ASTLiteral(HMUINT32 line, HMUINT32 column, const Value &value) : ASTNode(line, column), value(value) {}
         AST_DECL();
     };
 
     // 二元表达式
     AST_NODE(ASTBinary, ASTBinaryPtr) {
-        Token op;
+        TokenType op;
         ASTNodePtr lhs; // 产生式左边
         ASTNodePtr rhs; // 产生式右边
+        ASTBinary(HMUINT32 line, HMUINT32 column, TokenType op, ASTNodePtr lhs, ASTNodePtr rhs) : ASTNode(
+                line, column), op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
+
         AST_DECL();
     };
 
@@ -109,6 +113,9 @@ namespace hypermind {
     AST_NODE(ASTVarStmt, ASTVarStmtPtr) {
         Token identifier;
         ASTNodePtr value; // 初始值表达式
+        ASTVarStmt(HMUINT32 line, HMUINT32 column, const Token &identifier, ASTNodePtr value) :
+                ASTNode(line,column), identifier(identifier), value(std::move(value)) {}
+
         AST_DECL();
     };
 
@@ -116,6 +123,9 @@ namespace hypermind {
     AST_NODE(ASTParamStmt, ASTParamStmtPtr) {
         Token identifier;
         ASTNodePtr value; // 初始值表达式
+        ASTParamStmt(HMUINT32 line, HMUINT32 column, const Token &identifier, ASTNodePtr value) :
+                ASTNode(line,column), identifier(identifier), value(std::move(value)) {}
+
         AST_DECL();
     };
 

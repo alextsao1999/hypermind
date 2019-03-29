@@ -19,7 +19,7 @@ namespace hypermind {
             ASTVariablePtr astVariablePtr = make_ptr(ASTVariable);
             astVariablePtr->var = tok;
             return astVariablePtr;
-        } else if (tok.type == TokenType::String) {
+        } else if (tok.type == TokenType::String || tok.type == TokenType::Number) {
             ASTLiteralPtr astLiteralPtr = make_ptr(ASTLiteral);
             astLiteralPtr->value = tok.value;
             return astLiteralPtr;
@@ -30,10 +30,6 @@ namespace hypermind {
         } else if (tok.type == TokenType::KeywordFalse) {
             ASTLiteralPtr astLiteralPtr = make_ptr(ASTLiteral);
             astLiteralPtr->value.type = ValueType::False;
-            return astLiteralPtr;
-        } else if (tok.type == TokenType::Number) {
-            ASTLiteralPtr astLiteralPtr = make_ptr(ASTLiteral);
-            astLiteralPtr->value = tok.value;
             return astLiteralPtr;
         } else {
             // TODO 不存在的Primary ??
@@ -56,11 +52,8 @@ namespace hypermind {
             if (prec > nextOp.prec)
                 break;
             mLexer.Consume();
-            ASTBinaryPtr lhsBin = make_ptr(ASTBinary);
-            lhsBin->op.type = op;
-            lhsBin->lhs = lhs;
-            lhsBin->rhs = ParseBinaryOp(ParseUnary(), nextOp.association ? nextOp.prec + 1 : nextOp.prec);
-            lhs = lhsBin;
+            lhs = make_ptr(ASTBinary, op, lhs,
+                           ParseBinaryOp(ParseUnary(), nextOp.association ? nextOp.prec + 1 : nextOp.prec));
         }
         return lhs;
     }

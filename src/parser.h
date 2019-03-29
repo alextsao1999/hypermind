@@ -6,13 +6,11 @@
 #define HYPERMIND_PARSER_H
 #define UNPREC {-1, false}
 #define PREC(p,a) {p, a}
-#define SET_POSITION(astPtr)  {astPtr->position.line = mLexer.GetCurrentLineNumber(); \
-astPtr->position.column = mLexer.GetLineColumn(); }
 
 #include <memory>
 #include "lexer.h"
 #include "ast.h"
-#define make_ptr(v, args...) std::make_shared<v>(, ##args)
+#define make_ptr(v, args...) std::make_shared<v>(mLexer.GetCurrentLineNumber(), mLexer.GetLineColumn(), ##args)
 
 namespace hypermind {
     struct Precedence {

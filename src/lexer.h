@@ -121,6 +121,8 @@ namespace hypermind {
         KeywordStatic,
     };
 
+    void DumpTokenType(Ostream &os, TokenType type);
+
     static std::map<String, TokenType> HMKeywords = {
             {_HM_C("if"),       TokenType::KeywordIf},
             {_HM_C("else"),     TokenType::KeywordElse},
@@ -178,6 +180,7 @@ namespace hypermind {
         void Consume();
         Token Peek(HMInteger i = 1);
         bool Match(TokenType tokenType);
+
         inline HMUINT32 GetCurrentLineNumber(){
             return CURRENT_LINE;
         };

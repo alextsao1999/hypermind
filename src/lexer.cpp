@@ -23,26 +23,165 @@ namespace hypermind {
         return IsAlpha(ch) || ch == _HM_C('_') || (ch >= _HM_C('\u4e00') && ch <= _HM_C('\u9fa5'));
     }
 
+    void DumpTokenType(Ostream &os, TokenType type) {
+#define TOKEN_DUMP(v) os << _HM_C(v);
+        switch (type) {
+            case TokenType::End:
+                TOKEN_DUMP("<end>");
+                break;
+            case TokenType::Delimiter:
+                TOKEN_DUMP("<delimiter>");
+                break;
+            case TokenType::Add:
+                TOKEN_DUMP("+");
+                break;
+            case TokenType::Sub:
+                TOKEN_DUMP("-");
+                break;
+            case TokenType::Mul:
+                TOKEN_DUMP("*");
+                break;
+            case TokenType::Div:
+                TOKEN_DUMP("/");
+                break;
+            case TokenType::Identifier:
+                TOKEN_DUMP("<identifier>");
+            case TokenType::Number:
+                TOKEN_DUMP("<number>");
+                break;
+            case TokenType::String:
+                TOKEN_DUMP("<string>");
+                break;
+            case TokenType::Dot:
+                TOKEN_DUMP(".");
+                break;
+            case TokenType::Comma:
+                TOKEN_DUMP(",");
+                break;
+            case TokenType::LeftParen:
+                TOKEN_DUMP("(");
+                break;
+            case TokenType::RightParen:
+                TOKEN_DUMP(")");
+                break;
+            case TokenType::LeftBracket:
+                TOKEN_DUMP("[");
+                break;
+            case TokenType::RightBracket:
+                TOKEN_DUMP("]");
+                break;
+            case TokenType::LeftBrace:
+                TOKEN_DUMP("{");
+                break;
+            case TokenType::RightBrace:
+                TOKEN_DUMP("}");
+                break;
+            case TokenType::Increase:
+                TOKEN_DUMP("++");
+                break;
+            case TokenType::Decrease:
+                TOKEN_DUMP("--");
+                break;
+            case TokenType::Assign:
+                TOKEN_DUMP("=");
+                break;
+            case TokenType::AddAssign:
+                TOKEN_DUMP("+=");
+                break;
+            case TokenType::SubAssign:
+                TOKEN_DUMP("-=");
+                break;
+            case TokenType::MulAssign:
+                TOKEN_DUMP("*=");
+                break;
+            case TokenType::DivAssign:
+                TOKEN_DUMP("/=");
+                break;
+            case TokenType::ModAssign:
+                TOKEN_DUMP("%=");
+                break;
+            case TokenType::AndAssign:
+                TOKEN_DUMP("&=");
+                break;
+            case TokenType::OrAssign:
+                TOKEN_DUMP("|=");
+                break;
+            case TokenType::XorAssign:
+                TOKEN_DUMP("^=");
+                break;
+            case TokenType::Arrow:
+                TOKEN_DUMP("->");
+                break;
+            case TokenType::Not:
+                TOKEN_DUMP("!");
+                break;
+            case TokenType::Equal:
+                TOKEN_DUMP("==");
+                break;
+            case TokenType::NotEqual:
+                TOKEN_DUMP("!=");
+                break;
+            case TokenType::Greater:
+                TOKEN_DUMP(">");
+                break;
+            case TokenType::Less:
+                TOKEN_DUMP("<");
+                break;
+            case TokenType::GreaterEqual:
+                TOKEN_DUMP(">=");
+                break;
+            case TokenType::LessEqual:
+                TOKEN_DUMP("<=");
+                break;
+            case TokenType::Or:
+                TOKEN_DUMP("|");
+                break;
+            case TokenType::LogicOr:
+                TOKEN_DUMP("||");
+                break;
+            case TokenType::And:
+                TOKEN_DUMP("&");
+                break;
+            case TokenType::LogicAnd:
+                TOKEN_DUMP("&&");
+                break;
+            case TokenType::Mod:
+                TOKEN_DUMP("%");
+                break;
+            case TokenType::At:
+                TOKEN_DUMP("@");
+                break;
+            case TokenType::Colon:
+                TOKEN_DUMP(":");
+                break;
+            default:
+                TOKEN_DUMP("<unkown>");
+        }
+#undef TOKEN_DUMP
+
+    }
+
     void Token::dump(Ostream &os) const {
+#define TOKEN_DUMP(v) name = _HM_C(v);
         String name;
         switch (type) {
             case TokenType::End:
-                name = _HM_C("<结束>");
+                TOKEN_DUMP("<结束>");
                 break;
             case TokenType::Delimiter:
-                name = _HM_C("<行结束>");
+                TOKEN_DUMP("<行结束>");
                 break;
             case TokenType::Add:
-                name = _HM_C("+");
+                TOKEN_DUMP("+");
                 break;
             case TokenType::Sub:
-                name = _HM_C("-");
+                TOKEN_DUMP("-");
                 break;
             case TokenType::Mul:
-                name = _HM_C("*");
+                TOKEN_DUMP("*");
                 break;
             case TokenType::Div:
-                name = _HM_C("/");
+                TOKEN_DUMP("/");
                 break;
             case TokenType::Identifier:
             case TokenType::Number:
@@ -51,111 +190,113 @@ namespace hypermind {
             case TokenType::String:
                 break;
             case TokenType::Dot:
-                name = _HM_C(".");
+                TOKEN_DUMP(".");
                 break;
             case TokenType::Comma:
-                name = _HM_C(",");
+                TOKEN_DUMP(",");
                 break;
             case TokenType::LeftParen:
-                name = _HM_C("(");
+                TOKEN_DUMP("(");
                 break;
             case TokenType::RightParen:
-                name = _HM_C(")");
+                TOKEN_DUMP(")");
                 break;
             case TokenType::LeftBracket:
-                name = _HM_C("[");
+                TOKEN_DUMP("[");
                 break;
             case TokenType::RightBracket:
-                name = _HM_C("]");
+                TOKEN_DUMP("]");
                 break;
             case TokenType::LeftBrace:
-                name = _HM_C("{");
+                TOKEN_DUMP("{");
                 break;
             case TokenType::RightBrace:
-                name = _HM_C("}");
+                TOKEN_DUMP("}");
                 break;
             case TokenType::Increase:
-                name = _HM_C("++");
+                TOKEN_DUMP("++");
                 break;
             case TokenType::Decrease:
-                name = _HM_C("--");
+                TOKEN_DUMP("--");
                 break;
             case TokenType::Assign:
-                name = _HM_C("=");
+                TOKEN_DUMP("=");
                 break;
             case TokenType::AddAssign:
-                name = _HM_C("+=");
+                TOKEN_DUMP("+=");
                 break;
             case TokenType::SubAssign:
-                name = _HM_C("-=");
+                TOKEN_DUMP("-=");
                 break;
             case TokenType::MulAssign:
-                name = _HM_C("*=");
+                TOKEN_DUMP("*=");
                 break;
             case TokenType::DivAssign:
-                name = _HM_C("/=");
+                TOKEN_DUMP("/=");
                 break;
             case TokenType::ModAssign:
-                name = _HM_C("%=");
+                TOKEN_DUMP("%=");
                 break;
             case TokenType::AndAssign:
-                name = _HM_C("&=");
+                TOKEN_DUMP("&=");
                 break;
             case TokenType::OrAssign:
-                name = _HM_C("|=");
+                TOKEN_DUMP("|=");
                 break;
             case TokenType::XorAssign:
-                name = _HM_C("^=");
+                TOKEN_DUMP("^=");
                 break;
             case TokenType::Arrow:
-                name = _HM_C("->");
+                TOKEN_DUMP("->");
                 break;
             case TokenType::Not:
-                name = _HM_C("!");
+                TOKEN_DUMP("!");
                 break;
             case TokenType::Equal:
-                name = _HM_C("==");
+                TOKEN_DUMP("==");
                 break;
             case TokenType::NotEqual:
-                name = _HM_C("!=");
+                TOKEN_DUMP("!=");
                 break;
             case TokenType::Greater:
-                name = _HM_C(">");
+                TOKEN_DUMP(">");
                 break;
             case TokenType::Less:
-                name = _HM_C("<");
+                TOKEN_DUMP("<");
                 break;
             case TokenType::GreaterEqual:
-                name = _HM_C(">=");
+                TOKEN_DUMP(">=");
                 break;
             case TokenType::LessEqual:
-                name = _HM_C("<=");
+                TOKEN_DUMP("<=");
                 break;
             case TokenType::Or:
-                name = _HM_C("|");
+                TOKEN_DUMP("|");
                 break;
             case TokenType::LogicOr:
-                name = _HM_C("||");
+                TOKEN_DUMP("||");
                 break;
             case TokenType::And:
-                name = _HM_C("&");
+                TOKEN_DUMP("&");
                 break;
             case TokenType::LogicAnd:
-                name = _HM_C("&&");
+                TOKEN_DUMP("&&");
                 break;
             case TokenType::Mod:
-                name = _HM_C("%");
+                TOKEN_DUMP("%");
                 break;
             case TokenType::At:
-                name = _HM_C("@");
+                TOKEN_DUMP("@");
                 break;
             case TokenType::Colon:
-                name = _HM_C(":");
+                TOKEN_DUMP(":");
                 break;
             default:
-                name = _HM_C("<未知>");
+                TOKEN_DUMP("<未知>");
         }
         os << name ;
+#undef TOKEN_DUMP
+
     }
 
     // 读取一个Token
