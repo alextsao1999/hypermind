@@ -313,9 +313,4 @@ constants[index].dump(os);
 #undef ReadInt
 
     }
-
-    FunctionDebug::FunctionDebug(const String &name) : name(name), line(Vector<HMUINT32>()) {
-
-    }
-
 }

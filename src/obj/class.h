@@ -33,15 +33,22 @@ namespace hypermind {
     // 类对象
     HM_OBJECT(Class) {
         HMClass *superClass;  // 父类
-        HMUINT32 fieldNumer;
+        HMUINT32 fieldNubmer;
         Buffer<HMMethod> methods;
         HMString *name; // 类名
+        HM_OBJ_CONSTRUCTOR_CLASS(Class, nullptr, HMString *name, HMClass *super, HMUINT32 fieldNumber), name(name),
+                                                                                                        superClass(super),
+                                                                                                        fieldNubmer(fieldNumber),
+                                                                                                        methods(Buffer<HMMethod>(vm)) {
+        };
+
         HM_OBJ_DECL();
     };
 
     // 实例对象
     HM_OBJECT(Instance) {
         Value *fields{nullptr};
+        HM_OBJ_CONSTRUCTOR_CLASS(Instance, clazz, HMClass *clazz), fields(vm->Allocate<Value>(clazz->fieldNubmer)) {};
         HM_OBJ_DECL();
     };
 

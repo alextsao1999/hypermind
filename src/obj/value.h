@@ -70,25 +70,7 @@ namespace hypermind {
 
         }
 
-        inline HMClass *getClass(const VM *vm) const {
-            switch (type) {
-                case ValueType::Integer:
-                    return vm->mIntegerClass;
-                case ValueType::Float:
-                    return vm->mFloatClass;
-                case ValueType::Undefined:
-                case ValueType::Null:
-                    break;
-                case ValueType::Object:
-                    return objval->classObj;
-                case ValueType::True:
-                case ValueType::False:
-                    return vm->mBooleanClass;
-                default:
-                    break;
-            }
-            return vm->mMetaClass;
-        }
+        inline HMClass *getClass(const VM *vm) const;
 
     };
 }

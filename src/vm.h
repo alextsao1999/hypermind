@@ -7,7 +7,7 @@
 
 #include <obj/object.h>
 #include "hypermind.h"
-
+#include "obj/value.h"
 namespace hypermind {
     class VM {
     public:
@@ -73,14 +73,12 @@ namespace hypermind {
             return new(MemManger(nullptr, 0, sizeof(T))) T(this, std::forward<Args>(args)...);
         }
 
-/*
-        inline void GrayObject(HMObject *obj) {
+        inline void Gray(HMObject *obj) {
             if (obj == nullptr || obj->isDark)
                 return;
             obj->isDark = true;
-            mGrays.push_back(obj);
+            mGrayObjs.push_back(obj);
         }
-*/
 
     protected:
         // 已经分配的字节数
@@ -88,8 +86,9 @@ namespace hypermind {
 
 
         // 所有灰对象
-        Vector<HMObject *> mGrays;
-
+        Vector<HMObject *> mGrayObjs;
+        // 受保护的对象
+        Vector<HMObject *> mProtectedObj;
 
     };
 }

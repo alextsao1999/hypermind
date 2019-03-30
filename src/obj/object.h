@@ -7,7 +7,6 @@
 
 #include <iostream>
 #include "hypermind.h"
-#include "vm.h"
 
 #define HM_OBJECT(name) \
 struct HM##name : public HMObject
@@ -35,7 +34,7 @@ namespace hypermind {
         Module,
         Range,
         String,
-        Upval,
+        Upvalue,
         Function,
         Method,
         Closure,

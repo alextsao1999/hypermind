@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by 曹顺 on 2019/2/23.
 //
@@ -15,7 +17,7 @@ namespace hypermind {
     struct FunctionDebug {
         String name;  // 函数名称
         Vector<HMUINT32> line;  // 所在行号
-        explicit FunctionDebug(const String &name);
+        explicit FunctionDebug(String name) : name(std::move(name)), line(Vector<HMUINT32>()) {};
     };
 
     // 函数对象
