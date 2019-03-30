@@ -55,7 +55,11 @@ namespace hypermind {
     // 闭包对象
     HM_OBJECT(Closure) {
         // 闭包指向的函数
-        HMFunction *pFun;
+        HMFunction *pFn;
+        HMUpvalue *upvalues{nullptr};
+        HM_OBJ_CONSTRUCTOR_CLASS(Closure, vm->mFunctionClass, HMFunction *fun), pFn(fun), upvalues(
+                vm->Allocate<HMUpvalue>(fun->upvalueNum)) {};
+
         HM_OBJ_DECL();
     };
 

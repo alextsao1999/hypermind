@@ -22,11 +22,11 @@ namespace hypermind {
         return false;
     }
     HM_OBJ_DUMP(Function) {
-        os << _HM_C(" { HMFunction(" << sizeof(HMFunction) << ") " << static_cast<const void *>(this)
-        << "  name : ") << debug->name;
+        os << _HM_C(" { HMFunction(") << sizeof(HMFunction) << _HM_C(") ") << static_cast<const void *>(this)
+        << _HM_C("  name : ") << debug->name << _HM_C("  max stack : ") << maxStackSlotNum << _HM_C("  ");
         os << std::endl << _HM_C("   opcode dump : ") << std::endl;
         DumpAllInstructions(os);
-        os << " } ";
+        os << _HM_C(" } ");
     }
 
     void HMFunction::DumpInstruction(int i) {
@@ -121,7 +121,7 @@ namespace hypermind {
                 Instruction("Or");
             case Opcode::CreateClosure:
                 Instruction("Create_Closure");
-            case Opcode::CloseUpval:
+            case Opcode::CloseUpvalue:
                 Instruction("Close_Upval");
             case Opcode::Return:
                 Instruction("Return");
@@ -282,7 +282,7 @@ constants[index].dump(os);
                     Instruction("Create_Closure");
                     ConstantShortArg();
                     Finish();
-                case Opcode::CloseUpval:
+                case Opcode::CloseUpvalue:
                     Instruction("Close_Upval");
                     Finish();
                 case Opcode::Return:

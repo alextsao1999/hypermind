@@ -16,7 +16,10 @@ if (mStackSlotNum > mFn->maxStackSlotNum) mFn->maxStackSlotNum = mStackSlotNum;}
 
 namespace hypermind {
     class VM;
-
+    enum class CompileFlag {
+        Null = 0,
+        Assign = 1
+    };
     enum class ScopeType {
         Invalid,
         Module,  // 模块变量
@@ -115,7 +118,7 @@ namespace hypermind {
         };
 
         /**
-         * 当前作用域声明局部变量 存在返回索引 不存在添加后返回索引
+         * 当前作用域添加局部变量 返回索引
          * @param id
          * @return 返回索引
          */
@@ -134,9 +137,14 @@ namespace hypermind {
          * 根据作用域声明变量/参数
          * @return
          */
-        HMInteger AddVariable(const Token &id) {
+        HMInteger DeclareVariable(const Token &id) {
             if (mScopeDepth == -1) {
                 // TODO 模块变量
+            }
+            HMInteger index = FindLocal(id);
+            if (index != -1) {
+                // 此前已经存在该局部变量
+                return index;
             }
             return AddLocalVariable(id);
         }
@@ -257,11 +265,18 @@ namespace hypermind {
         }
 
         /**
-         * 丢弃作用域内的局部变量
+         * 丢弃作用域内的局部变量 返回丢弃个数
          */
-        void DiscardLocalVariable() {
-
-
+        HMInteger DiscardLocalVariable() {
+            HMInteger index = mLocalVarNumber - 1;
+            while (index >= 0 && mLocalVariables[index].scopeDepth >= mScopeDepth) {
+                if (mLocalVariables[index].isUpvalue)
+                    EmitCloseUpvalue();
+                else
+                    EmitPop();
+                index--;
+            }
+            return mLocalVarNumber - index - 1;
         }
 
         /**
@@ -274,6 +289,11 @@ namespace hypermind {
             //  相同的文本或者数值会造成资源重复 可以先取hash
             return mFn->constants.Append(value);
         };
+
+        void EmitCloseUpvalue() {
+            STACK_CHANGE(-1);
+            WriteOpcode(Opcode::CloseUpvalue);
+        }
 
         void EmitPop() {
             STACK_CHANGE(-1);
@@ -297,7 +317,7 @@ namespace hypermind {
          * @param argNum
          */
         void EmitCall(HMUINT32 methodIndex, HMUINT32 argNum) {
-            STACK_CHANGE(argNum);
+            STACK_CHANGE(-argNum);
             if (argNum <= 7)
                 WriteByte(static_cast<HMByte>((HMByte) Opcode::Call + argNum));
             else {
@@ -380,10 +400,11 @@ namespace hypermind {
         }
 
         void EmitCreateClosure(HMInteger index) {
+            STACK_CHANGE(1);
             WriteOpcode(Opcode::CreateClosure);
             WriteShortOperand(index);
         }
-        
+
         void EmitEnd() {
             WriteOpcode(Opcode::End);
         }
@@ -399,13 +420,18 @@ namespace hypermind {
         VM *mVM;
 
         // 当前正在编译的模块
-        HMModule *mCurModule;
+        HMModule *mCurModule{};
         // 当前正在编译的函数
-        CompileUnit *mCurCompileUnit;
+        CompileUnit *mCurCompileUnit{};
 
         explicit Compiler(VM *mVM) : mVM(mVM) {};
 
 #ifdef HMDebug
+        /**
+         * 创建编译单元 并将其置为当前编译单元
+         * @param debug 调试信息
+         * @return
+         */
         CompileUnit CreateCompileUnit(FunctionDebug *debug) {
             CompileUnit cu(mVM);
             cu.mFn = mVM->NewObject<HMFunction>(mCurModule);
@@ -421,6 +447,10 @@ namespace hypermind {
         return cu;
     }
 #endif
+        /**
+         * 离开编译单元 将创建编译单元之前的编译单元设为当前编译单元
+         * @param cu
+         */
         void LeaveCompileUnit(const CompileUnit &cu) {
             mCurCompileUnit = cu.mOuter;
         };

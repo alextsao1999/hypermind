@@ -5,6 +5,7 @@
 #ifndef HYPERMIND_VM_H
 #define HYPERMIND_VM_H
 
+#include <obj/object.h>
 #include "hypermind.h"
 
 namespace hypermind {
@@ -23,6 +24,7 @@ namespace hypermind {
         HMClass *mMetaClass{nullptr};
         HMClass *mMapClass{nullptr};
         HMClass *mListClass{nullptr};
+
         /**
          * 虚拟机内存管理
          * 频繁的申请内存可以用内存池代替
@@ -71,11 +73,22 @@ namespace hypermind {
             return new(MemManger(nullptr, 0, sizeof(T))) T(this, std::forward<Args>(args)...);
         }
 
-
+/*
+        inline void GrayObject(HMObject *obj) {
+            if (obj == nullptr || obj->isDark)
+                return;
+            obj->isDark = true;
+            mGrays.push_back(obj);
+        }
+*/
 
     protected:
         // 已经分配的字节数
         HMUINT32 mAllocatedBytes{0};
+
+
+        // 所有灰对象
+        Vector<HMObject *> mGrays;
 
 
     };

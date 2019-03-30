@@ -26,6 +26,7 @@ explicit HM##obj(VM *vm, ##args) : HMObject(vm, ObjectType::obj, claz)
 
 namespace hypermind {
     struct HMClass;
+    class VM;
 
     enum class ObjectType {
         Class,   //此项是class类型,以下都是object类型

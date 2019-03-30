@@ -14,7 +14,6 @@ namespace hypermind {
     // 模块对象
     HM_OBJECT(Module) {
         HMString *moduleName;
-
         Buffer<Value> variables;
         HM_OBJ_CONSTRUCTOR_CLASS(Module, nullptr, HMString *name), moduleName(name), variables(Buffer<Value>(vm)) {
 

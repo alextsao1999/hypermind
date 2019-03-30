@@ -522,8 +522,6 @@ namespace hypermind {
 
     }
 
-    Lexer::~Lexer() = default;
-
     Token Lexer::Read() {
         if (!mTokens.empty()) {
             Token token = mTokens.front();
@@ -532,10 +530,6 @@ namespace hypermind {
         }
         GetNextToken();
         return CURRENT_TOKEN;
-    }
-
-    Lexer::Lexer(VM *mVM, HMChar *mSource) : mVM(mVM), mSource(mSource) {
-
     }
 
     TokenType Lexer::ReadTokenType() {
@@ -556,6 +550,14 @@ namespace hypermind {
             mTokens.pop_front();
         else
             GetNextToken();
+    }
+
+    void Lexer::Consume(TokenType type) {
+        if (PeekTokenType() == type)
+            Consume();
+        else
+            //TODO missing
+            ;
     }
 
     Token::Token(TokenType mType, const HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine) : type(mType),

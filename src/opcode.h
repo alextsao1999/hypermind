@@ -62,7 +62,7 @@ namespace hypermind {
 
 
          CreateClosure,
-         CloseUpval,
+         CloseUpvalue,
          Return,
 
          CreateClass,

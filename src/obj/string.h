@@ -19,8 +19,18 @@ namespace hypermind {
             // 计算文本hash
             charSequence = vm->Allocate<HMChar>(length);
             if (charSequence != nullptr) {
-                hashCode = hashString(charSequence, length);
                 hm_memcpy(charSequence, str, length);
+                hashCode = hashString(charSequence, length);
+            } else {
+                MEMRY_ERROR("文本对象申请内存失败");
+            }
+        }
+        HM_OBJ_CONSTRUCTOR(String, const String &str), length(str.size()) {
+            // 计算文本hash
+            charSequence = vm->Allocate<HMChar>(length);
+            if (charSequence != nullptr) {
+                hm_memcpy(charSequence, str.c_str(), length);
+                hashCode = hashString(charSequence, length);
             } else {
                 MEMRY_ERROR("文本对象申请内存失败");
             }

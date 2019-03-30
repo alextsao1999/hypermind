@@ -170,13 +170,14 @@ namespace hypermind {
     public:
         Token mCurrentToken;
 
-        Lexer(VM *mVM, HMChar *mSource);
-        ~Lexer();
+        Lexer(VM *mVM, HMChar *mSource) : mVM(mVM), mSource(mSource) {};
+        ~Lexer() = default;
 
         Token Read();
         TokenType ReadTokenType();
         TokenType PeekTokenType();
         void Consume();
+        void Consume(TokenType type);
         Token Peek(HMInteger i = 1);
         bool Match(TokenType tokenType);
 

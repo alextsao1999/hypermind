@@ -19,12 +19,15 @@ int main() {
     ASTNodePtr ast = parser.ParseProgram();
     Compiler compiler(&vm);
     CompileUnit cu = compiler.CreateCompileUnit(new FunctionDebug("module"));
-    compiler.mCurModule = vm.NewObject<HMModule>(vm.NewObject<HMString>(_HM_C("test"), 4));
+    compiler.mCurModule = vm.NewObject<HMModule>(vm.NewObject<HMString>(_HM_C("test")));
     compiler.mCurCompileUnit = &cu;
-    ast->compile(&compiler, false);
+    ast->compile(&compiler);
 
-    ast->dump(hm_cout);
-//    vm.DumpAllObjects();
+//    ast->dump(hm_cout);
+    vm.DumpAllObjects();
+
+    hm_cout<< " allocated :  " << vm.GetAllocatedBytes();
+
 
     return 0;
 }

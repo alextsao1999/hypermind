@@ -19,10 +19,11 @@
     struct n;  \
     using p = std::shared_ptr<n>;  \
     struct n : public ASTNode
-#define AST_DECL() void compile(Compiler *compiler, bool isAssign);void dump(Ostream &os);using ASTNode::ASTNode;
+#define AST_DECL() void compile(Compiler *compiler, CompileFlag flag);void dump(Ostream &os);using ASTNode::ASTNode;
 #define AST_DUMP(n) void n::dump(Ostream &os)
-#define AST_COMPILE(n) void n::compile(Compiler *compiler, bool isAssign)
+#define AST_COMPILE(n) void n::compile(Compiler *compiler, CompileFlag flag)
 namespace hypermind {
+    enum class CompileFlag;
     class Compiler;
     struct ASTNode {
         HMUINT32 line{0};
@@ -30,7 +31,8 @@ namespace hypermind {
         ASTNode(HMUINT32 line, HMUINT32 column) : line(line), column(column) {};
         ASTNode() = default;
         virtual void dump(Ostream &os){};
-        virtual void compile(Compiler *compiler, bool isAssign){};
+        // 虚函数不允许默认参数 不过这样能运行 我太懒了 直接就这样吧 (●'◡'●)
+        virtual void compile(Compiler *compiler, CompileFlag flag = (CompileFlag) 0) {};
     };
     using ASTNodePtr = std::shared_ptr<ASTNode>;
 
@@ -140,18 +142,30 @@ namespace hypermind {
     // AST类声明
     AST_NODE(ASTClassStmt, ASTClassStmtPtr) {
         Token name; // 类名称
-        ASTNodePtr classBody;
+        ASTListPtr fields;
+        ASTListPtr methods;
+        AST_DECL();
+    };
 
+    AST_NODE(ASTNegativeExpr, ASTNegativeExprPtr) {
+        ASTNodePtr expr;
+        AST_DECL();
+    };
+
+    AST_NODE(ASTNotExpr, ASTNotExprPtr) {
+        ASTNodePtr expr;
         AST_DECL();
     };
 
     AST_NODE(ASTArgPostfix, ASTArgPostfixPtr) {
-
+        ASTNodePtr expr;
+        ASTListPtr args;
         AST_DECL();
     };
 
     AST_NODE(ASTDotPostfix, ASTDotPostfixPtr) {
-
+        ASTNodePtr expr;
+        Token name;
         AST_DECL();
     };
 

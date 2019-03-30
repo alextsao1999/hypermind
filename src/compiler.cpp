@@ -12,7 +12,7 @@ namespace hypermind {
     AST_COMPILE(ASTBlock) {
         AST_ENTER();
         for (auto &stmt : stmts)
-            stmt->compile(compiler, false);
+            stmt->compile(compiler);
     }
 
     // 编译二元表达式
@@ -20,12 +20,12 @@ namespace hypermind {
         AST_ENTER();
         // Σ(っ °Д °;)っ 这是个异类
         if (op == TokenType::Assign) {
-            rhs->compile(compiler, false);
-            lhs->compile(compiler, true);
+            rhs->compile(compiler, CompileFlag::Null);
+            lhs->compile(compiler, CompileFlag::Assign);
             return;
         }
-        lhs->compile(compiler, false);
-        rhs->compile(compiler, false);
+        lhs->compile(compiler);
+        rhs->compile(compiler);
         // 根据Op 编译相应的Opcode
         switch (op) {
             case TokenType::Add:
@@ -48,19 +48,19 @@ namespace hypermind {
                 break;
             case TokenType::AddAssign:
                 compiler->mCurCompileUnit->EmitAdd();
-                lhs->compile(compiler, true);
+                lhs->compile(compiler);
                 break;
             case TokenType::SubAssign:
                 compiler->mCurCompileUnit->EmitSub();
-                lhs->compile(compiler, true);
+                lhs->compile(compiler);
                 break;
             case TokenType::MulAssign:
                 compiler->mCurCompileUnit->EmitMul();
-                lhs->compile(compiler, true);
+                lhs->compile(compiler);
                 break;
             case TokenType::DivAssign:
                 compiler->mCurCompileUnit->EmitDiv();
-                lhs->compile(compiler, true);
+                lhs->compile(compiler);
                 break;
             case TokenType::ModAssign:
                 break;
@@ -130,10 +130,11 @@ namespace hypermind {
     AST_COMPILE(ASTVariable) {
         AST_ENTER();
         Variable variable = compiler->mCurCompileUnit->FindVariable(var);
-        if (isAssign)
+        if (flag == CompileFlag::Assign) {
             compiler->mCurCompileUnit->EmitStoreVariable(variable);
-        else
+        } else {
             compiler->mCurCompileUnit->EmitLoadVariable(variable);
+        }
     }
 
     // 编译IF
@@ -166,7 +167,7 @@ namespace hypermind {
     AST_COMPILE(ASTList) {
         AST_ENTER();
         for (auto &element : elements)
-            element->compile(compiler, false);
+            element->compile(compiler);
     }
 
     /**
@@ -179,9 +180,9 @@ namespace hypermind {
         if (value == nullptr) {
             compiler->mCurCompileUnit->EmitPushNull();
         } else {
-            value->compile(compiler, false);
+            value->compile(compiler);
         }
-        HMInteger index = compiler->mCurCompileUnit->AddVariable(identifier);
+        HMInteger index = compiler->mCurCompileUnit->DeclareVariable(identifier);
         // 局部变量并没有什么变化
         //  如果是模块变量的话 会把局部变量值弹出 存到模块变量中
         compiler->mCurCompileUnit->DefineVariable(index);
@@ -190,12 +191,14 @@ namespace hypermind {
     AST_COMPILE(ASTParamStmt) {
         AST_ENTER();
         // 声明参数
-        compiler->mCurCompileUnit->AddVariable(identifier);
+        compiler->mCurCompileUnit->AddLocalVariable(identifier);
     }
 
     // 编译函数
     AST_COMPILE(ASTFunctionStmt) {
         AST_ENTER();
+        compiler->mCurCompileUnit->DeclareVariable(name);
+
         // 创建编译单元
 #ifdef HMDebug
         //  附上调试信息
@@ -212,10 +215,11 @@ namespace hypermind {
         }
         cu.mFn->maxStackSlotNum = cu.mStackSlotNum;
 
-        params->compile(compiler, false); // 编译参数声明
-        body->compile(compiler, false); // 编译函数实体
+        params->compile(compiler); // 编译参数声明
+        body->compile(compiler); // 编译函数实体
         compiler->LeaveCompileUnit(cu);
         cu.EmitEnd();
+        // 记录函数上值 创建闭包的时候用
         cu.mFn->upvalues = compiler->mVM->Allocate<Upvalue>(cu.mFn->upvalueNum);
         memcpy(cu.mFn->upvalues, cu.mUpvalues, sizeof(Upvalue) * cu.mFn->upvalueNum);
         HMInteger index = cu.mOuter->AddConstant(Value(cu.mFn));
