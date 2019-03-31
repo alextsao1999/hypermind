@@ -334,12 +334,34 @@ namespace hypermind {
             case _HM_C('.'):
                 TOKEN(TokenType::Dot, 1);
                 break;
+            case _HM_C('@'):
+                TOKEN(TokenType::At, 1);
+                break;
+            case _HM_C(':'):
+                TOKEN(TokenType::Colon, 1);
+                break;
             case _HM_C('!'):
                 if (NEXT_CHAR == _HM_C('=')) {
                     TOKEN(TokenType::NotEqual, 2);  // != not equal 不相等
                     NEXT();
                 } else {
                     TOKEN(TokenType::Not, 1);  // !
+                }
+                break;
+            case _HM_C('|'):
+                if (NEXT_CHAR == _HM_C('|')) {
+                    TOKEN(TokenType::LogicOr, 2);  // ||
+                    NEXT();
+                } else {
+                    TOKEN(TokenType::Or, 1);  // |
+                }
+                break;
+            case _HM_C('&'):
+                if (NEXT_CHAR == _HM_C('&')) {
+                    TOKEN(TokenType::LogicAnd, 2);  // &&
+                    NEXT();
+                } else {
+                    TOKEN(TokenType::And, 1);  // &
                 }
                 break;
             case _HM_C('+'):
@@ -353,6 +375,22 @@ namespace hypermind {
                     TOKEN(TokenType::Add, 1); // +
                 }
                 break;
+            case _HM_C('>'):
+                if (NEXT_CHAR == _HM_C('=')) {
+                    TOKEN(TokenType::GreaterEqual, 2); // >=
+                    NEXT();
+                } else {
+                    TOKEN(TokenType::Greater, 1); // +
+                }
+                break;
+            case _HM_C('<'):
+                if (NEXT_CHAR == _HM_C('=')) {
+                    TOKEN(TokenType::LessEqual, 2); // >=
+                    NEXT();
+                } else {
+                    TOKEN(TokenType::Less, 1); // +
+                }
+                break;
             case _HM_C('='):
                 if (NEXT_CHAR == _HM_C('=')) {
                     TOKEN(TokenType::Equal, 2); // ==
@@ -361,22 +399,35 @@ namespace hypermind {
                     TOKEN(TokenType::Assign, 1); // =
                 }
                 break;
+            case _HM_C('%'):
+                if (NEXT_CHAR == _HM_C('=')) {
+                    TOKEN(TokenType::ModAssign, 2); // %=
+                    NEXT();
+                } else {
+                    TOKEN(TokenType::Mod, 1); // %
+                }
+                break;
             case _HM_C('-'):
                 if (NEXT_CHAR == _HM_C('-')) { // --
-                    TOKEN(TokenType::Decrease, 1); // 自减
+                    TOKEN(TokenType::Decrease, 2); // 自减
                     NEXT();
                 } else if (NEXT_CHAR == _HM_C('=')) { // -=
-                    TOKEN(TokenType::SubAssign, 1);
+                    TOKEN(TokenType::SubAssign, 2);
                     NEXT();
                 } else if (NEXT_CHAR == _HM_C('>')) { // -> Arrow 箭头
-                    TOKEN(TokenType::Arrow, 1);
+                    TOKEN(TokenType::Arrow, 2);
                     NEXT();
                 } else {
                     TOKEN(TokenType::Sub, 1); // -
                 }
                 break;
             case _HM_C('*'):
-                TOKEN(TokenType::Mul, 1);
+                if (NEXT_CHAR == _HM_C('=')) {
+                    TOKEN(TokenType::MulAssign, 2); // *=
+                    NEXT();
+                } else {
+                    TOKEN(TokenType::Mul, 1);
+                }
                 break;
             case _HM_C(','):
                 TOKEN(TokenType::Comma, 1);
@@ -386,6 +437,9 @@ namespace hypermind {
                 if (NEXT_CHAR == _HM_C('/') || NEXT_CHAR == _HM_C('*')) {
                     SkipComment();
                     return GetNextToken(); // 跳过之后继续读取一个token
+                } else if (NEXT_CHAR == _HM_C('=')) { // /=
+                    TOKEN(TokenType::DivAssign, 2);
+                    NEXT();
                 } else {
                     TOKEN(TokenType::Div, 1);
                 }
@@ -411,11 +465,12 @@ namespace hypermind {
     }
 
     void Lexer::SkipComment() {
-        // TODO 多行注释跳过 /*   */
+        // TODO 仅支持单行 之后添加多行注释 /*   */
         do {
             NEXT();
-        } while (CURRENT_CHAR == _HM_C('\n'));
+        } while (CURRENT_CHAR != _HM_C('\n') || !mEof);
         NEXT_LINE();
+        NEXT();
     }
 
     void Lexer::SkipSpace() {
@@ -555,9 +610,11 @@ namespace hypermind {
     void Lexer::Consume(TokenType type) {
         if (PeekTokenType() == type)
             Consume();
-        else
-            //TODO missing
-            ;
+        else {
+            hm_cout << _HM_C(" missing token :  ");
+            DumpTokenType(hm_cout, type);
+            hm_cout << std::endl;
+        }
     }
 
     Token::Token(TokenType mType, const HMChar *mStart, HMUINT32 mLength, HMUINT32 mLine) : type(mType),

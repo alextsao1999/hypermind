@@ -4,6 +4,16 @@
 
 #include <utility>
 
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
 //
 // Created by 曹顺 on 2019/3/1.
 //
@@ -55,8 +65,7 @@ namespace hypermind {
     // 表达式中的变量
     AST_NODE(ASTVariable, ASTVariablePtr){
         Token var;
-        ASTListPtr postfix;
-
+        ASTVariable(HMUINT32 line, HMUINT32 column, const Token &var) : ASTNode(line, column), var(var) {}
         AST_DECL();
     };
 
@@ -149,23 +158,33 @@ namespace hypermind {
 
     AST_NODE(ASTNegativeExpr, ASTNegativeExprPtr) {
         ASTNodePtr expr;
+        ASTNegativeExpr(HMUINT32 line, HMUINT32 column, ASTNodePtr expr) : ASTNode(line, column), expr(std::move(expr)) {}
         AST_DECL();
     };
 
     AST_NODE(ASTNotExpr, ASTNotExprPtr) {
         ASTNodePtr expr;
+        ASTNotExpr(HMUINT32 line, HMUINT32 column, ASTNodePtr expr) : ASTNode(line, column), expr(std::move(expr)) {}
         AST_DECL();
     };
 
     AST_NODE(ASTArgPostfix, ASTArgPostfixPtr) {
         ASTNodePtr expr;
         ASTListPtr args;
+        ASTArgPostfix(HMUINT32 line, HMUINT32 column, ASTNodePtr expr, ASTListPtr args) : ASTNode(line, column),
+                                                                                                        expr(std::move(expr)),
+                                                                                                        args(std::move(args)) {
+
+        }
         AST_DECL();
     };
 
     AST_NODE(ASTDotPostfix, ASTDotPostfixPtr) {
         ASTNodePtr expr;
         Token name;
+        ASTDotPostfix(HMUINT32 line, HMUINT32 column, ASTNodePtr expr, const Token &name) : ASTNode(line, column),
+                                                                                                   expr(std::move(expr)),
+                                                                                                   name(name) {}
         AST_DECL();
     };
 

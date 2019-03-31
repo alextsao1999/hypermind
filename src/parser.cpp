@@ -10,32 +10,47 @@ namespace hypermind {
 
     // Unary ::= Primary |  "!" Primary | "++" Primary | Primary "++"
     ASTNodePtr Parser::ParseUnary() {
+        TokenType next = mLexer.PeekTokenType();
+        if (next == TokenType::Not) {
+            return make_ptr(ASTNotExpr, ParsePrimary());
+        } else if (next == TokenType::Sub) {
+            return make_ptr(ASTNegativeExpr, ParsePrimary());
+        }
         return ParsePrimary();
     }
 
     // Primary ::= Literal | Varible | true | false
     ASTNodePtr Parser::ParsePrimary() {
         Token tok = mLexer.Read();
+        ASTNodePtr leaf;
         if (tok.type == TokenType::Identifier) {
-            ASTVariablePtr astVariablePtr = make_ptr(ASTVariable);
-            astVariablePtr->var = tok;
-            return astVariablePtr;
+            leaf = make_ptr(ASTVariable, tok);
         } else if (tok.type == TokenType::String || tok.type == TokenType::Number) {
-            ASTLiteralPtr astLiteralPtr = make_ptr(ASTLiteral);
-            astLiteralPtr->value = tok.value;
-            return astLiteralPtr;
+            leaf = make_ptr(ASTLiteral, tok.value);
         } else if (tok.type == TokenType::KeywordTrue) {
-            ASTLiteralPtr astLiteralPtr = make_ptr(ASTLiteral);
-            astLiteralPtr->value.type = ValueType::True;
-            return astLiteralPtr;
+            leaf = make_ptr(ASTLiteral, Value(ValueType::True));
         } else if (tok.type == TokenType::KeywordFalse) {
-            ASTLiteralPtr astLiteralPtr = make_ptr(ASTLiteral);
-            astLiteralPtr->value.type = ValueType::False;
-            return astLiteralPtr;
+            leaf = make_ptr(ASTLiteral, Value(ValueType::False));
+        } else if (tok.type == TokenType::LeftParen) {
+            leaf = ParseExpression();
+            mLexer.Consume(TokenType::RightParen);
         } else {
             // TODO 不存在的Primary ??
             return nullptr;
         }
+        while (true) {
+            TokenType type = mLexer.PeekTokenType();
+            if (type == TokenType::LeftParen) {
+                mLexer.Consume();
+                leaf = make_ptr(ASTArgPostfix, leaf, ParseArgList());
+                mLexer.Consume(TokenType::RightParen);
+            } else if (type == TokenType::Dot) {
+                leaf = make_ptr(ASTDotPostfix, leaf, mLexer.Read());
+            } else {
+                break;
+            }
+        }
+        return leaf;
     }
 
     ASTNodePtr Parser::ParseExpression() {
@@ -73,13 +88,9 @@ namespace hypermind {
         mLexer.Consume(); // Consume function
         ASTFunctionStmtPtr ast = make_ptr(ASTFunctionStmt);
         ast->name = mLexer.Read();
-        if (!mLexer.Match(TokenType::LeftParen)) {
-            // TODO ErrorReport 缺少左括号
-        }
+        mLexer.Consume(TokenType::LeftParen);
         ast->params = ParseParamList();
-        if (!mLexer.Match(TokenType::RightParen)) {
-            // TODO ErrorReport 缺少右括号
-        }
+        mLexer.Consume(TokenType::RightParen);
         ast->body = ParseBlock();
         return ast;
     }
@@ -87,14 +98,9 @@ namespace hypermind {
     ASTNodePtr Parser::ParseIfStmt() {
         mLexer.Consume(); // Consume If
         ASTIfStmtPtr ast = make_ptr(ASTIfStmt);
-
-        if (!mLexer.Match(TokenType::LeftParen)) {
-            // TODO ErrorReport 缺少左括号
-        }
+        mLexer.Consume(TokenType::LeftParen);
         ast->condition = ParseExpression();
-        if (!mLexer.Match(TokenType::RightParen)) {
-            // TODO ErrorReport 缺少右括号
-        }
+        mLexer.Consume(TokenType::RightParen);
         ast->thenBlock = ParseBlock();
         if (mLexer.Match(TokenType::KeywordElse)) {
             ast->elseBlock = ParseBlock();
@@ -106,13 +112,9 @@ namespace hypermind {
     ASTNodePtr Parser::ParseWhileStmt() {
         mLexer.Consume(); // Consume while
         ASTWhileStmtPtr ast = make_ptr(ASTWhileStmt);
-        if (!mLexer.Match(TokenType::LeftParen)) {
-            // TODO ErrorReport 缺少左括号
-        }
+        mLexer.Consume(TokenType::LeftParen);
         ast->condition = ParseExpression();
-        if (!mLexer.Match(TokenType::RightParen)) {
-            // TODO ErrorReport 缺少右括号
-        }
+        mLexer.Consume(TokenType::RightParen);
         ast->block = ParseBlock();
         return ast;
     }
@@ -129,8 +131,9 @@ namespace hypermind {
 
     ASTNodePtr Parser::ParseReturnStmt() {
         ASTReturnStmtPtr ast = make_ptr(ASTReturnStmt);
-        // FIXME  注意! 可能是空返回值
-        ast->retvalue = ParseExpression();
+        if (!mLexer.Match(TokenType::Delimiter)) {
+            ast->retvalue = ParseExpression();
+        }
         return ast;
     }
 

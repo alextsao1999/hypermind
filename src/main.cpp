@@ -12,7 +12,7 @@ using namespace hypermind;
 using namespace std;
 
 int main() {
-    auto *source = const_cast<HMChar *>(_HM_C("function test(a, b, c) {var ddd = 666+41*3;ddd=100;}"));
+    auto *source = const_cast<HMChar *>(_HM_C("function test(a, b, c) {var ddd = (1+2)*3;ddd=100;}"));
     VM vm;
     Lexer lexer(&vm, source);
     Parser parser(_HM_C(""), lexer);
