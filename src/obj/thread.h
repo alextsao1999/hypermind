@@ -387,6 +387,7 @@ hm_cout << _HM_C("_") << index;
                         Value val = Pop();
                         createFrame(vm, (HMClosure *) val.objval, opcode - (HMByte) Opcode::Call0);
                         ReadShort();
+                        StoreCurFrame();
                         LoadCurFrame();
                     }
                         Finish();
@@ -461,6 +462,7 @@ hm_cout << _HM_C("_") << index;
                             *stackStart = Pop();
                             sp = stackStart + 1;
                         }
+                        LoadCurFrame();
                     case Opcode::CreateClass:
                         Finish();
                     case Opcode::Constructor:
