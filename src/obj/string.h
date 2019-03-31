@@ -37,6 +37,21 @@ namespace hypermind {
         }
         HM_OBJ_DECL();
 
+        HMBool equals(HMObject *object) override {
+            if (object->type != ObjectType::String)
+                return false;
+            if (this == object) {
+                return true;
+            }
+            auto *str = (HMString *)object;
+            if (length == 0 && str->length == 0) {
+                return true;
+            }
+            if (str->length == length && hm_memcmp(str->charSequence, charSequence, length) == 0) {
+                return true;
+            }
+            return HMObject::equals(object);
+        }
     };
 
 }

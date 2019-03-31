@@ -12,9 +12,9 @@ namespace hypermind {
     ASTNodePtr Parser::ParseUnary() {
         TokenType next = mLexer.PeekTokenType();
         if (next == TokenType::Not) {
-            return make_ptr(ASTNotExpr, ParsePrimary());
+            return make_ptr(ASTNotExpr, ParseUnary());
         } else if (next == TokenType::Sub) {
-            return make_ptr(ASTNegativeExpr, ParsePrimary());
+            return make_ptr(ASTNegativeExpr, ParseUnary());
         }
         return ParsePrimary();
     }
@@ -45,6 +45,7 @@ namespace hypermind {
                 leaf = make_ptr(ASTArgPostfix, leaf, ParseArgList());
                 mLexer.Consume(TokenType::RightParen);
             } else if (type == TokenType::Dot) {
+                mLexer.Consume();
                 leaf = make_ptr(ASTDotPostfix, leaf, mLexer.Read());
             } else {
                 break;
@@ -202,7 +203,7 @@ namespace hypermind {
      * ParamList ::= ID {"," ID}
      * @return
      */
-    ASTNodePtr Parser::ParseParamList() {
+    ASTListPtr Parser::ParseParamList() {
         ASTListPtr list = make_ptr(ASTList);
         if (mLexer.PeekTokenType() == TokenType::RightParen)
             return list;
@@ -214,7 +215,7 @@ namespace hypermind {
         return list;
     }
 
-    ASTNodePtr Parser::ParseArgList() {
+    ASTListPtr Parser::ParseArgList() {
         ASTListPtr list = make_ptr(ASTList);
         if (mLexer.PeekTokenType() == TokenType::RightParen)
             return list;

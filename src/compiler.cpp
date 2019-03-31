@@ -232,6 +232,25 @@ namespace hypermind {
         AST_ENTER();
 
     }
+    AST_COMPILE(ASTNegativeExpr) {
+        AST_ENTER();
+
+    }
+
+    AST_COMPILE(ASTNotExpr) {
+        AST_ENTER();
+
+    }
+
+    AST_COMPILE(ASTArgPostfix) {
+        AST_ENTER();
+
+    }
+
+    AST_COMPILE(ASTDotPostfix) {
+        AST_ENTER();
+
+    }
 
 
 }

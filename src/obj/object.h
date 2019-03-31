@@ -71,6 +71,9 @@ namespace hypermind {
         virtual HMBool free(VM *vm){
             return true;
         };
+        virtual HMBool equals(HMObject * object){
+            return this == object;
+        };
     };
 
 

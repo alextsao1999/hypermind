@@ -90,9 +90,9 @@ namespace hypermind {
     protected:
         const HMChar *mFileName{};
         Lexer &mLexer;
-        inline ASTNodePtr ParsePrimary();
-        inline ASTNodePtr ParseUnary();
-        inline ASTNodePtr ParseBinaryOp(ASTNodePtr lhs, HMInteger prec);
+        ASTNodePtr ParsePrimary();
+        ASTNodePtr ParseUnary();
+        ASTNodePtr ParseBinaryOp(ASTNodePtr lhs, HMInteger prec);
 
     public:
         Parser(const HMChar *mFileName, Lexer &mLexer) : mFileName(mFileName), mLexer(mLexer) {}
@@ -119,8 +119,8 @@ namespace hypermind {
         ASTBlockPtr ParseBlock();
         ASTNodePtr ParseProgram();
 
-        ASTNodePtr ParseParamList();
-        ASTNodePtr ParseArgList();
+        ASTListPtr ParseParamList();
+        ASTListPtr ParseArgList();
 
 
     };

@@ -72,6 +72,27 @@ namespace hypermind {
 
         inline HMClass *getClass(const VM *vm) const;
 
+        inline HMBool equals(Value &value) {
+            if (type != value.type)
+                return false;
+            switch (type) {
+                case ValueType::Undefined:
+                case ValueType::Null:
+                case ValueType::True:
+                case ValueType::False:
+                    return true;
+                case ValueType::Integer:
+                    return intval == value.intval;
+                case ValueType::Float:
+                    return floatval == value.floatval;
+                case ValueType::Object:
+                    if (objval == value.objval)
+                        return true;
+                    return objval->equals(value.objval);
+            }
+
+        }
+
     };
 }
 

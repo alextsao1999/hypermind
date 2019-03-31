@@ -113,4 +113,25 @@ namespace hypermind {
 
     }
 
+    AST_DUMP(ASTNegativeExpr) {
+        os << _HM_C(" - ");
+        expr->dump(os);
+    }
+
+    AST_DUMP(ASTNotExpr) {
+        os << _HM_C(" ! ");
+        expr->dump(os);
+    }
+
+    AST_DUMP(ASTArgPostfix) {
+        expr->dump(os);
+        args->dump(os);
+    }
+
+    AST_DUMP(ASTDotPostfix) {
+        expr->dump(os);
+        os << _HM_C(".");
+        name.dump(os);
+    }
+
 }
