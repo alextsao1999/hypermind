@@ -132,6 +132,7 @@ namespace hypermind {
 
         void dump(HMByte *ip) {
             HMInteger index;
+            HMByte opcode;
             // 使用小端字节序
 #define ReadByte() (*(ip++))
 #define ReadShort() (ip += 2,  (ip[-1] << 8) | ip[-2])
@@ -141,7 +142,8 @@ namespace hypermind {
 #define ConstantShortArg()  index = ReadShort(); \
 hm_cout << _HM_C("_") << index;
 #define Finish() hm_cout << std::endl; break;
-            switch ((Opcode) ReadByte()) {
+            opcode = ReadByte();
+            switch ((Opcode) opcode) {
                 case Opcode::LoadConstant:
                     Instruction("Load_Constant");
                     ConstantShortArg();
@@ -210,7 +212,7 @@ hm_cout << _HM_C("_") << index;
                 case Opcode::Call6:
                 case Opcode::Call7:
                     Instruction("Call");
-//                    hm_cout <<  - (HMByte) Opcode::Call0;
+                    hm_cout << opcode - (HMByte) Opcode::Call0;
                     ShortArg();
                     Finish();
                 case Opcode::Super:
@@ -309,7 +311,7 @@ hm_cout << _HM_C("_") << index;
             Value *stackStart;
             HMByte *ip;
             HMFunction *fn;
-            Opcode opcode;
+            HMByte opcode;
             //  ------------------------------ 定义宏函数 (使用小端字节序)
 #define LoadCurFrame() curFrame = &frames[usedFrameNum - 1]; stackStart = curFrame->stackStart; \
     fn = curFrame->closure->pFn;ip = curFrame->ip;
@@ -326,7 +328,8 @@ hm_cout << _HM_C("_") << index;
             //  ------------------------------ 加载完成
             while (true) {
                 dump(ip);
-                switch ((Opcode) ReadByte()) {
+                opcode = ReadByte();
+                switch ((Opcode) opcode) {
                     case Opcode::LoadConstant:
                         Push(fn->constants[ReadShort()]);
                         Finish();
@@ -343,9 +346,10 @@ hm_cout << _HM_C("_") << index;
                         ReadShort();
                         Finish();
                     case Opcode::LoadUpvalue:
-
+                        ReadShort();
                         Finish();
                     case Opcode::StoreUpvalue:
+                        ReadShort();
                         Finish();
                     case Opcode::LoadThisField:
                         Finish();
@@ -368,6 +372,8 @@ hm_cout << _HM_C("_") << index;
                         Push(Value(ValueType::False));
                         Finish();
                     case Opcode::Call:
+                        ReadShort();
+                        ReadShort();
                         Finish();
                     case Opcode::Call0:
                     case Opcode::Call1:
@@ -376,9 +382,13 @@ hm_cout << _HM_C("_") << index;
                     case Opcode::Call4:
                     case Opcode::Call5:
                     case Opcode::Call6:
-                    case Opcode::Call7:
-//                        os << code[i] - (HMByte) Opcode::Call0;
-//                        ShortArg();
+                    case Opcode::Call7: {
+                        // 将闭包函数弹出
+                        Value val = Pop();
+                        createFrame(vm, (HMClosure *) val.objval, opcode - (HMByte) Opcode::Call0);
+                        ReadShort();
+                        LoadCurFrame();
+                    }
                         Finish();
                     case Opcode::Super:
                         Finish();
@@ -428,6 +438,10 @@ hm_cout << _HM_C("_") << index;
                     case Opcode::Or:
                         Finish();
                     case Opcode::CreateClosure:
+                        // ------------------------
+                        // 注意 : 没有对Objval 进行检查
+                        // ------------------------
+                        Push(Value(vm->NewObject<HMClosure>((HMFunction *) fn->constants[ReadShort()].objval)));
                         Finish();
                     case Opcode::CloseUpvalue:
 
@@ -438,12 +452,14 @@ hm_cout << _HM_C("_") << index;
                         // 只有当前没有栈帧的时候线程才结束
                         if (usedFrameNum == 0) {
                             dumpStack(stack, fn->maxStackSlotNum);
-
                             if (caller == nullptr) {
-//                                stack[0] = Pop();
+                                stack[0] = Pop();
                             }
                             sp = stack + 1;
                             return;
+                        } else {
+                            *stackStart = Pop();
+                            sp = stackStart + 1;
                         }
                     case Opcode::CreateClass:
                         Finish();
@@ -467,7 +483,7 @@ hm_cout << _HM_C("_") << index;
 #undef ReadByte
 #undef ReadShort
 #undef ReadInt
-
+#undef Finish
         }
 
         HM_OBJ_DECL();

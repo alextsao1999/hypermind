@@ -131,6 +131,7 @@ namespace hypermind {
     }
 
     ASTNodePtr Parser::ParseReturnStmt() {
+        mLexer.Consume();
         ASTReturnStmtPtr ast = make_ptr(ASTReturnStmt);
         if (!mLexer.Match(TokenType::Delimiter)) {
             ast->retvalue = ParseExpression();
@@ -139,6 +140,7 @@ namespace hypermind {
     }
 
     ASTNodePtr Parser::ParseClassStmt() {
+        mLexer.Consume();
         return hypermind::ASTNodePtr();
     }
 

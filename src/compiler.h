@@ -456,8 +456,11 @@ namespace hypermind {
          * 离开编译单元 将创建编译单元之前的编译单元设为当前编译单元
          * @param cu
          */
-        void LeaveCompileUnit(const CompileUnit &cu) {
+        void LeaveCompileUnit(CompileUnit &cu) {
+            cu.EmitPushNull();
+            cu.EmitReturn();
             mCurCompileUnit = cu.mOuter;
+
         };
 
     };

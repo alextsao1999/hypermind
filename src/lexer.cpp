@@ -155,7 +155,7 @@ namespace hypermind {
                 TOKEN_DUMP(":");
                 break;
             default:
-                TOKEN_DUMP("<unkown>");
+                TOKEN_DUMP("<unknown>");
         }
 #undef TOKEN_DUMP
 

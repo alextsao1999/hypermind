@@ -161,6 +161,8 @@ namespace hypermind {
     // 编译Return
     AST_COMPILE(ASTReturnStmt) {
         AST_ENTER();
+        retvalue->compile(compiler);
+        compiler->mCurCompileUnit->EmitReturn();
     }
 
     // 编译List
@@ -209,11 +211,11 @@ namespace hypermind {
         compiler->mCurCompileUnit = &cu;
         if (cu.mOuter != nullptr) {
             // TODO 如果为 函数 则 添加Null 为 方法就添加This
-            cu.AddLocalVariable(Token(TokenType::Identifier, nullptr, 0, 0));
             // 进入作用域
             cu.EnterScope(); // 直接就编译了 不需要离开作用域
+            cu.AddLocalVariable(Token(TokenType::Identifier, nullptr, 0, 0));
         }
-        cu.mFn->maxStackSlotNum = cu.mStackSlotNum;
+        cu.mFn->maxStackSlotNum = cu.mStackSlotNum = cu.mLocalVarNumber;
 
         params->compile(compiler); // 编译参数声明
         body->compile(compiler); // 编译函数实体
@@ -245,8 +247,8 @@ namespace hypermind {
 
     AST_COMPILE(ASTArgPostfix) {
         AST_ENTER();
-        expr->compile(compiler);
         args->compile(compiler, CompileFlag::Null);
+        expr->compile(compiler);
         compiler->mCurCompileUnit->EmitCall(0, args->elements.size());
 
     }
