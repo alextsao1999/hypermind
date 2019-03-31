@@ -25,8 +25,9 @@ namespace hypermind {
         Value errorObj{};
 
         HM_OBJ_CONSTRUCTOR(Thread, HMClosure *closure), frames(vm->Allocate<Frame>(INIT_FRAME_NUM)), stackCapacity(
-                CeilToPowerOf2(closure->pFn->maxStackSlotNum + 1)), stack(vm->Allocate<Value>(stackCapacity)),
-                                                        sp(stack) {
+                CeilToPowerOf2(closure->pFn->maxStackSlotNum + 1)) {
+            stack = vm->Allocate<Value>(stackCapacity);
+            sp = stack;
             prepare(closure, stack);
         }
 
@@ -129,6 +130,179 @@ namespace hypermind {
             return newUpvalue;//返回该结点
         }
 
+        void dump(HMByte *ip) {
+            HMInteger index;
+            // 使用小端字节序
+#define ReadByte() (*(ip++))
+#define ReadShort() (ip += 2,  (ip[-1] << 8) | ip[-2])
+#define ReadInt() (ip += 4, (ip[-1] << 24) | (ip[-2] << 16) | (ip[-3] << 8) | ip[-4])
+#define Instruction(v) hm_cout << v;
+#define ShortArg() hm_cout << _HM_C("_") << (int) ReadShort();
+#define ConstantShortArg()  index = ReadShort(); \
+hm_cout << _HM_C("_") << index;
+#define Finish() hm_cout << std::endl; break;
+            switch ((Opcode) ReadByte()) {
+                case Opcode::LoadConstant:
+                    Instruction("Load_Constant");
+                    ConstantShortArg();
+                    Finish();
+                case Opcode::LoadLocalVariable:
+                    Instruction("Load_Local_Variable");
+                    ShortArg();
+                    Finish();
+                case Opcode::StoreLocalVariable:
+                    Instruction("Store_Local_Variable");
+                    ShortArg();
+                    Finish();
+                case Opcode::LoadModuleVariable:
+                    Instruction("Load_Module_Variable");
+                    ShortArg();
+                    Finish();
+                case Opcode::StoreModuleVariable:
+                    Instruction("Store_Module_Varible");
+                    ShortArg();
+                    Finish();
+                case Opcode::LoadUpvalue:
+                    Instruction("Load_Upvalue");
+                    ShortArg();
+                    Finish();
+                case Opcode::StoreUpvalue:
+                    Instruction("Store_Upvalue");
+                    ShortArg();
+                    Finish();
+                case Opcode::LoadThisField:
+                    Instruction("Load_This_Field");
+                    Finish();
+                case Opcode::StoreThisField:
+                    Instruction("Store_This_Field");
+                    Finish();
+                case Opcode::LoadField:
+                    Instruction("Load_Field");
+                    ShortArg();
+                    Finish();
+                case Opcode::StoreField:
+                    Instruction("Store_Field");
+                    ShortArg();
+                    Finish();
+                case Opcode::Pop:
+                    Instruction("Pop");
+                    Finish();
+                case Opcode::PushNull:
+                    Instruction("Push_Null");
+                    Finish();
+                case Opcode::PushTrue:
+                    Instruction("Push_True");
+                    Finish();
+                case Opcode::PushFalse:
+                    Instruction("Push_False");
+                    Finish();
+                case Opcode::Call:
+                    Instruction("Call");
+                    ShortArg();
+                    ShortArg();
+                    Finish();
+                case Opcode::Call0:
+                case Opcode::Call1:
+                case Opcode::Call2:
+                case Opcode::Call3:
+                case Opcode::Call4:
+                case Opcode::Call5:
+                case Opcode::Call6:
+                case Opcode::Call7:
+                    Instruction("Call");
+//                    hm_cout <<  - (HMByte) Opcode::Call0;
+                    ShortArg();
+                    Finish();
+                case Opcode::Super:
+                    Instruction("Super");
+                    ShortArg();
+                    ShortArg();
+                    Finish();
+                case Opcode::Super0:
+                case Opcode::Super1:
+                case Opcode::Super2:
+                case Opcode::Super3:
+                case Opcode::Super4:
+                case Opcode::Super5:
+                case Opcode::Super6:
+                case Opcode::Super7:
+                    Instruction("Super");
+                    ShortArg();
+                    Finish();
+                case Opcode::Jump:
+                    Instruction("Jump");
+                    ShortArg();
+                    Finish();
+                case Opcode::Loop:
+                    Instruction("Loop");
+                    Finish();
+                case Opcode::JumpIfFalse:
+                    Instruction("Jump_If_False");
+                    ShortArg();
+                    Finish();
+                case Opcode::JumpIfTrue:
+                    Instruction("Jump_If_True");
+                    ShortArg();
+                    Finish();
+                case Opcode::Add:
+                    Instruction("Add");
+                    Finish();
+                case Opcode::Sub:
+                    Instruction("Sub");
+                    Finish();
+                case Opcode::Mul:
+                    Instruction("Mul");
+                    Finish();
+                case Opcode::Div:
+                    Instruction("Div");
+                    Finish();
+                case Opcode::And:
+                    Instruction("And");
+                    Finish();
+                case Opcode::Or:
+                    Instruction("Or");
+                    Finish();
+                case Opcode::CreateClosure:
+                    Instruction("Create_Closure");
+                    ConstantShortArg();
+                    Finish();
+                case Opcode::CloseUpvalue:
+                    Instruction("Close_Upval");
+                    Finish();
+                case Opcode::Return:
+                    Instruction("Return");
+                    Finish();
+                case Opcode::CreateClass:
+                    Instruction("Create_Class");
+                    Finish();
+                case Opcode::Constructor:
+                    Instruction("Constructor");
+                    Finish();
+                case Opcode::InstanceMethod:
+                    Instruction("Instance_Method");
+                    Finish();
+                case Opcode::StaticMethod:
+                    Instruction("Static_Method");
+                    Finish();
+                case Opcode::End:
+                    Instruction("End");
+                    Finish();
+            }
+#undef Instruction
+#undef ReadByte
+#undef ReadShort
+#undef ReadInt
+
+        }
+
+        void dumpStack(Value *stack, HMUINT32 num) {
+            for (int i = 0; i < num; ++i) {
+                hm_cout << i << " : ";
+                stack[i].dump(hm_cout);
+                hm_cout << std::endl;
+            }
+        }
+
         void execute(VM *vm) {
             vm->mCurrentThread = this;
             Frame *curFrame;
@@ -151,18 +325,25 @@ namespace hypermind {
             LoadCurFrame();
             //  ------------------------------ 加载完成
             while (true) {
+                dump(ip);
                 switch ((Opcode) ReadByte()) {
                     case Opcode::LoadConstant:
+                        Push(fn->constants[ReadShort()]);
                         Finish();
                     case Opcode::LoadLocalVariable:
+                        Push(stackStart[ReadShort()]);
                         Finish();
                     case Opcode::StoreLocalVariable:
+                        stackStart[ReadShort()] = Pop();
                         Finish();
                     case Opcode::LoadModuleVariable:
+                        ReadShort();
                         Finish();
                     case Opcode::StoreModuleVariable:
+                        ReadShort();
                         Finish();
                     case Opcode::LoadUpvalue:
+
                         Finish();
                     case Opcode::StoreUpvalue:
                         Finish();
@@ -181,9 +362,10 @@ namespace hypermind {
                         Push(Value(ValueType::Null));
                         Finish();
                     case Opcode::PushTrue:
-                        Push(Value(true));
+                        Push(Value(ValueType::True));
                         Finish();
                     case Opcode::PushFalse:
+                        Push(Value(ValueType::False));
                         Finish();
                     case Opcode::Call:
                         Finish();
@@ -217,13 +399,29 @@ namespace hypermind {
                         Finish();
                     case Opcode::JumpIfTrue:
                         Finish();
-                    case Opcode::Add:
+                    case Opcode::Add: {
+                        Value op1 = Pop();
+                        Value op2 = Pop();
+                        Push(Value(op1.intval + op2.intval));
+                    }
                         Finish();
-                    case Opcode::Sub:
+                    case Opcode::Sub: {
+                        Value op1 = Pop();
+                        Value op2 = Pop();
+                        Push(Value(op1.intval - op2.intval));
+                    }
                         Finish();
-                    case Opcode::Mul:
+                    case Opcode::Mul: {
+                        Value op1 = Pop();
+                        Value op2 = Pop();
+                        Push(Value(op1.intval * op2.intval));
+                    }
                         Finish();
-                    case Opcode::Div:
+                    case Opcode::Div: {
+                        Value op1 = Pop();
+                        Value op2 = Pop();
+                        Push(Value(op1.intval / op2.intval));
+                    }
                         Finish();
                     case Opcode::And:
                         Finish();
@@ -239,8 +437,10 @@ namespace hypermind {
                         closeUpvalue(stackStart);
                         // 只有当前没有栈帧的时候线程才结束
                         if (usedFrameNum == 0) {
+                            dumpStack(stack, fn->maxStackSlotNum);
+
                             if (caller == nullptr) {
-                                stack[0] = Pop();
+//                                stack[0] = Pop();
                             }
                             sp = stack + 1;
                             return;
