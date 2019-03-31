@@ -102,7 +102,7 @@ namespace hypermind {
     }
 
     template<typename T>
-    T *Buffer<T>::GetBuffer() {
+    inline T *Buffer<T>::GetBuffer() {
         return mData;
     }
 

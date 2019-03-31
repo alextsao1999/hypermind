@@ -40,6 +40,7 @@ namespace hypermind {
                                                                                                         superClass(super),
                                                                                                         fieldNubmer(fieldNumber),
                                                                                                         methods(Buffer<HMMethod>(vm)) {
+            // 加到保护对象中?
         };
 
         HM_OBJ_DECL();

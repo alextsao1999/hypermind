@@ -157,7 +157,6 @@ namespace hypermind {
 
     class Lexer {
     protected:
-        bool mEof{false};
         std::deque<Token> mTokens;
 
         inline void GetNextToken();
@@ -168,6 +167,7 @@ namespace hypermind {
         inline void ParseNumber();
 
     public:
+        HMBool mEof{false};
         Token mCurrentToken;
 
         Lexer(VM *mVM, HMChar *mSource) : mVM(mVM), mSource(mSource) {};

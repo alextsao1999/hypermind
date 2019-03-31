@@ -117,10 +117,12 @@ namespace hypermind {
          * @return
          */
         ASTBlockPtr ParseBlock();
-        ASTNodePtr ParseProgram();
+        ASTNodePtr ParseStmt();
 
         ASTListPtr ParseParamList();
         ASTListPtr ParseArgList();
+
+        ASTListPtr ParseProgram();
 
 
     };

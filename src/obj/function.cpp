@@ -227,6 +227,7 @@ constants[index].dump(os);
                 case Opcode::Call6:
                 case Opcode::Call7:
                     Instruction("Call");
+                    os << code[i] - (HMByte) Opcode::Call0;
                     ShortArg();
                     Finish();
                 case Opcode::Super:

@@ -67,7 +67,7 @@ namespace hypermind {
         LocalVariable mLocalVariables[MAX_LOCAL_VAR_NUMBER]{};
         HMUINT32 mLocalVarNumber{0}; // 局部变量个数
 
-        // 最大操作栈数量
+        // 记录操作栈变化
         HMUINT32 mStackSlotNum{0};
 
     public:
@@ -156,8 +156,8 @@ namespace hypermind {
         void DefineVariable(HMInteger index) {
             if (mScopeDepth == -1) {
                 // 作用域为模块作用域
-                EmitStoreVariable(Variable(ScopeType::Module, index));
-                EmitPop();
+                //EmitStoreVariable(Variable(ScopeType::Module, index));
+                //EmitPop();
             }
             // 不是模块作用域 不用管
         }
@@ -318,13 +318,18 @@ namespace hypermind {
          */
         void EmitCall(HMUINT32 methodIndex, HMUINT32 argNum) {
             STACK_CHANGE(-argNum);
-            if (argNum <= 7)
-                WriteByte(static_cast<HMByte>((HMByte) Opcode::Call + argNum));
-            else {
+            if (argNum <= 7) {
+                WriteByte(static_cast<HMByte>((HMByte) Opcode::Call0 + argNum));
+                WriteShortOperand(methodIndex);
+            } else {
                 WriteOpcode(Opcode::Call);
                 WriteShortOperand(methodIndex); // 方法索引
                 WriteShortOperand(argNum); // 实参数量
             }
+        }
+
+        void EmitReturn() {
+            WriteOpcode(Opcode::Return);
         }
 
         /**

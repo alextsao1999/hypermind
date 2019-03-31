@@ -232,6 +232,7 @@ namespace hypermind {
         AST_ENTER();
 
     }
+
     AST_COMPILE(ASTNegativeExpr) {
         AST_ENTER();
 
@@ -244,6 +245,9 @@ namespace hypermind {
 
     AST_COMPILE(ASTArgPostfix) {
         AST_ENTER();
+        expr->compile(compiler);
+        args->compile(compiler, CompileFlag::Null);
+        compiler->mCurCompileUnit->EmitCall(0, args->elements.size());
 
     }
 

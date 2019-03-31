@@ -50,7 +50,10 @@ namespace hypermind {
         Value closedUpvalue;
 
         // 链接下一个Upvalue
-        HMUpvalue *nextUpvalue;
+        HMUpvalue *nextUpvalue{nullptr};
+        HM_OBJ_CONSTRUCTOR_CLASS(Upvalue, nullptr, Value *local), localVarPtr(local) {
+
+        }
         HM_OBJ_DECL();
     };
 
@@ -58,9 +61,9 @@ namespace hypermind {
     HM_OBJECT(Closure) {
         // 闭包指向的函数
         HMFunction *pFn;
-        HMUpvalue *upvalues{nullptr};
+        HMUpvalue **upvalues{nullptr};
         HM_OBJ_CONSTRUCTOR_CLASS(Closure, vm->mFunctionClass, HMFunction *fun), pFn(fun), upvalues(
-                vm->Allocate<HMUpvalue>(fun->upvalueNum)) {};
+                vm->Allocate<HMUpvalue *>(fun->upvalueNum)) {};
 
         HM_OBJ_DECL();
     };

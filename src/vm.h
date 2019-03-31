@@ -9,21 +9,25 @@
 #include "hypermind.h"
 #include "obj/value.h"
 namespace hypermind {
+    struct HMThread;
     class VM {
     public:
         /**
          * 链接的所有对象
          */
         HMObject *mAllObjects{nullptr};
+
         HMClass *mBooleanClass{nullptr};
         HMClass *mStringClass{nullptr};
         HMClass *mIntegerClass{nullptr};
         HMClass *mFloatClass{nullptr};
         HMClass *mFunctionClass{nullptr};
-        HMClass *mMethodClass{nullptr};
+        HMClass *mThreadClass{nullptr};
         HMClass *mMetaClass{nullptr};
         HMClass *mMapClass{nullptr};
         HMClass *mListClass{nullptr};
+
+        HMThread *mCurrentThread{nullptr};
 
         /**
          * 虚拟机内存管理

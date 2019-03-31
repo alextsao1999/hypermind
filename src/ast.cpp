@@ -19,13 +19,9 @@ namespace hypermind {
 
     // 二元表达式Dump
     AST_DUMP(ASTBinary) {
-        os << _HM_C(" line< ") << line << _HM_C("> ");
-
-        os << _HM_C(" { (binary)  ");
         lhs->dump(os);
         DumpTokenType(os, op);
         rhs->dump(os);
-        os << _HM_C("  } ") ;
     }
 
     // 字面量Dump
@@ -67,8 +63,9 @@ namespace hypermind {
     }
     AST_DUMP(ASTReturnStmt) {
         os << _HM_C("return ");
-        retvalue->dump(os);
-
+        if (retvalue != nullptr)
+            retvalue->dump(os);
+        
     }
 
     AST_DUMP(ASTVarStmt) {

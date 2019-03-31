@@ -55,6 +55,10 @@ namespace hypermind {
     // AST列表
     AST_NODE(ASTList, ASTListPtr) {
         std::vector<ASTNodePtr> elements;
+        inline void addItem(ASTNodePtr &&np) {
+            // 添加语句 Block/Stmt/Expr
+            elements.push_back(np);
+        }
         AST_DECL();
     };
 

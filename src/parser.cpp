@@ -148,18 +148,18 @@ namespace hypermind {
         if (mLexer.PeekTokenType() == TokenType::LeftBrace) {
             mLexer.Consume();
             ASTNodePtr stmt;
-            while ((stmt = ParseProgram()) != nullptr) {
+            while ((stmt = ParseStmt()) != nullptr) {
                 blockPtr->addStmt(std::move(stmt));
                 if (mLexer.Match(TokenType::RightBrace))
                     break;
             }
         } else {
-            blockPtr->addStmt(std::move(ParseProgram()));
+            blockPtr->addStmt(std::move(ParseStmt()));
         }
         return blockPtr;
     }
 
-    ASTNodePtr Parser::ParseProgram() {
+    ASTNodePtr Parser::ParseStmt() {
         SkipDelimiter();
         TokenType tok = mLexer.PeekTokenType();
         ASTNodePtr ptr;
@@ -223,6 +223,14 @@ namespace hypermind {
             ASTNodePtr &&ptr = ParseExpression();
             list->elements.push_back(ptr);
         } while (mLexer.Match(TokenType::Comma));
+        return list;
+    }
+
+    ASTListPtr Parser::ParseProgram() {
+        ASTListPtr list = make_ptr(ASTList);
+        while (!mLexer.mEof) {
+            list->addItem(ParseStmt());
+        }
         return list;
     }
 
