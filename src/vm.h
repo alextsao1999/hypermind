@@ -100,17 +100,47 @@ namespace hypermind {
             mProtectedObjNum--;
         }
 
+        void StartGC() {
+            HMObject *&obj = mAllObjects;
+            while (obj != nullptr) {
+                if (obj->isDark) {
+                    // 黑对象置白
+                    obj->isDark = false;
+                } else {
+                    // 白对象清除
+//                    obj->free(this);
+//                    Deallocate(obj, sizeof());
+
+                }
+            }
+
+        }
+
     protected:
         // 已经分配的字节数
         HMUINT32 mAllocatedBytes{0};
 
+        // GC 配置
+        struct {
+            //堆生长因子
+            float heapGrowthFactor{1.5};
+
+            //初始堆大小,默认为10MB
+            HMUINT32 initialHeapSize;
+
+            //最小堆大小,默认为1MB
+            HMUINT32 minHeapSize;
+
+            //第一次触发gc的堆大小,默认为initialHeapSize
+            HMUINT32 nextGC;
+        } mConfig;
 
         // 所有灰对象
         Vector<HMObject *> mGrayObjs;
         // 受保护的对象
         HMObject *mProtectedObj[8];
         HMUINT32 mProtectedObjNum{0};
-//        Vector<HMObject *> mProtectedObj;
+
     };
 }
 

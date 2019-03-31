@@ -16,7 +16,7 @@ using namespace std;
 
 int main() {
 //    auto *source = const_cast<HMChar *>(_HM_C("function test(a, b, c) {var ddd = (1+2)*3;ddd=100;} \ntest(1,2,3)"));
-    auto *source = const_cast<HMChar *>(_HM_C("var a = 100; a = a + 20;"));
+    auto *source = const_cast<HMChar *>(_HM_C("var a = 100; a = a + 20+391;"));
     VM vm;
     Lexer lexer(&vm, source);
     Parser parser(_HM_C(""), lexer);
@@ -32,8 +32,10 @@ int main() {
     auto *closure = vm.NewObject<HMClosure>(compiler.mCurCompileUnit->mFn);
     auto *thread = vm.NewObject<HMThread>(closure);
     thread->execute(&vm);
-    vm.DumpAllObjects();
-    hm_cout << " allocated :  " << vm.GetAllocatedBytes();
+//    vm.DumpAllObjects();
+    vm.StartGC();
+//    vm.DumpAllObjects();
+//    hm_cout << " allocated :  " << vm.GetAllocatedBytes();
     return 0;
 }
 
