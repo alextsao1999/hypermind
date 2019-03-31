@@ -80,6 +80,22 @@ namespace hypermind {
             mGrayObjs.push_back(obj);
         }
 
+        /**
+         * 标黑对象
+         * @param obj
+         */
+        inline void Black(HMObject *obj) {
+
+        }
+
+        inline void PushProtectedObject(HMObject *object) {
+            mProtectedObj[mProtectedObjNum++] = object;
+        }
+
+        inline void PopProtectedObject() {
+            mProtectedObjNum--;
+        }
+
     protected:
         // 已经分配的字节数
         HMUINT32 mAllocatedBytes{0};
@@ -88,8 +104,9 @@ namespace hypermind {
         // 所有灰对象
         Vector<HMObject *> mGrayObjs;
         // 受保护的对象
-        Vector<HMObject *> mProtectedObj;
-
+        HMObject *mProtectedObj[8];
+        HMUINT32 mProtectedObjNum{0};
+//        Vector<HMObject *> mProtectedObj;
     };
 }
 

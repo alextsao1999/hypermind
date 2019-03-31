@@ -30,7 +30,7 @@ namespace hypermind {
         Value() : type(ValueType::Undefined) {};
         Value(ValueType type) : type(type) {};
         Value(HMObject *obj) : type(ValueType::Object), objval(obj) {};
-        Value(HMUINT32 val) : type(ValueType::Integer), intval(val) {};
+        Value(HMInteger val) : type(ValueType::Integer), intval(val) {};
         Value(HMFloat val) : type(ValueType::Float), floatval(val) {};
         Value(HMBool val) : type(val ? ValueType::True : ValueType::False) {};
 

@@ -9,7 +9,7 @@
 
 namespace hypermind {
 
-    HMObject::HMObject(VM *vm, ObjectType type, HMClass *classObj) {
+    HMObject::HMObject(VM *vm, ObjectType type, HMClass *classObj) : type(type), classObj(classObj) {
         next = vm->mAllObjects;
         vm->mAllObjects = this;
     }

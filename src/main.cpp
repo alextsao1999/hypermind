@@ -7,6 +7,7 @@
 #include "obj/string.h"
 #include "compiler.h"
 
+#include <obj/map.h>
 using namespace hypermind;
 
 using namespace std;
@@ -21,12 +22,12 @@ int main() {
     CompileUnit cu = compiler.CreateCompileUnit(new FunctionDebug("module"));
     compiler.mCurModule = vm.NewObject<HMModule>(vm.NewObject<HMString>(_HM_C("test")));
     compiler.mCurCompileUnit = &cu;
-//    ast->compile(&compiler);
+    ast->compile(&compiler);
 
-    ast->dump(hm_cout);
-//    vm.DumpAllObjects();
-//
-//    hm_cout<< " allocated :  " << vm.GetAllocatedBytes();
+//    ast->dump(hm_cout);
+    vm.DumpAllObjects();
+
+    hm_cout<< " allocated :  " << vm.GetAllocatedBytes();
 
 
     return 0;

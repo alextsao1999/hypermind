@@ -17,20 +17,22 @@ namespace hypermind {
         HMChar *charSequence;
         HM_OBJ_CONSTRUCTOR(String, const HMChar *str, HMUINT32 len), length(len) {
             // 计算文本hash
-            charSequence = vm->Allocate<HMChar>(length);
+            charSequence = vm->Allocate<HMChar>(length + 1);
             if (charSequence != nullptr) {
                 hm_memcpy(charSequence, str, length);
                 hashCode = hashString(charSequence, length);
+                charSequence[length] = '\0';
             } else {
                 MEMRY_ERROR("文本对象申请内存失败");
             }
         }
         HM_OBJ_CONSTRUCTOR(String, const String &str), length(str.size()) {
             // 计算文本hash
-            charSequence = vm->Allocate<HMChar>(length);
+            charSequence = vm->Allocate<HMChar>(length + 1);
             if (charSequence != nullptr) {
                 hm_memcpy(charSequence, str.c_str(), length);
                 hashCode = hashString(charSequence, length);
+                charSequence[length] = '\0';
             } else {
                 MEMRY_ERROR("文本对象申请内存失败");
             }
