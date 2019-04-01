@@ -38,8 +38,7 @@ namespace hypermind {
         HMString *name; // 类名
         HM_OBJ_CONSTRUCTOR_CLASS(Class, nullptr, HMString *name, HMClass *super, HMUINT32 fieldNumber), name(name),
                                                                                                         superClass(super),
-                                                                                                        fieldNubmer(fieldNumber),
-                                                                                                        methods(Buffer<HMMethod>(vm)) {
+                                                                                                        fieldNubmer(fieldNumber){
             // 加到保护对象中?
         };
 

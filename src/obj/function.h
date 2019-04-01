@@ -31,8 +31,7 @@ namespace hypermind {
 #ifdef HMDebug
         FunctionDebug *debug{nullptr};
 #endif
-        HM_OBJ_CONSTRUCTOR(Function, HMModule *module), constants(Buffer<Value>(vm)), instructions(Buffer<HMByte>(vm)),
-                                                       module(module) {
+        HM_OBJ_CONSTRUCTOR(Function, HMModule *module), module(module) {
 
         };
 
@@ -63,7 +62,9 @@ namespace hypermind {
         HMFunction *pFn;
         HMUpvalue **upvalues{nullptr};
         HM_OBJ_CONSTRUCTOR_CLASS(Closure, vm->mFunctionClass, HMFunction *fun), pFn(fun), upvalues(
-                vm->Allocate<HMUpvalue *>(fun->upvalueNum)) {};
+                vm->Allocate<HMUpvalue *>(fun->upvalueNum)) {
+
+        };
 
         HM_OBJ_DECL();
     };

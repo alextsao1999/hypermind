@@ -30,7 +30,7 @@ namespace hypermind {
     }
 
     void HMFunction::DumpInstruction(int i) {
-        HMByte *code = instructions.GetBuffer();
+        HMByte *code = instructions.data;
         String str;
 #define Instruction(v)                 str = _HM_C(v);break;
 #define ReadByte() (code[i++])
@@ -142,7 +142,7 @@ namespace hypermind {
     }
 
     void HMFunction::DumpAllInstructions(Ostream &os) {
-        HMByte *code = instructions.GetBuffer();
+        HMByte *code = instructions.data;
         HMInteger index;
         // 使用小端字节序
 #define ReadByte() (code[i++])
@@ -156,7 +156,7 @@ constants[index].dump(os);
 
 #define Finish() os << std::endl; break;
         int i = 0;
-        while (i < instructions.GetCount()) {
+        while (i < instructions.count) {
             os << _HM_C("     ");
             switch ((Opcode) code[i]) {
                 case Opcode::LoadConstant:

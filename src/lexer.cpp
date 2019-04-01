@@ -512,54 +512,55 @@ namespace hypermind {
     }
 
     void Lexer::ParseString() {
-        Buffer<HMChar> strbuf(mVM);
+        Buffer<HMChar> strbuf;
         HMChar first = CURRENT_CHAR;
         NEXT(); // 跳过 '   "  文本符
         TOKEN(TokenType::String, 0);
+#define APPEND_CHAR(c) strbuf.append(mVM, c)
         do {
             if (CURRENT_CHAR == _HM_C('\\')) { // 跳过转义符
                 NEXT();
                 switch (CURRENT_CHAR) {
                     case _HM_C('n'):
-                        strbuf.Append(_HM_C('\n'));
+                        APPEND_CHAR(_HM_C('\n'));
                         break;
                     case _HM_C('\''):
-                        strbuf.Append(_HM_C('\''));
+                        APPEND_CHAR(_HM_C('\''));
                         break;
                     case _HM_C('\"'):
-                        strbuf.Append(_HM_C('"'));
+                        APPEND_CHAR(_HM_C('"'));
                         break;
                     case _HM_C('\\'):
-                        strbuf.Append(_HM_C('\\'));
+                        APPEND_CHAR(_HM_C('\\'));
                         break;
                     case _HM_C('a'):
-                        strbuf.Append(_HM_C('\a'));
+                        APPEND_CHAR(_HM_C('\a'));
                         break;
                     case _HM_C('b'):
-                        strbuf.Append(_HM_C('\b'));
+                        APPEND_CHAR(_HM_C('\b'));
                         break;
                     case _HM_C('f'):
-                        strbuf.Append(_HM_C('\f'));
+                        APPEND_CHAR(_HM_C('\f'));
                         break;
                     case _HM_C('r'):
-                        strbuf.Append(_HM_C('\r'));
+                        APPEND_CHAR(_HM_C('\r'));
                         break;
                     default:
                         // 不存在
                         break;
                 }
             } else {
-                strbuf.Append(CURRENT_CHAR);
+                APPEND_CHAR(CURRENT_CHAR);
             }
             NEXT();
         } while (CURRENT_CHAR != first);
         TOKEN_LENGTH((HMUINT32)(CURRENT_POS - TOKEN_START));
         // 当前字符为 " ' 跳过   获取下一个字符
         NEXT();
-        auto *objString = mVM->NewObject<HMString>(strbuf.GetBuffer(), strbuf.GetCount());
+        auto *objString = mVM->NewObject<HMString>(strbuf.data, strbuf.count);
         TOKEN_VALUE.type = ValueType::Object;
         TOKEN_VALUE.objval = objString;
-        strbuf.Clear();
+        strbuf.clear(mVM);
     }
 
     void Lexer::ParseIdentifier() {

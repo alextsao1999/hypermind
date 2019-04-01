@@ -45,7 +45,7 @@ namespace hypermind {
             Frame *frame = &(frames[usedFrameNum++]);
             frame->stackStart = start;
             frame->closure = closure;
-            frame->ip = closure->pFn->instructions.GetBuffer();
+            frame->ip = closure->pFn->instructions.data;
         }
 
         void ensureStack(VM *vm, HMUINT32 needSlots) {
@@ -294,7 +294,7 @@ hm_cout << _HM_C("_") << index;
 #undef ReadByte
 #undef ReadShort
 #undef ReadInt
-
+#undef Finish
         }
 
         void dumpStack(Value *stack, HMUINT32 num) {
@@ -317,7 +317,9 @@ hm_cout << _HM_C("_") << index;
     fn = curFrame->closure->pFn;ip = curFrame->ip;
 #define StoreCurFrame() curFrame->ip = ip
 #define Push(v) (*sp++ = v)
+#define PushType(t) sp->type = t;sp++;
 #define Pop() (*(--sp))
+#define PopPtr() --sp
 #define Peek(n) (*(sp - n))
 #define ReadByte() (*(ip++))
 #define ReadShort() (ip += 2,  (ip[-1] << 8) | ip[-2])
@@ -360,16 +362,15 @@ hm_cout << _HM_C("_") << index;
                     case Opcode::StoreField:
                         Finish();
                     case Opcode::Pop:
-                        Pop();
                         Finish();
                     case Opcode::PushNull:
-                        Push(Value(ValueType::Null));
+                        PushType(ValueType::Null);
                         Finish();
                     case Opcode::PushTrue:
-                        Push(Value(ValueType::True));
+                        PushType(ValueType::True);
                         Finish();
                     case Opcode::PushFalse:
-                        Push(Value(ValueType::False));
+                        PushType(ValueType::False);
                         Finish();
                     case Opcode::Call:
                         ReadShort();
@@ -384,8 +385,8 @@ hm_cout << _HM_C("_") << index;
                     case Opcode::Call6:
                     case Opcode::Call7: {
                         // 将闭包函数弹出
-                        Value val = Pop();
-                        createFrame(vm, (HMClosure *) val.objval, opcode - (HMByte) Opcode::Call0);
+                        Value *val = PopPtr();
+                        createFrame(vm, (HMClosure *) val->objval, opcode - (HMByte) Opcode::Call0);
                         ReadShort();
                         StoreCurFrame();
                         LoadCurFrame();
@@ -411,15 +412,15 @@ hm_cout << _HM_C("_") << index;
                     case Opcode::JumpIfTrue:
                         Finish();
                     case Opcode::Add: {
-                        Value op1 = Pop();
-                        Value op2 = Pop();
-                        Push(Value(op1.intval + op2.intval));
+                        Value *op1 = PopPtr();
+                        Value *op2 = PopPtr();
+                        Push(Value(op1->intval + op2->intval));
                     }
                         Finish();
                     case Opcode::Sub: {
-                        Value op1 = Pop();
-                        Value op2 = Pop();
-                        Push(Value(op1.intval - op2.intval));
+                        Value *op1 = PopPtr();
+                        Value *op2 = PopPtr();
+                        Push(Value(op1->intval - op2->intval));
                     }
                         Finish();
                     case Opcode::Mul: {
@@ -429,9 +430,9 @@ hm_cout << _HM_C("_") << index;
                     }
                         Finish();
                     case Opcode::Div: {
-                        Value op1 = Pop();
-                        Value op2 = Pop();
-                        Push(Value(op1.intval / op2.intval));
+                        Value *op1 = PopPtr();
+                        Value *op2 = PopPtr();
+                        Push(Value(op1->intval / op2->intval));
                     }
                         Finish();
                     case Opcode::And:

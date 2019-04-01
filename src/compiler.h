@@ -85,7 +85,7 @@ namespace hypermind {
 #endif
 
         inline void WriteByte(HMByte byte) {
-            mFn->instructions.Append(byte);
+            mFn->instructions.append(mVM, byte);
 #ifdef HMDebug
             mFn->debug->line.push_back(mLine);
 #endif
@@ -287,7 +287,7 @@ namespace hypermind {
         HMInteger AddConstant(const Value &value) {
             // TODO 现在直接将value存到constants中了
             //  相同的文本或者数值会造成资源重复 可以先取hash
-            return mFn->constants.Append(value);
+            return mFn->constants.append(mVM, value);
         };
 
         void EmitCloseUpvalue() {
