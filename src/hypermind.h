@@ -56,7 +56,6 @@ namespace hypermind {
     struct HMClass;
     struct HMObject;
     struct HMClosure;
-
 }
 #define UNUSED __attribute__ ((unused))
 

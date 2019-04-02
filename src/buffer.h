@@ -6,8 +6,7 @@
 #define HYPERMIND_BUFFER_H
 
 #include <iostream>
-#include "hypermind.h"
-#include "vm.h"
+#include "gc.h"
 // Buffer
 #define BUFFER_GROWTH(count) CeilToPowerOf2(count)
 
@@ -20,15 +19,15 @@ namespace hypermind {
         HMUINT32 count{0};
         HMUINT32 capacity{0};
 
-        inline void fill(VM *vm, const T &value, HMUINT32 num) {
-            ensureCapacity(vm, count + num);
+        inline void fill(GCHeap *heap, const T &value, HMUINT32 num) {
+            ensureCapacity(heap, count + num);
             for (int i = 0; i < num; ++i) {
                 data[count++] = value;
             }
         };
 
-        inline HMUINT32 append(VM *vm, const T &data) {
-            fill(vm, data, 1);
+        inline HMUINT32 append(GCHeap *heap, const T &data) {
+            fill(heap, data, 1);
             return count - 1;
         };
 
@@ -42,11 +41,11 @@ namespace hypermind {
             return true;
         };
 
-        inline bool insert(VM *vm, HMUINT32 index, const T &value) {
+        inline bool insert(GCHeap *heap, HMUINT32 index, const T &value) {
             if (index >= count)
-                ensureCapacity(vm, count = index + 1);
+                ensureCapacity(heap, count = index + 1);
             else {
-                ensureCapacity(vm, ++count);
+                ensureCapacity(heap, ++count);
                 memmove(&data[index + 1], &data[index], (count - index - 1) * sizeof(T));
             }
             data[index] = value;
@@ -57,8 +56,8 @@ namespace hypermind {
             return capacity * sizeof(T);
         };
 
-        inline void clear(VM *vm) {
-            data = (T *) vm->MemManger(data, capacity * sizeof(T), 0);
+        inline void clear(GCHeap *heap) {
+            data = (T *) heap->MemManger(data, capacity * sizeof(T), 0);
         }
 
         void dump() {
@@ -74,11 +73,11 @@ namespace hypermind {
          * @param mVM
          * @param count
          */
-        inline void ensureCapacity(VM *vm, HMUINT32 newCapacity) {
+        inline void ensureCapacity(GCHeap *heap, HMUINT32 newCapacity) {
             if (newCapacity > capacity) {
                 size_t oldSize = capacity * sizeof(T);
                 capacity = BUFFER_GROWTH(newCapacity);
-                data = (T *) vm->MemManger(data, oldSize, capacity * sizeof(T));
+                data = (T *) heap->MemManger(data, oldSize, capacity * sizeof(T));
             }
         };
 
@@ -86,9 +85,9 @@ namespace hypermind {
          * 缩小到合适大小
          * @param mVM
          */
-        void shrink(VM *vm) {
+        void shrink(GCHeap *heap) {
             if (capacity > count) {
-                data = (T *) vm->MemManger(data, count * sizeof(T), 0);
+                data = (T *) heap->MemManger(data, count * sizeof(T), 0);
                 capacity = count;
             }
         }

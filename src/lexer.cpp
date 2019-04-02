@@ -516,7 +516,8 @@ namespace hypermind {
         HMChar first = CURRENT_CHAR;
         NEXT(); // 跳过 '   "  文本符
         TOKEN(TokenType::String, 0);
-#define APPEND_CHAR(c) strbuf.append(mVM, c)
+
+#define APPEND_CHAR(c) strbuf.append(&mVM->mGCHeap, c)
         do {
             if (CURRENT_CHAR == _HM_C('\\')) { // 跳过转义符
                 NEXT();
@@ -560,7 +561,7 @@ namespace hypermind {
         auto *objString = mVM->NewObject<HMString>(strbuf.data, strbuf.count);
         TOKEN_VALUE.type = ValueType::Object;
         TOKEN_VALUE.objval = objString;
-        strbuf.clear(mVM);
+        strbuf.clear(&mVM->mGCHeap);
     }
 
     void Lexer::ParseIdentifier() {

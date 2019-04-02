@@ -11,7 +11,7 @@ namespace hypermind {
     }
 
     HM_OBJ_FREE(String) {
-        charSequence = (HMChar *) vm->MemManger(charSequence, length * sizeof(HMChar), 0);
+        charSequence = (HMChar *) vm->Deallocate(charSequence, length * sizeof(HMChar));
         return charSequence == nullptr;
     }
 

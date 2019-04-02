@@ -10,7 +10,7 @@
 #define MAP_LOAD_PERCENT 0.8
 
 #include "vm.h"
-
+#include "value.h"
 namespace hypermind {
     struct Entry {
         HMHash hash{0}; // 将hash值储存避免重复计算
@@ -106,7 +106,7 @@ namespace hypermind {
             entry->key = Value();
             entry->value = Value(true);
             if (value.type == ValueType::Object) {
-                vm->PushProtectedObject(value.objval);
+                vm->mGCHeap.PushProtectedObject(value.objval);
             }
             count--;
             if (count == 0) { //若删除该entry后map为空就回收该空间
@@ -120,7 +120,7 @@ namespace hypermind {
                 resize(vm, newCapacity);
             }
             if (value.type == ValueType::Object) {
-                vm->PopProtectedObject();
+                vm->mGCHeap.PopProtectedObject();
             }
 
             return value;

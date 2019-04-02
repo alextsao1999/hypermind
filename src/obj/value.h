@@ -8,6 +8,7 @@
 #include "object.h"
 
 namespace hypermind {
+    class VM;
     enum class ValueType {
         Undefined,
         Null,

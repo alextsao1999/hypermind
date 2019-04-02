@@ -3,7 +3,7 @@
 //
 
 #include "vm.h"
-
+#include "obj/value.h"
 namespace hypermind {
     HMClass* Value::getClass(const hypermind::VM *vm) const {
         switch (type) {
@@ -25,17 +25,5 @@ namespace hypermind {
         return vm->mMetaClass;
     };
 
-    void *VM::MemManger(void *ptr, size_t oldSize, size_t newSize) {
-        mAllocatedBytes += newSize - oldSize;
-        if (newSize == 0){
-            free(ptr);
-            return nullptr; // 防止野指针
-        }
-        return realloc(ptr, newSize);
-    }
-
-    HMUINT32 VM::GetAllocatedBytes() {
-        return mAllocatedBytes;
-    }
 
 }

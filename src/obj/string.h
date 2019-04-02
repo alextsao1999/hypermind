@@ -9,15 +9,15 @@
 #include "vm.h"
 #include "object.h"
 #include "utils.h"
-#include <memory>
+
 namespace hypermind {
     HM_OBJECT(String) {
         HMHash hashCode;
         HMUINT32 length;
-        HMChar *charSequence;
+        HMChar *charSequence{nullptr};
         HM_OBJ_CONSTRUCTOR(String, const HMChar *str, HMUINT32 len), length(len) {
-            // 计算文本hash
             charSequence = vm->Allocate<HMChar>(length + 1);
+            // 计算文本hash
             if (charSequence != nullptr) {
                 hm_memcpy(charSequence, str, length);
                 hashCode = hashString(charSequence, length);

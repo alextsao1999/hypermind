@@ -8,4 +8,4 @@ foreach (DIR ${DIRS})
     aux_source_directory(${DIR} FILES)
 endforeach ()
 
-add_executable(HyperMind ${FILES} opcode.h)
+add_executable(HyperMind ${FILES})

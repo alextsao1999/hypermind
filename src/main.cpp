@@ -6,8 +6,6 @@
 #include "obj/value.h"
 #include "obj/string.h"
 #include "compiler.h"
-
-#include <obj/map.h>
 #include "obj/thread.h"
 
 using namespace hypermind;
@@ -31,9 +29,10 @@ int main() {
     // 由指令流创建闭包
     auto *closure = vm.NewObject<HMClosure>(compiler.mCurCompileUnit->mFn);
     auto *thread = vm.NewObject<HMThread>(closure);
+
     thread->execute(&vm);
 //    vm.DumpAllObjects();
-    vm.StartGC();
+    vm.mGCHeap.StartGC();
 //    vm.DumpAllObjects();
 //    hm_cout << " allocated :  " << vm.GetAllocatedBytes();
     return 0;

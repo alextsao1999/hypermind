@@ -7,7 +7,6 @@
 
 #include <iostream>
 #include "hypermind.h"
-
 #define HM_OBJECT(name) \
 struct HM##name : public HMObject
 #define HM_OBJ_DECL() using HMObject::HMObject; \
@@ -26,7 +25,6 @@ explicit HM##obj(VM *vm, ##args) : HMObject(vm, ObjectType::obj, claz)
 namespace hypermind {
     struct HMClass;
     class VM;
-
     enum class ObjectType {
         Class,   //此项是class类型,以下都是object类型
         List,
@@ -54,7 +52,7 @@ namespace hypermind {
          * @param type
          * @param classObj
          */
-        HMObject(VM *vm, ObjectType type, HMClass *classObj);
+        HMObject(VM *vm, ObjectType type, HMClass *classObj);;
 
         /**
          * 获得对象hash值

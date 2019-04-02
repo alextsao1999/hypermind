@@ -11,9 +11,9 @@ namespace hypermind {
     HM_OBJECT(Thread) {
         Value *stack{};
         Value *sp{};
+        HMUINT32 stackCapacity{0};
 
         Frame *frames{};
-        HMUINT32 stackCapacity{0};
         HMUINT32 usedFrameNum{0};   // 已使用的frame数量
         HMUINT32 frameCapacity{INIT_FRAME_NUM};  // frame容量
 
@@ -57,7 +57,7 @@ namespace hypermind {
             Value *oldStack = stack;
 
             HMUINT32 slotSize = sizeof(Value);
-            stack = (Value *) vm->MemManger(stack, stackCapacity * slotSize, newStackCapacity * slotSize);
+            stack = (Value *) vm->mGCHeap.MemManger(stack, stackCapacity * slotSize, newStackCapacity * slotSize);
             stackCapacity = newStackCapacity;
 
             long offset = stack - oldStack;
@@ -83,7 +83,7 @@ namespace hypermind {
             if (usedFrameNum + 1 > frameCapacity) {
                 HMUINT32 newCapacity = frameCapacity * 2;
                 HMUINT32 frameSize = sizeof(Frame);
-                frames = (Frame *) vm->MemManger(frames, frameSize * frameCapacity, frameSize * newCapacity);
+                frames = (Frame *) vm->mGCHeap.MemManger(frames, frameSize * frameCapacity, frameSize * newCapacity);
                 frameCapacity = newCapacity;
             }
             auto stackSlots = (HMUINT32) (sp - stack);
