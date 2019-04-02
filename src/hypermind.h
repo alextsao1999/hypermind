@@ -38,6 +38,7 @@ typedef std::wostream Ostream;
 #define hm_memcpy wmemcpy
 #define hm_memcmp wmemcmp
 #define hm_strtoi _wtoi
+#define hm_strlen wcslen
 #else
 // ---- Ansi ----
 #define _HM_C(ch) ch
@@ -49,7 +50,7 @@ typedef std::ostream Ostream;
 #define hm_memcpy memcpy
 #define hm_memcmp memcmp
 #define hm_strtoi atoi
-
+#define hm_strlen strlen
 #endif
 
 namespace hypermind {

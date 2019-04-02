@@ -22,6 +22,7 @@ namespace hypermind {
 
     // 函数对象
     HM_OBJECT(Function) {
+        HMInteger argNum{0};
         Buffer<HMByte> instructions; // 指令流
         Buffer<Value> constants;  // 所有常量
         HMModule *module;   // 所属模块

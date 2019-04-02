@@ -6,10 +6,12 @@
 #define HYPERMIND_SYMBOL_H
 
 #include "buffer.h"
+#include "lexer.h"
 
 namespace hypermind {
     enum class SignatureType {
         None,
+        Class,
         Method,
         Getter,
         Setter,
@@ -18,11 +20,20 @@ namespace hypermind {
     };
 
     struct Signature {
-        SignatureType type;
-        const HMChar *str;
-        HMUINT32 length;
+        SignatureType type{SignatureType::None};
+        const HMChar *str{nullptr};
+        HMUINT32 length{0};
         Signature(SignatureType type, const HMChar *str, HMUINT32 length) : type(type), str(str), length(length) {}
+        Signature(const HMChar *str, HMUINT32 length) : type(SignatureType::None), str(str), length(length) {}
+        Signature(const Token &token) : type(SignatureType::None), str(token.start), length(token.length) {}
+        Signature(const HMChar *str) : type(SignatureType::None), str(str), length(hm_strlen(str)) {}
         explicit Signature(SignatureType type) : type(type), str(nullptr), length(0) {}
+        Signature(){}
+
+        bool operator==(const Signature&signature) {
+            return type == signature.type && length == signature.length &&
+            hm_memcmp(str, signature.str, length) == 0;
+        }
     };
 
     class SymbolTable {
@@ -46,8 +57,7 @@ namespace hypermind {
 
         HMInteger Find(Signature signature) {
             for (int i = 0; i < mSymbols.count; ++i) {
-                if (mSymbols[i].type == signature.type && mSymbols[i].length == signature.length &&
-                    hm_memcmp(mSymbols[i].str, signature.str, signature.length) == 0) {
+                if (mSymbols[i] == signature) {
                     return i;
                 }
             }

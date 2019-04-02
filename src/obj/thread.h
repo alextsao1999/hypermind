@@ -330,6 +330,9 @@ hm_cout << _HM_C("_") << index;
             //  ------------------------------ 加载完成
             while (true) {
                 dump(ip);
+//                hm_cout << "------------------------------" << std::endl;
+//                dumpStack(stack, 10);
+//                hm_cout << "------------------------------" << std::endl;
                 opcode = ReadByte();
                 switch ((Opcode) opcode) {
                     case Opcode::LoadConstant:
@@ -362,6 +365,7 @@ hm_cout << _HM_C("_") << index;
                     case Opcode::StoreField:
                         Finish();
                     case Opcode::Pop:
+                        PopPtr();
                         Finish();
                     case Opcode::PushNull:
                         PushType(ValueType::Null);
@@ -385,8 +389,9 @@ hm_cout << _HM_C("_") << index;
                     case Opcode::Call6:
                     case Opcode::Call7: {
                         // 将闭包函数弹出
-                        Value *val = PopPtr();
-                        createFrame(vm, (HMClosure *) val->objval, opcode - (HMByte) Opcode::Call0);
+                        int argNum = opcode - (HMByte) Opcode::Call0;
+                        Value *closure = sp - argNum - 1;
+                        createFrame(vm, (HMClosure *) closure->objval, argNum + 1);
                         ReadShort();
                         StoreCurFrame();
                         LoadCurFrame();

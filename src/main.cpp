@@ -2,7 +2,6 @@
 #include "lexer.h"
 #include "parser.h"
 #include "vm.h"
-#include "buffer.h"
 #include "obj/value.h"
 #include "obj/string.h"
 #include "compiler.h"
@@ -13,7 +12,7 @@ using namespace hypermind;
 using namespace std;
 
 int main() {
-    auto *source = const_cast<HMChar *>(_HM_C("function test(a, b, c) {var ddd = (1+2)*3;ddd=100;return ddd;} \ntest(1,2,3)"));
+    auto *source = const_cast<HMChar *>(_HM_C("function test(a, b, c) {var ddd = (a+b)*c;return ddd;} \ntest(2,3,4)"));
 //    auto *source = const_cast<HMChar *>(_HM_C("var a = 100; a = a + 20+391;"));
     VM vm;
     Lexer lexer(&vm, source);

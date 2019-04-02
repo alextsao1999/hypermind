@@ -6,7 +6,7 @@
 #include "obj/object.h"
 
 namespace hypermind {
-    void GCHeap::Gray(hypermind::HMObject *obj) {
+    void GCHeap::Gray(HMObject *obj) {
         if (obj == nullptr || obj->isDark)
             return;
         obj->isDark = true;
@@ -21,7 +21,7 @@ namespace hypermind {
         }
         return realloc(ptr, newSize);
     }
-    
+
 
 
     void GCHeap::Black(HMObject *obj) {

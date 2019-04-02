@@ -8,6 +8,7 @@
 #include "hypermind.h"
 #include "ast.h"
 #include "obj/function.h"
+#include "symbol.h"
 #include "opcode.h"
 
 // 操作栈改变 影响栈的深度
@@ -47,8 +48,7 @@ namespace hypermind {
 
     // 局部变量
     struct LocalVariable {
-        const HMChar *name;
-        HMUINT32 length;
+        Signature signature;
         HMInteger scopeDepth;  //局部变量作用域
         bool isUpvalue;
     };
@@ -122,12 +122,11 @@ namespace hypermind {
          * @param id
          * @return 返回索引
          */
-        HMInteger AddLocalVariable(const Token &id) {
+        HMInteger AddLocalVariable(Signature signature) {
             if (mLocalVarNumber >= MAX_LOCAL_VAR_NUMBER) {
                 // TODO 错误 变量数目大于最大局部变量
             }
-            mLocalVariables[mLocalVarNumber].name = id.start;
-            mLocalVariables[mLocalVarNumber].length = id.length;
+            mLocalVariables[mLocalVarNumber].signature = signature;
             mLocalVariables[mLocalVarNumber].scopeDepth = mScopeDepth;
             mLocalVariables[mLocalVarNumber].isUpvalue = false;
             return mLocalVarNumber++;
@@ -137,16 +136,16 @@ namespace hypermind {
          * 根据作用域声明变量/参数
          * @return
          */
-        HMInteger DeclareVariable(const Token &id) {
+        HMInteger DeclareVariable(Signature signature) {
             if (mScopeDepth == -1) {
                 // TODO 模块变量
             }
-            HMInteger index = FindLocal(id);
+            HMInteger index = FindLocal(signature);
             if (index != -1) {
                 // 此前已经存在该局部变量
                 return index;
             }
-            return AddLocalVariable(id);
+            return AddLocalVariable(signature);
         }
 
         /**
@@ -156,8 +155,8 @@ namespace hypermind {
         void DefineVariable(HMInteger index) {
             if (mScopeDepth == -1) {
                 // 作用域为模块作用域
-                //EmitStoreVariable(Variable(ScopeType::Module, index));
-                //EmitPop();
+                EmitStoreVariable(Variable(ScopeType::Module, index));
+                EmitPop();
             }
             // 不是模块作用域 不用管
         }
@@ -167,10 +166,9 @@ namespace hypermind {
          * @param id
          * @return
          */
-        HMInteger FindLocal(const Token &id) {
+        HMInteger FindLocal(Signature signature) {
             for (HMUINT32 i = 0; i < mLocalVarNumber; ++i) {
-                if (id.length == mLocalVariables[i].length &&
-                    hm_memcmp(mLocalVariables[i].name, id.start, id.length) == 0) {
+                if (signature == mLocalVariables[i].signature) {
                     return i;
                 }
             }
@@ -178,15 +176,15 @@ namespace hypermind {
         }
 
         // 查找局部变量 或者 Upvalue
-        Variable FindLocalOrUpvalue(const Token &id) {
+        Variable FindLocalOrUpvalue(Signature signature) {
             // 先寻找局部变量
-            HMInteger index = FindLocal(id);
+            HMInteger index = FindLocal(signature);
             if (index != -1) {
                 return Variable(ScopeType::Local, index);
             }
 
             // 没找到局部变量 查找Upvalue
-            index = FindUpvalue(id);
+            index = FindUpvalue(signature);
             if (index != -1) {
                 return Variable(ScopeType::Upvalue, index);
             }
@@ -199,9 +197,10 @@ namespace hypermind {
          * @param id
          * @return
          */
-        Variable FindVariable(const Token &id) {
-            Variable var = FindLocalOrUpvalue(id);
+        Variable FindVariable(Signature signature) {
+            Variable var = FindLocalOrUpvalue(signature);
             if (var.scopeType == ScopeType::Invalid) {
+
                 // TODO 查找模块变量
             }
             return var;
@@ -226,19 +225,19 @@ namespace hypermind {
             return mFn->upvalueNum++;
         };
 
-        HMInteger FindUpvalue(const Token &id) {
+        HMInteger FindUpvalue(Signature signature) {
             if (mOuter == nullptr) {
                 // 未找到
                 return -1;
             }
-            HMInteger index = mOuter->FindLocal(id);
+            HMInteger index = mOuter->FindLocal(signature);
             if (index != -1) {
                 // 找到Upvalue 将局部变量Upvalue
                 mOuter->SetLocalVariableUpvalue(index);
                 return AddUpvalue(true, index);
             }
             // 递归查询添加
-            index = mOuter->FindUpvalue(id);
+            index = mOuter->FindUpvalue(signature);
             if (index != -1) {
                 return AddUpvalue(false, index);
             }
