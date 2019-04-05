@@ -20,7 +20,7 @@ namespace hypermind {
     // 二元表达式Dump
     AST_DUMP(ASTBinary) {
         lhs->dump(os);
-        DumpTokenType(os, op);
+        op.dump(os);
         rhs->dump(os);
     }
 
@@ -107,6 +107,31 @@ namespace hypermind {
     }
 
     AST_DUMP(ASTClassStmt) {
+        os << " class : ";
+        name.dump(os);
+        os << " super -> ";
+        super.dump(os);
+        os << std::endl;
+
+        for (auto &field : fields) {
+            field->dump(os);
+        }
+        for (auto &method : methods) {
+            method->dump(os);
+        }
+        for (auto &staticField : statics) {
+            staticField->dump(os);
+        }
+    }
+
+    AST_DUMP(ASTMethodStmt) {
+        os << _HM_C(" method  name : ");
+        name.dump(os);
+        if (params != nullptr) {
+            params->dump(os);
+        }
+        body->dump(os);
+        os << std::endl;
 
     }
 

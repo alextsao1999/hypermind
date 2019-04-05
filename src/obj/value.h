@@ -28,7 +28,7 @@ namespace hypermind {
             HMObject *objval;
         };
 
-        Value() : type(ValueType::Undefined) {};
+        Value() : type(ValueType::Null) {};
         Value(ValueType type) : type(type) {};
         Value(HMObject *obj) : type(ValueType::Object), objval(obj) {};
         Value(HMInteger val) : type(ValueType::Integer), intval(val) {};

@@ -4,6 +4,7 @@
 
 #include "parser.h"
 #include "ast.h"
+#include "symbol.h"
 #define SkipDelimiter() while (mLexer.PeekTokenType() == TokenType::Delimiter) mLexer.Consume();
 
 namespace hypermind {
@@ -62,8 +63,8 @@ namespace hypermind {
     // BinaryOp ::= ('+'  Unary)
     ASTNodePtr Parser::ParseBinaryOp(ASTNodePtr lhs, HMInteger prec) {
         while (true) {
-            TokenType op = mLexer.PeekTokenType();
-            Precedence nextOp = opPrecs[(HMInteger) op];
+            Token op = mLexer.Peek();
+            Precedence nextOp = opPrecs[(HMInteger) op.type];
             if (nextOp.prec == -1) // 没有符号优先级信息
                 return lhs;
             if (prec > nextOp.prec)
@@ -141,7 +142,108 @@ namespace hypermind {
 
     ASTNodePtr Parser::ParseClassStmt() {
         mLexer.Consume();
-        return hypermind::ASTNodePtr();
+        ASTClassStmtPtr classPtr = make_ptr(ASTClassStmt);
+        classPtr->name = mLexer.Read();
+        if (mLexer.Match(TokenType::Colon)) {
+            classPtr->super = mLexer.Read();
+        }
+        HMBool inStatic = false;
+        SkipDelimiter();
+        if (mLexer.Match(TokenType::LeftBrace)) {
+            while (true) {
+                SkipDelimiter();
+                Token token = mLexer.Read();
+                switch (token.type) {
+                    case TokenType::Add:
+                    case TokenType::Sub:
+                    case TokenType::Mul:
+                    case TokenType::Div:
+                    case TokenType::Increase:
+                    case TokenType::Decrease:
+                    case TokenType::Assign:
+                    case TokenType::AddAssign:
+                    case TokenType::SubAssign:
+                    case TokenType::MulAssign:
+                    case TokenType::DivAssign:
+                    case TokenType::ModAssign:
+                    case TokenType::AndAssign:
+                    case TokenType::OrAssign:
+                    case TokenType::XorAssign:
+                    case TokenType::Arrow:
+                    case TokenType::Not:
+                    case TokenType::Equal:
+                    case TokenType::NotEqual:
+                    case TokenType::Greater:
+                    case TokenType::Less:
+                    case TokenType::GreaterEqual:
+                    case TokenType::LessEqual:
+                    case TokenType::Or:
+                    case TokenType::LogicOr:
+                    case TokenType::And:
+                    case TokenType::LogicAnd:
+                    case TokenType::Mod:
+                    case TokenType::At:
+                    case TokenType::Colon:
+                    case TokenType::Identifier:
+                    case TokenType::KeywordNew:
+                        {
+                            ASTMethodStmtPtr method = make_ptr(ASTMethodStmt);
+
+                            // Method
+                            if (token.type == TokenType::KeywordNew) {
+                                method->name = Signature(SignatureType::Constructor);
+                            } else {
+                                method->name = Signature(SignatureType::Method, token.start, token.length);
+                            }
+
+                            if (mLexer.Match(TokenType::Assign)) {
+                                // Setter
+                                method->name = Signature(SignatureType::Setter, token.start, token.length);
+                            }
+
+                            if (mLexer.Match(TokenType::LeftParen)) {
+                                method->params = ParseParamList();
+                                mLexer.Consume(TokenType::RightParen);
+                            } else {
+                                method->name = Signature(SignatureType::Getter, token.start, token.length);
+                            }
+
+                            method->body = ParseBlock();
+                            if (inStatic)
+                                classPtr->methods.push_back(method);
+                            else
+                                classPtr->statics.push_back(method);
+                        }
+
+                        inStatic = false;
+                        break;
+                    case TokenType::KeywordVar: {
+                        ASTVarStmtPtr ast = make_ptr(ASTVarStmt);
+                        ast->identifier = mLexer.Read();
+                        if (mLexer.Match(TokenType::Assign)) {
+                            ast->value = ParseExpression();
+                        }
+                        if (inStatic)
+                            classPtr->fields.push_back(ast);
+                        else
+                            classPtr->statics.push_back(ast);
+                    }
+                        inStatic = false;
+                        break;
+                    case TokenType::KeywordStatic:
+                        inStatic = true;
+                        break;
+                    case TokenType::RightBrace:
+                        return classPtr;
+                    default:
+                        // Error
+                        break;
+                }
+            }
+        } else {
+            // Error 要以大括号开始
+        }
+        return classPtr;
     }
 
     ASTBlockPtr Parser::ParseBlock() {
@@ -212,6 +314,9 @@ namespace hypermind {
         do {
             ASTParamStmtPtr &&var = make_ptr(ASTParamStmt);
             var->identifier = mLexer.Read();
+            if (var->identifier.type != TokenType::Identifier) {
+                // TODO Error Missing Idenifier
+            }
             list->elements.push_back(var);
         } while (mLexer.Match(TokenType::Comma));
         return list;

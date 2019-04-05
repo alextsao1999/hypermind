@@ -26,11 +26,11 @@ namespace hypermind {
                 MEMRY_ERROR("文本对象申请内存失败");
             }
         }
-        HM_OBJ_CONSTRUCTOR(String, const String &str), length(str.size()) {
+        HM_OBJ_CONSTRUCTOR(String, const HMChar *str), length(hm_strlen(str)) {
             // 计算文本hash
             charSequence = vm->Allocate<HMChar>(length + 1);
             if (charSequence != nullptr) {
-                hm_memcpy(charSequence, str.c_str(), length);
+                hm_memcpy(charSequence, str, length);
                 hashCode = hashString(charSequence, length);
                 charSequence[length] = '\0';
             } else {

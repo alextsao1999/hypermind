@@ -15,9 +15,9 @@ namespace hypermind {
     struct Upvalue;
     // 调试结构
     struct FunctionDebug {
-        String name;  // 函数名称
-        Vector<HMUINT32> line;  // 所在行号
-        explicit FunctionDebug(String name) : name(std::move(name)), line(Vector<HMUINT32>()) {};
+        Signature name;  // 函数名称
+        Buffer<HMUINT32> line;  // 所在行号
+        explicit FunctionDebug(Signature name) : name(name) {};
     };
 
     // 函数对象
@@ -25,6 +25,7 @@ namespace hypermind {
         HMInteger argNum{0};
         Buffer<HMByte> instructions; // 指令流
         Buffer<Value> constants;  // 所有常量
+        SymbolTable symbols; // 所有符号
         HMModule *module;   // 所属模块
         HMUINT32 maxStackSlotNum{0};  // 最大栈空间
         Upvalue *upvalues{nullptr};

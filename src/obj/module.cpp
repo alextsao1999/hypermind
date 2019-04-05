@@ -3,6 +3,7 @@
 //
 
 #include "module.h"
+#include "string.h"
 
 namespace hypermind {
     HM_OBJ_HASH(Module) {
@@ -18,6 +19,5 @@ namespace hypermind {
         os << _HM_C(" } ");
 
     }
-
 
 }

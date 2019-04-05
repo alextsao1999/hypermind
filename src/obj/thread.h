@@ -280,10 +280,10 @@ hm_cout << _HM_C("_") << index;
                 case Opcode::Constructor:
                     Instruction("Constructor");
                     Finish();
-                case Opcode::InstanceMethod:
+                case Opcode::BindInstanceMethod:
                     Instruction("Instance_Method");
                     Finish();
-                case Opcode::StaticMethod:
+                case Opcode::BindStaticMethod:
                     Instruction("Static_Method");
                     Finish();
                 case Opcode::End:
@@ -345,10 +345,10 @@ hm_cout << _HM_C("_") << index;
                         stackStart[ReadShort()] = Pop();
                         Finish();
                     case Opcode::LoadModuleVariable:
-                        ReadShort();
+                        Push(fn->module->varValues[ReadShort()]);
                         Finish();
                     case Opcode::StoreModuleVariable:
-                        ReadShort();
+                        fn->module->varValues[ReadShort()] = Pop();
                         Finish();
                     case Opcode::LoadUpvalue:
                         ReadShort();
@@ -473,9 +473,9 @@ hm_cout << _HM_C("_") << index;
                         Finish();
                     case Opcode::Constructor:
                         Finish();
-                    case Opcode::InstanceMethod:
+                    case Opcode::BindInstanceMethod:
                         Finish();
-                    case Opcode::StaticMethod:
+                    case Opcode::BindStaticMethod:
                         Finish();
                     case Opcode::End:
                         // 这里不可达

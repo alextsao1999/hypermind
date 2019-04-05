@@ -166,7 +166,7 @@ namespace hypermind {
         String name;
         switch (type) {
             case TokenType::End:
-                TOKEN_DUMP("<结束>");
+                TOKEN_DUMP("<end>");
                 break;
             case TokenType::Delimiter:
                 TOKEN_DUMP("<行结束>");

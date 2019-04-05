@@ -53,9 +53,16 @@ namespace hypermind {
         bool isUpvalue;
     };
 
+    // 正在编译的类信息
+    struct ClassInfo {
+        SymbolTable fields;
+
+    };
+
     class CompileUnit {
         friend Compiler;
         friend ASTFunctionStmt;
+        friend ASTMethodStmt;
     protected:
         // 所属虚拟机
         VM *mVM{nullptr};
@@ -70,14 +77,18 @@ namespace hypermind {
         // 记录操作栈变化
         HMUINT32 mStackSlotNum{0};
 
+
     public:
-        explicit CompileUnit(VM *mVm) : mVM(mVm) {};
+        explicit CompileUnit(VM *mVm, Compiler *compiler) : mVM(mVm), mCurCompiler(compiler) {};
 
         // 当前正在编译的函数
         HMFunction *mFn{nullptr};
 
         // 外层编译单元
         CompileUnit *mOuter{nullptr};
+        Compiler *mCurCompiler{nullptr};
+        // 当前编译的类信息
+        ClassInfo *mCurClassInfo{nullptr};
 
 #ifdef HMDebug
         HMUINT32 mLine{0};
@@ -87,7 +98,7 @@ namespace hypermind {
         inline void WriteByte(HMByte byte) {
             mFn->instructions.append(&mVM->mGCHeap, byte);
 #ifdef HMDebug
-            mFn->debug->line.push_back(mLine);
+            mFn->debug->line.append(&mVM->mGCHeap, mLine);
 #endif
 
         };
@@ -136,17 +147,7 @@ namespace hypermind {
          * 根据作用域声明变量/参数
          * @return
          */
-        HMInteger DeclareVariable(Signature signature) {
-            if (mScopeDepth == -1) {
-                // TODO 模块变量
-            }
-            HMInteger index = FindLocal(signature);
-            if (index != -1) {
-                // 此前已经存在该局部变量
-                return index;
-            }
-            return AddLocalVariable(signature);
-        }
+        HMInteger DeclareVariable(Signature signature);
 
         /**
          * 定义变量   变量设置初始值
@@ -197,14 +198,7 @@ namespace hypermind {
          * @param id
          * @return
          */
-        Variable FindVariable(Signature signature) {
-            Variable var = FindLocalOrUpvalue(signature);
-            if (var.scopeType == ScopeType::Invalid) {
-
-                // TODO 查找模块变量
-            }
-            return var;
-        };
+        Variable FindVariable(Signature signature);;
 
         /**
          * 添加Upvalue
@@ -288,6 +282,19 @@ namespace hypermind {
             //  相同的文本或者数值会造成资源重复 可以先取hash
             return mFn->constants.append(&mVM->mGCHeap, value);
         };
+
+        /**
+         * 添加符号
+         * @param signature
+         * @return
+         */
+        HMInteger AddSymbol(Signature signature) {
+            return mFn->symbols.mSymbols.append(&mVM->mGCHeap, signature);
+        }
+
+        void LoadModuleVar(Signature signature) {
+
+        }
 
         void EmitCloseUpvalue() {
             STACK_CHANGE(-1);
@@ -386,6 +393,17 @@ namespace hypermind {
             WriteShortOperand(index);
         }
 
+        void EmitLoadThisField(HMInteger index) {
+            STACK_CHANGE(1);
+            WriteOpcode(Opcode::LoadThisField);
+            WriteShortOperand(index);
+        }
+
+        void EmitStoreThisField(HMInteger index) {
+            WriteOpcode(Opcode::StoreThisField);
+            WriteShortOperand(index);
+        }
+
         void EmitAdd() {
             STACK_CHANGE(-1);
             WriteOpcode(Opcode::Add);
@@ -407,6 +425,16 @@ namespace hypermind {
             STACK_CHANGE(1);
             WriteOpcode(Opcode::CreateClosure);
             WriteShortOperand(index);
+        }
+
+        void EmitCreateClass(HMInteger fieldNumber) {
+            STACK_CHANGE(1);
+            WriteOpcode(Opcode::CreateClass);
+            WriteShortOperand(fieldNumber);
+        }
+
+        void EmitInstanceMethod(HMInteger index) {
+
         }
 
         void EmitEnd() {
@@ -437,7 +465,7 @@ namespace hypermind {
          * @return
          */
         CompileUnit CreateCompileUnit(FunctionDebug *debug) {
-            CompileUnit cu(mVM);
+            CompileUnit cu(mVM, this);
             cu.mFn = mVM->NewObject<HMFunction>(mCurModule);
             cu.mFn->debug = debug;
             cu.mOuter = mCurCompileUnit;

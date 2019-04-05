@@ -1,25 +1,3 @@
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
 //
 // Created by 曹顺 on 2019/3/1.
 //
@@ -30,6 +8,7 @@
 #include "hypermind.h"
 #include "obj/value.h"
 #include "lexer.h"
+#include "symbol.h"
 
 #define AST_NODE(n,p)  \
     struct n;  \
@@ -88,10 +67,10 @@ namespace hypermind {
 
     // 二元表达式
     AST_NODE(ASTBinary, ASTBinaryPtr) {
-        TokenType op;
+        Token op;
         ASTNodePtr lhs; // 产生式左边
         ASTNodePtr rhs; // 产生式右边
-        ASTBinary(HMUINT32 line, HMUINT32 column, TokenType op, ASTNodePtr lhs, ASTNodePtr rhs) : ASTNode(
+        ASTBinary(HMUINT32 line, HMUINT32 column, Token op, ASTNodePtr lhs, ASTNodePtr rhs) : ASTNode(
                 line, column), op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
 
         AST_DECL();
@@ -158,11 +137,20 @@ namespace hypermind {
         AST_DECL();
     };
 
+    AST_NODE(ASTMethodStmt, ASTMethodStmtPtr) {
+        Signature name;
+        ASTNodePtr params; // 形式参数
+        ASTNodePtr body; // 函数体
+        AST_DECL();
+    };
+
     // AST类声明
     AST_NODE(ASTClassStmt, ASTClassStmtPtr) {
         Token name; // 类名称
-        ASTListPtr fields;
-        ASTListPtr methods;
+        Token super;
+        std::vector<ASTVarStmtPtr> fields; // 域
+        std::vector<ASTNodePtr> statics; // 静态的域或方法
+        std::vector<ASTMethodStmtPtr> methods; // 方法
         AST_DECL();
     };
 

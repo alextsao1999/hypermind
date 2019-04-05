@@ -12,12 +12,15 @@ using namespace hypermind;
 using namespace std;
 
 int main() {
-    auto *source = const_cast<HMChar *>(_HM_C("function test(a, b, c) {var ddd = (a+b)*c;return ddd;} \ntest(2,3,4)"));
+    auto *source = const_cast<HMChar *>(_HM_C("class test { var val ;new() {return value + val;} ; } ; "));
 //    auto *source = const_cast<HMChar *>(_HM_C("var a = 100; a = a + 20+391;"));
     VM vm;
     Lexer lexer(&vm, source);
     Parser parser(_HM_C(""), lexer);
     ASTNodePtr ast = parser.ParseProgram();
+
+    ast->dump(hm_cout);
+    exit(0);
     Compiler compiler(&vm);
     CompileUnit cu = compiler.CreateCompileUnit(new FunctionDebug("module"));
     compiler.mCurModule = vm.NewObject<HMModule>(vm.NewObject<HMString>(_HM_C("test")));
@@ -27,11 +30,11 @@ int main() {
     compiler.mCurCompileUnit->EmitReturn();
     // 由指令流创建闭包
     auto *closure = vm.NewObject<HMClosure>(compiler.mCurCompileUnit->mFn);
-    auto *thread = vm.NewObject<HMThread>(closure);
+//    auto *thread = vm.NewObject<HMThread>(closure);
 
-    thread->execute(&vm);
+//    thread->execute(&vm);
 //    vm.DumpAllObjects();
-    vm.mGCHeap.StartGC();
+//    vm.mGCHeap.StartGC();
 //    vm.DumpAllObjects();
 //    hm_cout << " allocated :  " << vm.GetAllocatedBytes();
     return 0;

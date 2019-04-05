@@ -4,8 +4,10 @@
 
 #include "vm.h"
 #include "obj/value.h"
+#include "obj/module.h"
+#include "obj/map.h"
 namespace hypermind {
-    HMClass* Value::getClass(const hypermind::VM *vm) const {
+    HMClass* Value::getClass(const VM *vm) const {
         switch (type) {
             case ValueType::Integer:
                 return vm->mIntegerClass;
@@ -25,5 +27,16 @@ namespace hypermind {
         return vm->mMetaClass;
     };
 
+    bool PrimitiveAdd(VM *vm, Value *args) {
+        return true;
+    }
 
+    VM::VM() {
+//        mAllModule = NewObject<HMMap>();
+//        auto *module = NewObject<HMModule>("");
+//        mAllModule->set(this, Value(), module);
+//        mObjectClass = NewObject<HMClass>(NewObject<HMString>("object"), nullptr, 0);
+//        mObjectClass->bind(this, Signature(SignatureType::Method, "="), PrimitiveAdd);
+
+    }
 }

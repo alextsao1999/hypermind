@@ -26,8 +26,9 @@ namespace hypermind {
         MethodType type;
         union {
             HMClosure *fn{};  // 方法引用的函数闭包
-            HMPrimitive *pfn; // 指向原生方法
+            HMPrimitive pfn; // 指向原生方法
         };
+        HMMethod(HMPrimitive func) : type(MethodType::Primitive), pfn(func) {}
     };
 
     // 类对象
@@ -35,12 +36,18 @@ namespace hypermind {
         HMClass *superClass;  // 父类
         HMUINT32 fieldNubmer;
         Buffer<HMMethod> methods;
+        SymbolTable methodTable;
         HMString *name; // 类名
         HM_OBJ_CONSTRUCTOR_CLASS(Class, nullptr, HMString *name, HMClass *super, HMUINT32 fieldNumber), name(name),
                                                                                                         superClass(super),
                                                                                                         fieldNubmer(fieldNumber){
             // 加到保护对象中?
         };
+
+        inline void bind(VM *vm, Signature signature, HMPrimitive func) {
+            methods.set(&vm->mGCHeap, static_cast<HMUINT32>(vm->mAllMethods.EnsureFind(&vm->mGCHeap, signature)),
+                        HMMethod(func));
+        }
 
         HM_OBJ_DECL();
     };

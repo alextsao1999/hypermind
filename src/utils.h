@@ -11,6 +11,7 @@ namespace hypermind {
 
     HMHash hashString(const HMChar *str, HMUINT32 length);
 
+    void mixHashString(HMHash &hashCode, const HMChar *str, HMUINT32 length);
 
 }
 

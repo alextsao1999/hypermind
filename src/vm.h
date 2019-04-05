@@ -8,11 +8,14 @@
 #include "hypermind.h"
 #include "gc.h"
 #include "symbol.h"
+//#include "obj/class.h"
 
 namespace hypermind {
     struct HMThread;
+    struct HMMap;
     class VM {
     public:
+        HMClass *mObjectClass{nullptr};
         HMClass *mBooleanClass{nullptr};
         HMClass *mStringClass{nullptr};
         HMClass *mIntegerClass{nullptr};
@@ -24,9 +27,13 @@ namespace hypermind {
         HMClass *mListClass{nullptr};
         HMThread *mCurrentThread{nullptr};
 
+        HMMap *mAllModule;
+
         SymbolTable mAllMethods;
 
         GCHeap mGCHeap;
+
+        VM();
 
         template<typename T, typename ...Args>
         T *New(Args&&...args) {
@@ -51,6 +58,14 @@ namespace hypermind {
             return mGCHeap.MemManger(ptr, size, 0);
         }
 
+        void DumpAllObjects() {
+            HMObject *nextObj = mGCHeap.mAllObjects;
+            while (nextObj != nullptr) {
+                nextObj->dump(hm_cout);
+                hm_cout << std::endl;
+                nextObj = nextObj->next;
+            }
+        }
 
     };
 }

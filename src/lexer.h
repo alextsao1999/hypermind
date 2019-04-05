@@ -138,6 +138,22 @@ namespace hypermind {
             {_HM_C("true"),   TokenType::KeywordTrue},
             {_HM_C("false"),   TokenType::KeywordFalse},
             {_HM_C("static"),   TokenType::KeywordStatic},
+            {_HM_C("如果"),       TokenType::KeywordIf},
+            {_HM_C("否则"),     TokenType::KeywordElse},
+            {_HM_C("循环"),    TokenType::KeywordWhile},
+            {_HM_C("跳出循环"),    TokenType::KeywordBreak},
+            {_HM_C("到循环尾"),    TokenType::KeywordContinue},
+            {_HM_C("遍历"),      TokenType::KeywordFor},
+            {_HM_C("类"),    TokenType::keywordClass},
+            {_HM_C("函数"), TokenType::KeywordFunction},
+            {_HM_C("创建"),      TokenType::KeywordNew},
+            {_HM_C("返回"),   TokenType::KeywordReturn},
+            {_HM_C("变量"),   TokenType::KeywordVar},
+            {_HM_C("自身"),   TokenType::KeywordThis},
+            {_HM_C("超类"),   TokenType::KeywordSuper},
+            {_HM_C("真"),   TokenType::KeywordTrue},
+            {_HM_C("假"),   TokenType::KeywordFalse},
+            {_HM_C("静态"),   TokenType::KeywordStatic},
 
     };
 

@@ -23,7 +23,9 @@ namespace hypermind {
     }
     HM_OBJ_DUMP(Function) {
         os << _HM_C(" { HMFunction(") << sizeof(HMFunction) << _HM_C(") ") << static_cast<const void *>(this)
-        << _HM_C("  name : ") << debug->name << _HM_C("  max stack : ") << maxStackSlotNum << _HM_C("  ");
+        << _HM_C("  name : ");
+        debug->name.dump(os);
+        os << _HM_C("  max stack : ") << maxStackSlotNum << _HM_C("  ");
         os << std::endl << _HM_C("   opcode dump : ") << std::endl;
         DumpAllInstructions(os);
         os << _HM_C(" } ");
@@ -129,9 +131,9 @@ namespace hypermind {
                 Instruction("Create_Class");
             case Opcode::Constructor:
                 Instruction("Constructor");
-            case Opcode::InstanceMethod:
+            case Opcode::BindInstanceMethod:
                 Instruction("Instance_Method");
-            case Opcode::StaticMethod:
+            case Opcode::BindStaticMethod:
                 Instruction("Static_Method");
         }
         hm_cout << str << std::endl;
@@ -295,10 +297,10 @@ constants[index].dump(os);
                 case Opcode::Constructor:
                     Instruction("Constructor");
                     Finish();
-                case Opcode::InstanceMethod:
+                case Opcode::BindInstanceMethod:
                     Instruction("Instance_Method");
                     Finish();
-                case Opcode::StaticMethod:
+                case Opcode::BindStaticMethod:
                     Instruction("Static_Method");
                     Finish();
                 case Opcode::End:

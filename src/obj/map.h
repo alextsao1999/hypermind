@@ -31,7 +31,7 @@ namespace hypermind {
             auto *newEntries = vm->Allocate<Entry>(newCapacity);
             uint32_t idx = 0;
             while (idx < newCapacity) {
-                newEntries[idx].key = Value();
+                newEntries[idx].key = Value(ValueType::Undefined);
                 newEntries[idx].value = Value(false);
 //                new(&newEntries[idx].value) Value(false);
                 idx++;
@@ -103,7 +103,7 @@ namespace hypermind {
                 return {};
             }
             Value value = entry->value;
-            entry->key = Value();
+            entry->key = Value(ValueType::Undefined);
             entry->value = Value(true);
             if (value.type == ValueType::Object) {
                 vm->mGCHeap.PushProtectedObject(value.objval);

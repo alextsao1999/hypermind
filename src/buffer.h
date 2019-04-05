@@ -52,6 +52,12 @@ namespace hypermind {
             return true;
         };
 
+        inline void set(GCHeap *heap, HMUINT32 index, const T &value) {
+            if (index >= count)
+                ensureCapacity(heap, count = index + 1);
+            data[index] = value;
+        };
+
         inline HMUINT32 size() {
             return capacity * sizeof(T);
         };
@@ -83,7 +89,7 @@ namespace hypermind {
 
         /**
          * 缩小到合适大小
-         * @param mVM
+         * @param heap
          */
         void shrink(GCHeap *heap) {
             if (capacity > count) {

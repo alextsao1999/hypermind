@@ -65,10 +65,14 @@ namespace hypermind {
          CloseUpvalue,
          Return,
 
+         // 创建类
          CreateClass,
          Constructor,
-         InstanceMethod,
-         StaticMethod,
+
+         // 绑定实例方法
+         BindInstanceMethod,
+         // 绑定静态方法
+         BindStaticMethod,
 
          End
 
