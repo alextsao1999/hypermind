@@ -52,7 +52,7 @@ namespace hypermind {
          * @param type
          * @param classObj
          */
-        HMObject(VM *vm, ObjectType type, HMClass *classObj);;
+        HMObject(VM *vm, ObjectType type, HMClass *classObj);
 
         /**
          * 获得对象hash值

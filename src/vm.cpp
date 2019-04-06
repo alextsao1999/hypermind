@@ -1,8 +1,8 @@
 //
 // Created by 曹顺 on 2019/2/13.
 //
-
 #include "vm.h"
+#include "obj/class.h"
 #include "obj/value.h"
 #include "obj/module.h"
 #include "obj/map.h"
@@ -32,11 +32,15 @@ namespace hypermind {
     }
 
     VM::VM() {
-//        mAllModule = NewObject<HMMap>();
-//        auto *module = NewObject<HMModule>("");
-//        mAllModule->set(this, Value(), module);
-//        mObjectClass = NewObject<HMClass>(NewObject<HMString>("object"), nullptr, 0);
-//        mObjectClass->bind(this, Signature(SignatureType::Method, "="), PrimitiveAdd);
+        mAllModule = NewObject<HMMap>();
+        auto *module = NewObject<HMModule>(nullptr);
+        mAllModule->set(this, Value(), module);
+
+        mObjectClass = NewObject<HMClass>(NewObject<HMString>("Object"), nullptr, 0);
+        mObjectClass->bind(this, Signature(SignatureType::Method, "+"), PrimitiveAdd);
+
+        module->varNames.Add(&mGCHeap, Signature("Object"));
+        module->varValues.append(&mGCHeap, mObjectClass);
 
     }
 }

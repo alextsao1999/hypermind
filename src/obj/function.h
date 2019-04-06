@@ -27,6 +27,8 @@ namespace hypermind {
         Buffer<Value> constants;  // 所有常量
         SymbolTable symbols; // 所有符号
         HMModule *module;   // 所属模块
+
+        HMUINT32 maxLocalVarNum{0};
         HMUINT32 maxStackSlotNum{0};  // 最大栈空间
         Upvalue *upvalues{nullptr};
         HMUINT32 upvalueNum{0}; // upvalue 数量
@@ -38,8 +40,6 @@ namespace hypermind {
         };
 
         HM_OBJ_DECL();
-
-        void DumpInstruction(int start);
 
         void DumpAllInstructions(Ostream &os);
 

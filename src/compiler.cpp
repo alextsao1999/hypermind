@@ -131,13 +131,18 @@ namespace hypermind {
         AST_ENTER();
         Variable variable = compiler->mCurCompileUnit->FindVariable(var);
         if (variable.scopeType == ScopeType::Invalid) {
-            if (compiler->mCurCompileUnit->mCurClassInfo != nullptr) {
+            if (compiler->mCurClassInfo != nullptr) {
                 // 查找Class Field
-                variable.index = compiler->mCurCompileUnit->mCurClassInfo->fields.Find(var);
+                variable.index = compiler->mCurClassInfo->fields.Find(var);
                 if (variable.index == -1) {
                     // TODO Error 域不存在
+
                 }
-                compiler->mCurCompileUnit->EmitLoadThisField(variable.index);
+                if (flag == CompileFlag::Assign) {
+                    compiler->mCurCompileUnit->EmitStoreThisField(variable.index);
+                } else {
+                    compiler->mCurCompileUnit->EmitLoadThisField(variable.index);
+                }
             } else {
                 // TODO Error 变量不存在
             }
@@ -230,14 +235,14 @@ namespace hypermind {
         // 进入作用域
         cu.EnterScope(); // 直接就编译了 不需要离开作用域
         cu.mFn->maxStackSlotNum = cu.mStackSlotNum = cu.mLocalVarNumber;
-        params->compile(compiler); // 编译参数声明
-        cu.mFn->argNum = cu.mLocalVarNumber - 1;
+        params->compile(compiler, CompileFlag::Null); // 编译参数声明
+        // 默认传入this 并不包含this
+        cu.mFn->argNum = params->elements.size();
         body->compile(compiler); // 编译函数实体
         compiler->LeaveCompileUnit(cu);
         cu.EmitEnd();
         // 记录函数上值 创建闭包的时候用
-        cu.mFn->upvalues = compiler->mVM->Allocate<Upvalue>(cu.mFn->upvalueNum);
-        memcpy(cu.mFn->upvalues, cu.mUpvalues, sizeof(Upvalue) * cu.mFn->upvalueNum);
+        cu.StoreUpvalue();
         HMInteger index = cu.mOuter->AddConstant(Value(cu.mFn));
         cu.mOuter->EmitCreateClosure(index);
         cu.mOuter->DefineVariable(funIdx);
@@ -247,22 +252,44 @@ namespace hypermind {
     // 编译类
     AST_COMPILE(ASTClassStmt) {
         AST_ENTER();
+        HMInteger classIdx = compiler->mCurCompileUnit->DeclareVariable(name);
+        auto *className = compiler->mVM->NewObject<HMString>(name.start, name.length);
+
+        compiler->mCurCompileUnit->EmitLoadConstant(
+                compiler->mCurCompileUnit->AddConstant(Value(className)));
+
+        // -------------------------
+        // ClassName
+        // SuperClass
+        // -------------------------
+
         ClassInfo classInfo;
-        compiler->mCurCompileUnit->mCurClassInfo = &classInfo;
+        classInfo.outer = compiler->mCurClassInfo;
+        compiler->mCurClassInfo = &classInfo;
+
+        // 装载Field的符号信息
         for (auto &field : fields) {
             classInfo.fields.Add(&compiler->mVM->mGCHeap, Signature(field->identifier));
         }
+
+        // 加载基类
         if (super.type == TokenType::End) {
-            compiler->mCurCompileUnit->LoadModuleVar("object");
+            compiler->mCurCompileUnit->LoadModuleVar("Object");
         } else {
             compiler->mCurCompileUnit->LoadModuleVar(super);
         }
-        compiler->mCurCompileUnit->EmitCreateClass(classInfo.fields.mSymbols.count);
 
+        // 创建Class对象
+        compiler->mCurCompileUnit->EmitCreateClass(classInfo.fields.GetCount());
+
+        // 绑定方法
         for (auto &method : methods) {
             method->compile(compiler, CompileFlag::Null);
         }
 
+        // 恢复外层ClassInfo
+        compiler->mCurClassInfo = classInfo.outer;
+        compiler->mCurCompileUnit->DefineVariable(classIdx);
 
     }
 
@@ -275,20 +302,24 @@ namespace hypermind {
         CompileUnit cu = compiler->CreateCompileUnit();
 #endif
         compiler->mCurCompileUnit = &cu;
+        cu.AddLocalVariable("this");
         cu.EnterScope();
         cu.mFn->maxStackSlotNum = cu.mStackSlotNum = cu.mLocalVarNumber;
-        params->compile(compiler); // 编译参数声明
-        cu.mFn->argNum = cu.mLocalVarNumber - 1;
+        if (params != nullptr) {
+            params->compile(compiler); // 编译参数声明
+            cu.mFn->argNum = cu.mLocalVarNumber - 1;
+        }
+
         body->compile(compiler); // 编译函数实体
         compiler->LeaveCompileUnit(cu);
         cu.EmitEnd();
         // 记录函数上值 创建闭包的时候用
-        cu.mFn->upvalues = compiler->mVM->Allocate<Upvalue>(cu.mFn->upvalueNum);
-        memcpy(cu.mFn->upvalues, cu.mUpvalues, sizeof(Upvalue) * cu.mFn->upvalueNum);
+        cu.StoreUpvalue();
         HMInteger index = cu.mOuter->AddConstant(Value(cu.mFn));
         cu.mOuter->EmitCreateClosure(index);
-        cu.mOuter->EmitInstanceMethod(0);
 
+        HMInteger methodIndex = cu.mVM->mAllMethods.EnsureFind(&cu.mVM->mGCHeap, name);
+        cu.mOuter->EmitBindInstanceMethod(methodIndex);
 
     }
 
@@ -333,7 +364,6 @@ namespace hypermind {
     Variable CompileUnit::FindVariable(Signature signature) {
         Variable var = FindLocalOrUpvalue(signature);
         if (var.scopeType == ScopeType::Invalid) {
-            // TODO 查找模块变量
             HMInteger index = mCurCompiler->mCurModule->varNames.Find(signature);
             if (index != -1) {
                 return Variable(ScopeType::Module, index);
@@ -341,4 +371,10 @@ namespace hypermind {
         }
         return var;
     }
+
+    void CompileUnit::LoadModuleVar(Signature signature) {
+        HMInteger index = mCurCompiler->mCurModule->varNames.Find(signature);
+        EmitLoadVariable(Variable(ScopeType::Module, index));
+    }
+
 }

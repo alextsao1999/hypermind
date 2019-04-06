@@ -56,7 +56,7 @@ namespace hypermind {
     // 正在编译的类信息
     struct ClassInfo {
         SymbolTable fields;
-
+        ClassInfo *outer{nullptr};
     };
 
     class CompileUnit {
@@ -87,8 +87,6 @@ namespace hypermind {
         // 外层编译单元
         CompileUnit *mOuter{nullptr};
         Compiler *mCurCompiler{nullptr};
-        // 当前编译的类信息
-        ClassInfo *mCurClassInfo{nullptr};
 
 #ifdef HMDebug
         HMUINT32 mLine{0};
@@ -140,6 +138,9 @@ namespace hypermind {
             mLocalVariables[mLocalVarNumber].signature = signature;
             mLocalVariables[mLocalVarNumber].scopeDepth = mScopeDepth;
             mLocalVariables[mLocalVarNumber].isUpvalue = false;
+            if (mLocalVarNumber + 1 > mFn->maxLocalVarNum) {
+                mFn->maxLocalVarNum = mLocalVarNumber + 1;
+            }
             return mLocalVarNumber++;
         };
 
@@ -158,7 +159,10 @@ namespace hypermind {
                 // 作用域为模块作用域
                 EmitStoreVariable(Variable(ScopeType::Module, index));
                 EmitPop();
+            } else {
+//                EmitStoreVariable(Variable(ScopeType::Local, index));
             }
+
             // 不是模块作用域 不用管
         }
 
@@ -198,7 +202,7 @@ namespace hypermind {
          * @param id
          * @return
          */
-        Variable FindVariable(Signature signature);;
+        Variable FindVariable(Signature signature);
 
         /**
          * 添加Upvalue
@@ -289,12 +293,15 @@ namespace hypermind {
          * @return
          */
         HMInteger AddSymbol(Signature signature) {
-            return mFn->symbols.mSymbols.append(&mVM->mGCHeap, signature);
+            return mFn->symbols.Add(&mVM->mGCHeap, signature);
         }
 
-        void LoadModuleVar(Signature signature) {
-
+        void StoreUpvalue() {
+            mFn->upvalues = mVM->Allocate<Upvalue>(mFn->upvalueNum);
+            memcpy(mFn->upvalues, mUpvalues, sizeof(Upvalue) * mFn->upvalueNum);
         }
+
+        void LoadModuleVar(Signature signature);
 
         void EmitCloseUpvalue() {
             STACK_CHANGE(-1);
@@ -335,6 +342,7 @@ namespace hypermind {
         }
 
         void EmitReturn() {
+            STACK_CHANGE(-1);
             WriteOpcode(Opcode::Return);
         }
 
@@ -433,7 +441,16 @@ namespace hypermind {
             WriteShortOperand(fieldNumber);
         }
 
-        void EmitInstanceMethod(HMInteger index) {
+        void EmitBindInstanceMethod(HMInteger index) {
+            STACK_CHANGE(-1);
+            WriteOpcode(Opcode::BindInstanceMethod);
+            WriteShortOperand(index);
+        }
+
+        void EmitBindStaticMethod(HMInteger index) {
+            STACK_CHANGE(-1);
+            WriteOpcode(Opcode::BindStaticMethod);
+            WriteShortOperand(index);
 
         }
 
@@ -455,6 +472,9 @@ namespace hypermind {
         HMModule *mCurModule{};
         // 当前正在编译的函数
         CompileUnit *mCurCompileUnit{};
+
+        // 当前编译的类信息
+        ClassInfo *mCurClassInfo{nullptr};
 
         explicit Compiler(VM *mVM) : mVM(mVM) {};
 

@@ -8,7 +8,6 @@
 #include "hypermind.h"
 #include "gc.h"
 #include "symbol.h"
-//#include "obj/class.h"
 
 namespace hypermind {
     struct HMThread;

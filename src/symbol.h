@@ -125,6 +125,10 @@ namespace hypermind {
             return -1;
         };
 
+        inline HMUINT32 GetCount() {
+            return mSymbols.count;
+        }
+
         inline Signature &operator[](const HMInteger &index) {
             return mSymbols[index];
         }

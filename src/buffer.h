@@ -69,7 +69,7 @@ namespace hypermind {
         void dump() {
             std::cout << " -- buf dump -- " << std::endl;
             for (int i = 0; i < count; ++i) {
-                std::cout << (T) data[i] << std::endl;
+                std::cout << data[i] << std::endl;
             }
             std::cout << " -- end dump -- " << std::endl;
         };

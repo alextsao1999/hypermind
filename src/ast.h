@@ -132,7 +132,7 @@ namespace hypermind {
     // AST函数声明
     AST_NODE(ASTFunctionStmt, ASTFunctionStmtPtr) {
         Token name; // 函数名称
-        ASTNodePtr params; // 形式参数
+        ASTListPtr params; // 形式参数
         ASTNodePtr body; // 函数体
         AST_DECL();
     };

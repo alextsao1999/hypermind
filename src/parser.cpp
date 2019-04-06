@@ -210,9 +210,9 @@ namespace hypermind {
 
                             method->body = ParseBlock();
                             if (inStatic)
-                                classPtr->methods.push_back(method);
-                            else
                                 classPtr->statics.push_back(method);
+                            else
+                                classPtr->methods.push_back(method);
                         }
 
                         inStatic = false;
@@ -224,9 +224,9 @@ namespace hypermind {
                             ast->value = ParseExpression();
                         }
                         if (inStatic)
-                            classPtr->fields.push_back(ast);
-                        else
                             classPtr->statics.push_back(ast);
+                        else
+                            classPtr->fields.push_back(ast);
                     }
                         inStatic = false;
                         break;
