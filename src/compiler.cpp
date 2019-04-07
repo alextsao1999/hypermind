@@ -21,6 +21,8 @@ namespace hypermind {
         // Σ(っ °Д °;)っ 这是个异类
         if (op.type == TokenType::Assign) {
             rhs->compile(compiler, CompileFlag::Null);
+
+            // xx.xxx
             lhs->compile(compiler, CompileFlag::Assign);
             return;
         }
@@ -136,12 +138,25 @@ namespace hypermind {
                 variable.index = compiler->mCurClassInfo->fields.Find(var);
                 if (variable.index == -1) {
                     // TODO Error 域不存在
-
                 }
-                if (flag == CompileFlag::Assign) {
-                    compiler->mCurCompileUnit->EmitStoreThisField(variable.index);
+
+                if (compiler->mCurCompileUnit->mCurClassInfo != nullptr) {
+                    // 编译方法
+                    if (flag == CompileFlag::Assign) {
+                        compiler->mCurCompileUnit->EmitStoreThisField(variable.index);
+                    } else {
+                        compiler->mCurCompileUnit->EmitLoadThisField(variable.index);
+                    }
                 } else {
-                    compiler->mCurCompileUnit->EmitLoadThisField(variable.index);
+                    // 编译方法中的闭包 将this作为upvalue加载到其中
+                    compiler->mCurCompileUnit->LoadThis();
+                    // 先将 this 弹出 之后对this进行 取值赋值
+                    if (flag == CompileFlag::Assign) {
+                        // 此时的栈结构为  值 | this
+                        compiler->mCurCompileUnit->EmitStoreField(variable.index);
+                    } else {
+                        compiler->mCurCompileUnit->EmitLoadField(variable.index);
+                    }
                 }
             } else {
                 // TODO Error 变量不存在
@@ -231,7 +246,7 @@ namespace hypermind {
         CompileUnit cu = compiler->CreateCompileUnit();
 #endif
         compiler->mCurCompileUnit = &cu;
-        cu.AddLocalVariable(_HM_C("this"));
+        cu.AddLocalVariable(_HM_C("arg"));
         // 进入作用域
         cu.EnterScope(); // 直接就编译了 不需要离开作用域
         cu.mFn->maxStackSlotNum = cu.mStackSlotNum = cu.mLocalVarNumber;
@@ -301,12 +316,13 @@ namespace hypermind {
 #else
         CompileUnit cu = compiler->CreateCompileUnit();
 #endif
+        cu.mCurClassInfo = compiler->mCurClassInfo;
         compiler->mCurCompileUnit = &cu;
         cu.AddLocalVariable(_HM_C("this"));
         cu.EnterScope();
         cu.mFn->maxStackSlotNum = cu.mStackSlotNum = cu.mLocalVarNumber;
         if (params != nullptr) {
-            params->compile(compiler); // 编译参数声明
+            params->compile(compiler, CompileFlag::Null); // 编译参数声明
             cu.mFn->argNum = cu.mLocalVarNumber - 1;
         }
         body->compile(compiler); // 编译函数实体
@@ -334,10 +350,10 @@ namespace hypermind {
 
     AST_COMPILE(ASTArgPostfix) {
         AST_ENTER();
+        HMInteger index = compiler->mVM->mAllMethods.Find(Signature(SignatureType::Method, _HM_C("call")));
         expr->compile(compiler);
         args->compile(compiler, CompileFlag::Null);
-        compiler->mCurCompileUnit->EmitCall(0, args->elements.size());
-
+        compiler->mCurCompileUnit->EmitCall(index, args->elements.size());
     }
 
     AST_COMPILE(ASTDotPostfix) {
@@ -369,6 +385,11 @@ namespace hypermind {
 
     AST_COMPILE(ASTSubscriptPostfix) {
         AST_ENTER();
+        expr->compile(compiler);
+        args->compile(compiler, CompileFlag::Null);
+        HMInteger index = compiler->mVM->mAllMethods.Find(
+                Signature(flag == CompileFlag::Assign ? SignatureType::SubscriptSetter : SignatureType::Subscript));
+        compiler->mCurCompileUnit->EmitCall(static_cast<HMUINT32>(index), args->elements.size());
 
     }
 

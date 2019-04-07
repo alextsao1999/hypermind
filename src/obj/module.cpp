@@ -13,7 +13,8 @@ namespace hypermind {
         return false;
     }
     HM_OBJ_DUMP(Module) {
-        os << _HM_C(" { HMModule(") << sizeof(HMModule) << _HM_C(") ") << static_cast<const void *>(this) << " name : ";
+        os << _HM_C(" { HMModule(") << sizeof(HMModule) << _HM_C(") ") << static_cast<const void *>(this)
+           << _HM_C(" name : ");
         if (moduleName != nullptr) {
             moduleName->dump(os);
         } else {
@@ -23,7 +24,7 @@ namespace hypermind {
 
         for (int i = 0; i < varValues.count; ++i) {
             String str(varNames.mSymbols[i].name, varNames.mSymbols[i].length);
-            os << "   " << str << "  :  ";
+            os << _HM_C("   ") << str << _HM_C("  :  ");
             varValues[i].dump(os);
             os << std::endl;
         }

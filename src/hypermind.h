@@ -26,7 +26,7 @@ typedef float HMFloat;
 typedef HMUINT32 HMHash;
 typedef bool HMBool;
 #define Vector std::vector
-#define HMUNICODE
+//#define HMUNICODE
 
 #ifdef HMUNICODE
 // Unicode

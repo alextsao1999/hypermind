@@ -169,17 +169,6 @@ namespace hypermind {
                     case TokenType::Sub:
                     case TokenType::Mul:
                     case TokenType::Div:
-                    case TokenType::Increase:
-                    case TokenType::Decrease:
-                    case TokenType::Assign:
-                    case TokenType::AddAssign:
-                    case TokenType::SubAssign:
-                    case TokenType::MulAssign:
-                    case TokenType::DivAssign:
-                    case TokenType::ModAssign:
-                    case TokenType::AndAssign:
-                    case TokenType::OrAssign:
-                    case TokenType::XorAssign:
                     case TokenType::Arrow:
                     case TokenType::Not:
                     case TokenType::Equal:
@@ -225,7 +214,29 @@ namespace hypermind {
                             else
                                 classPtr->methods.push_back(method);
                         }
-
+                        inStatic = false;
+                        break;
+                    case TokenType::LeftBracket:
+                        {
+                            ASTMethodStmtPtr method = make_ptr(ASTMethodStmt);
+                            method->params = ParseParamList();
+                            mLexer.Consume(TokenType::RightBracket);
+                            if (mLexer.Match(TokenType::Assign)) {
+                                // Subscript Setter
+                                method->name = Signature(SignatureType::SubscriptSetter);
+                                mLexer.Match(TokenType::LeftParen);
+                                method->params->elements.push_back(make_ptr(ASTParamStmt, mLexer.Read(), nullptr));
+                                mLexer.Match(TokenType::RightParen);
+                            } else {
+                                // Subscript
+                                method->name = Signature(SignatureType::Subscript);
+                            }
+                            method->body = ParseBlock();
+                            if (inStatic)
+                                classPtr->statics.push_back(method);
+                            else
+                                classPtr->methods.push_back(method);
+                        }
                         inStatic = false;
                         break;
                     case TokenType::KeywordVar: {
@@ -320,7 +331,8 @@ namespace hypermind {
      */
     ASTListPtr Parser::ParseParamList() {
         ASTListPtr list = make_ptr(ASTList);
-        if (mLexer.PeekTokenType() == TokenType::RightParen)
+        TokenType next = mLexer.PeekTokenType();
+        if (next == TokenType::RightParen || next == TokenType::RightBracket)
             return list;
         do {
             ASTParamStmtPtr &&var = make_ptr(ASTParamStmt);
@@ -335,7 +347,8 @@ namespace hypermind {
 
     ASTListPtr Parser::ParseArgList() {
         ASTListPtr list = make_ptr(ASTList);
-        if (mLexer.PeekTokenType() == TokenType::RightParen)
+        TokenType next = mLexer.PeekTokenType();
+        if (next == TokenType::RightParen || next == TokenType::RightBracket)
             return list;
         do {
             ASTNodePtr &&ptr = ParseExpression();

@@ -42,9 +42,6 @@ namespace hypermind {
         //  ------------------------------ 加载完成
         while (true) {
 //            dump(ip, vm, curFrame);
-//                hm_cout << "------------------------------" << std::endl;
-//                dumpStack(stack, 10);
-//                hm_cout << "------------------------------" << std::endl;
             opcode = ReadByte();
             switch ((Opcode) opcode) {
                 case Opcode::LoadConstant:
@@ -60,7 +57,6 @@ namespace hypermind {
                     Push(fn->module->varValues[ReadShort()]);
                     Finish();
                 case Opcode::StoreModuleVariable:
-
                     fn->module->varValues[ReadShort()] = Peek(1);
                     Finish();
                 case Opcode::LoadUpvalue:
@@ -83,9 +79,18 @@ namespace hypermind {
                 }
                     Finish();
                 case Opcode::LoadField:
-
+                {
+                    Value *value = PopPtr();
+                    auto *instance = (HMInstance *) value->objval;
+                    Push(instance->fields[ReadShort()]);
+                }
                     Finish();
                 case Opcode::StoreField:
+                    {
+                        Value *value = PopPtr();
+                        auto *instance = (HMInstance *) value->objval;
+                        instance->fields[ReadShort()] = Peek(1);
+                    }
                     Finish();
                 case Opcode::Pop:
                     PopPtr();
@@ -100,8 +105,26 @@ namespace hypermind {
                     PushType(ValueType::False);
                     Finish();
                 case Opcode::Call:
-                    ReadShort();
-                    ReadShort();
+                {
+                    int index = ReadShort();
+                    int argNum = ReadShort();
+                    Value *object = sp - argNum - 1;
+                    HMClass *claz = vm->GetValueClass(*object);
+                    if (claz->methods[index].type == MethodType::Script) {
+                        StoreCurFrame();
+                        // 默认将闭包作为第一个参数
+                        createFrame(vm, claz->methods[index].fn, argNum + 1);
+                        LoadCurFrame();
+                    } else if (claz->methods[index].type == MethodType::Primitive) {
+                        claz->methods[index].pfn(vm, argNum, object);
+                        sp = object + 1;
+                    } else if (claz->methods[index].type == MethodType::FunctionCall) {
+                        StoreCurFrame();
+                        // 默认将闭包作为第一个参数
+                        createFrame(vm, (HMClosure *) object->objval, argNum + 1);
+                        LoadCurFrame();
+                    }
+                }
                     Finish();
                 case Opcode::Call0:
                 case Opcode::Call1:
@@ -110,22 +133,27 @@ namespace hypermind {
                 case Opcode::Call4:
                 case Opcode::Call5:
                 case Opcode::Call6:
-                case Opcode::Call7: {
-                    int index = ReadShort();
-                    StoreCurFrame();
-
-                    int argNum = opcode - (HMByte) Opcode::Call0;
-                    Value *closure = sp - argNum - 1;
-                    HMClass *claz = vm->GetValueClass(*closure);
-                    if (claz->methods[index].type == MethodType::Script) {
-
-                        // 默认将闭包作为第一个参数
-                        createFrame(vm, claz->methods[index].fn, argNum + 1);
-                        LoadCurFrame();
-                    } else if (claz->methods[index].type == MethodType::Primitive) {
-                        claz->methods[index].pfn(vm, closure);
+                case Opcode::Call7:
+                    {
+                        int index = ReadShort();
+                        int argNum = opcode - (HMByte) Opcode::Call0;
+                        Value *object = sp - argNum - 1;
+                        HMClass *claz = vm->GetValueClass(*object);
+                        if (claz->methods[index].type == MethodType::Script) {
+                            StoreCurFrame();
+                            // 默认将闭包作为第一个参数
+                            createFrame(vm, claz->methods[index].fn, argNum + 1);
+                            LoadCurFrame();
+                        } else if (claz->methods[index].type == MethodType::Primitive) {
+                            claz->methods[index].pfn(vm, argNum, object);
+                            sp = object + 1;
+                        } else if (claz->methods[index].type == MethodType::FunctionCall) {
+                            StoreCurFrame();
+                            // 默认将闭包作为第一个参数
+                            createFrame(vm, (HMClosure *) object->objval, argNum + 1);
+                            LoadCurFrame();
+                        }
                     }
-                }
                     Finish();
                 case Opcode::Super:
                     Finish();
@@ -196,9 +224,6 @@ namespace hypermind {
                     } else {
                         *stackStart = Pop();
                         sp = stackStart + 1;
-
-                        hm_cout << " --- >>> " << sp - stack << std::endl;
-                        dumpStack(stack, 10);
                     }
                     LoadCurFrame();
                     Finish();
@@ -209,12 +234,10 @@ namespace hypermind {
                     auto *claz = vm->NewObject<HMClass>(
                             (HMString *) className->objval, (HMClass *) superClass->objval, ReadShort());
                     Push(claz);
-
                 }
                     Finish();
                 case Opcode::CreateInstance:
                 {
-
                     Value *value = PopPtr();
                     Push(vm->NewObject<HMInstance>((HMClass *) value->objval));
                 }

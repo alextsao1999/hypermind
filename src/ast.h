@@ -147,7 +147,7 @@ namespace hypermind {
 
     AST_NODE(ASTMethodStmt, ASTMethodStmtPtr) {
         Signature name;
-        ASTNodePtr params; // 形式参数
+        ASTListPtr params; // 形式参数
         ASTNodePtr body; // 函数体
         AST_DECL();
     };
@@ -207,10 +207,10 @@ namespace hypermind {
 
     AST_NODE(ASTSubscriptPostfix, ASTSubscriptPostfixPtr) {
         ASTNodePtr expr;
-        ASTListPtr params;
+        ASTListPtr args;
 
         ASTSubscriptPostfix(HMUINT32 line, HMUINT32 column, ASTNodePtr expr, ASTListPtr params) : ASTNode(
-                line, column), expr(std::move(expr)), params(std::move(params)) {}
+                line, column), expr(std::move(expr)), args(std::move(params)) {}
 
         AST_DECL();
     };

@@ -12,10 +12,8 @@ using namespace hypermind;
 using namespace std;
 
 int main() {
-    auto *source = const_cast<HMChar *>(_HM_C(
-            "类 people {变量 age; 创建(yr) {age = yr + 2 };年龄 { return age+1}; };变量 tt = people.创建(11); 变量 ss = tt.年龄;"
-            ));
-//    auto *source = const_cast<HMChar *>(_HM_C("var a = 100; a = a + 20+391;"));
+//    auto *source = const_cast<HMChar *>(_HM_C("类 people {变量 age; 创建(yr) {age = yr + 2 };年龄 { return age+1}; };变量 tt = people.创建(11); 变量 ss = tt.年龄;tt.print();"));
+    auto *source = const_cast<HMChar *>(_HM_C("class fuck{ var ttt ; new() {ttt = 66}; ttt{return ttt+1} };var val = fuck.new();val.print()"));
     VM vm;
     Lexer lexer(&vm, source);
     Parser parser(_HM_C(""), lexer);
@@ -36,11 +34,9 @@ int main() {
     auto *thread = vm.NewObject<HMThread>(closure);
 //    vm.DumpAllObjects();
     thread->execute(&vm);
+//    compiler.mCurModule->dump(hm_cout);
     compiler.mCurModule->dump(hm_cout);
     vm.mGCHeap.StartGC();
-    system("pause");
-
-//    vm.DumpAllObjects();
     return 0;
 }
 

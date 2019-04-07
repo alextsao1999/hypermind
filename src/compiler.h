@@ -88,6 +88,7 @@ namespace hypermind {
         // 外层编译单元
         CompileUnit *mOuter{nullptr};
         Compiler *mCurCompiler{nullptr};
+        ClassInfo *mCurClassInfo{nullptr};
 
 #ifdef HMDebug
         HMUINT32 mLine{0};
@@ -302,6 +303,14 @@ namespace hypermind {
             memcpy(mFn->upvalues, mUpvalues, sizeof(Upvalue) * mFn->upvalueNum);
         }
 
+        // 加载this的upvalue
+        void LoadThis() {
+            Variable var = FindLocalOrUpvalue(Signature(_HM_C("this")));
+            if (var.scopeType != ScopeType::Invalid) {
+                EmitLoadVariable(var);
+            }
+        };
+
         void LoadModuleVar(Signature signature);
 
         void EmitCloseUpvalue() {
@@ -330,7 +339,7 @@ namespace hypermind {
          * 弹出栈顶参数
          * @param argNum
          */
-        void EmitCall(HMUINT32 methodIndex, HMUINT32 argNum) {
+        void EmitCall(HMInteger methodIndex, HMInteger argNum) {
             STACK_CHANGE(-argNum);
             if (argNum <= 7) {
                 WriteByte(static_cast<HMByte>((HMByte) Opcode::Call0 + argNum));
@@ -399,6 +408,17 @@ namespace hypermind {
         void EmitLoadConstant(HMInteger index) {
             STACK_CHANGE(1);
             WriteOpcode(Opcode::LoadConstant);
+            WriteShortOperand(index);
+        }
+
+        void EmitLoadField(HMInteger index) {
+            STACK_CHANGE(1);
+            WriteOpcode(Opcode::LoadField);
+            WriteShortOperand(index);
+        }
+
+        void EmitStoreField(HMInteger index) {
+            WriteOpcode(Opcode::StoreField);
             WriteShortOperand(index);
         }
 

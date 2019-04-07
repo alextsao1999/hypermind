@@ -12,7 +12,7 @@
 
 namespace hypermind {
     // 原生函数指针
-    typedef bool (*HMPrimitive)(VM *vm, Value *args);
+    typedef bool (*HMPrimitive)(VM *vm, HMInteger argNum, Value *args);
 
     enum class MethodType {
         None,     // 空方法类型, 并不等同于undefined
@@ -31,6 +31,8 @@ namespace hypermind {
         HMMethod(HMPrimitive func) : type(MethodType::Primitive), pfn(func) {}
 
         HMMethod(HMClosure *func) : type(MethodType::Script), fn(func) {}
+
+        HMMethod(MethodType type) : type(type), fn(nullptr) {}
     };
 
     // 类对象
@@ -43,12 +45,23 @@ namespace hypermind {
         HM_OBJ_CONSTRUCTOR_CLASS(Class, nullptr, HMString *name, HMClass *super, HMUINT32 fieldNumber), name(name),
                                                                                                         superClass(super),
                                                                                                         fieldNubmer(fieldNumber){
+            if (super != nullptr) {
+                // 继承super的方法
+                for (int i = 0; i < super->methods.count; ++i) {
+                    methods.append(&vm->mGCHeap, super->methods[i]);
+                }
+            }
             // 加到保护对象中?
         };
 
         inline void bind(VM *vm, Signature signature, HMPrimitive func) {
             methods.set(&vm->mGCHeap, static_cast<HMUINT32>(vm->mAllMethods.EnsureFind(&vm->mGCHeap, signature)),
                         HMMethod(func));
+        }
+
+        inline void bind(VM *vm, Signature signature, HMMethod method) {
+            methods.set(&vm->mGCHeap, static_cast<HMUINT32>(vm->mAllMethods.EnsureFind(&vm->mGCHeap, signature)),
+                        method);
         }
 
         HM_OBJ_DECL();
