@@ -28,8 +28,14 @@ namespace hypermind {
 
         return true;
     }
+
     bool PrimitiveSub(VM *vm, HMInteger argNum, Value *args) {
         args[0].intval = args[0].intval - args[1].intval;
+        return true;
+    }
+
+    bool PrimitiveNegative(VM *vm, HMInteger argNum, Value *args) {
+        args[0].intval = -args[0].intval;
         return true;
     }
 
@@ -58,11 +64,11 @@ namespace hypermind {
 
         mFunctionClass = NewObject<HMClass>(NewObject<HMString>(_HM_C("Function")), nullptr, 0);
         mFunctionClass->bind(this, Signature(SignatureType::Method, _HM_C("call")), HMMethod(MethodType::FunctionCall));
-        mFunctionClass->bind(this, Signature(SignatureType::Method, _HM_C("调用")), HMMethod(MethodType::FunctionCall));
 
         mIntegerClass = NewObject<HMClass>(NewObject<HMString>(_HM_C("Integer")), nullptr, 0);
         mIntegerClass->bind(this, Signature(SignatureType::Method, _HM_C("+")), PrimitiveAdd);
         mIntegerClass->bind(this, Signature(SignatureType::Method, _HM_C("-")), PrimitiveSub);
+        mIntegerClass->bind(this, Signature(SignatureType::Getter, _HM_C("-")), PrimitiveNegative);
         mIntegerClass->bind(this, Signature(SignatureType::Method, _HM_C("*")), PrimitiveMul);
         mIntegerClass->bind(this, Signature(SignatureType::Method, _HM_C("/")), PrimitiveDiv);
 

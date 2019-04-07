@@ -24,7 +24,7 @@ namespace hypermind {
     ASTNodePtr Parser::ParsePrimary() {
         Token tok = mLexer.Read();
         ASTNodePtr leaf;
-        if (tok.type == TokenType::Identifier) {
+        if (tok.type == TokenType::Identifier || tok.type == TokenType::KeywordThis) {
             leaf = make_ptr(ASTVariable, tok);
         } else if (tok.type == TokenType::String || tok.type == TokenType::Number) {
             leaf = make_ptr(ASTLiteral, tok.value);
@@ -36,7 +36,7 @@ namespace hypermind {
             leaf = ParseExpression();
             mLexer.Consume(TokenType::RightParen);
         } else {
-            // TODO 不存在的Primary ??
+            // TODO Error 不存在的Primary ??
             return nullptr;
         }
         while (true) {

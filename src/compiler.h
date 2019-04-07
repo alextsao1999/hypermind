@@ -18,9 +18,12 @@ if (mStackSlotNum > mFn->maxStackSlotNum) mFn->maxStackSlotNum = mStackSlotNum;}
 namespace hypermind {
     class VM;
     enum class CompileFlag {
-        Null = 0,
-        Assign = 1,
-        Call = 2,
+        Null,
+        Error,
+        Assign,
+        Check,
+        Setter,
+        This,
     };
     enum class ScopeType {
         Invalid,
@@ -304,12 +307,7 @@ namespace hypermind {
         }
 
         // 加载this的upvalue
-        void LoadThis() {
-            Variable var = FindLocalOrUpvalue(Signature(_HM_C("this")));
-            if (var.scopeType != ScopeType::Invalid) {
-                EmitLoadVariable(var);
-            }
-        };
+        void LoadThis();
 
         void LoadModuleVar(Signature signature);
 

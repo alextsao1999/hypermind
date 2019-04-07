@@ -1,11 +1,3 @@
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
 //
 // Created by 曹顺 on 2019/3/1.
 //
@@ -22,9 +14,9 @@
     struct n;  \
     using p = std::shared_ptr<n>;  \
     struct n : public ASTNode
-#define AST_DECL() void compile(Compiler *compiler, CompileFlag flag);void dump(Ostream &os);using ASTNode::ASTNode;
+#define AST_DECL() CompileFlag compile(Compiler *compiler, CompileFlag flag);void dump(Ostream &os);using ASTNode::ASTNode;
 #define AST_DUMP(n) void n::dump(Ostream &os)
-#define AST_COMPILE(n) void n::compile(Compiler *compiler, CompileFlag flag)
+#define AST_COMPILE(n) CompileFlag n::compile(Compiler *compiler, CompileFlag flag)
 namespace hypermind {
     enum class CompileFlag;
     class Compiler;
@@ -35,7 +27,7 @@ namespace hypermind {
         ASTNode() = default;
         virtual void dump(Ostream &os){};
         // 虚函数不允许默认参数 不过这样能运行 我太懒了 直接就这样吧 (●'◡'●)
-        virtual void compile(Compiler *compiler, CompileFlag flag = (CompileFlag) 0) {};
+        virtual CompileFlag compile(Compiler *compiler, CompileFlag flag = (CompileFlag) 0) {};
     };
     using ASTNodePtr = std::shared_ptr<ASTNode>;
 
