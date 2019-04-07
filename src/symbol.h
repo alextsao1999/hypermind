@@ -34,13 +34,13 @@ namespace hypermind {
 
         Signature(SignatureType type, const HMChar *str, HMUINT32 length, const HMChar *field, HMUINT32 fieldLength)
                 : type(type), name(str), length(length), hash(hashString(field, fieldLength)) {
-            mixHashString(hash, " ", 1);
+            mixHashString(hash, _HM_C(" "), 1);
             mixHashString(hash, str, length);
         }
 
         Signature(const HMChar *str, HMUINT32 length, const HMChar *field, HMUINT32 fieldLength) : type(SignatureType::None), name(str), length(length),
                                                         hash(hashString(field, fieldLength)) {
-            mixHashString(hash, " ", 1);
+            mixHashString(hash, _HM_C(" "), 1);
             mixHashString(hash, str, length);
         }
 

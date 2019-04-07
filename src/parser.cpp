@@ -153,7 +153,8 @@ namespace hypermind {
     ASTNodePtr Parser::ParseClassStmt() {
         mLexer.Consume();
         ASTClassStmtPtr classPtr = make_ptr(ASTClassStmt);
-        classPtr->name = mLexer.Read();
+        Token name = mLexer.Read();
+        classPtr->name = name;
         if (mLexer.Match(TokenType::Colon)) {
             classPtr->super = mLexer.Read();
         }

@@ -231,7 +231,7 @@ namespace hypermind {
         CompileUnit cu = compiler->CreateCompileUnit();
 #endif
         compiler->mCurCompileUnit = &cu;
-        cu.AddLocalVariable("this");
+        cu.AddLocalVariable(_HM_C("this"));
         // 进入作用域
         cu.EnterScope(); // 直接就编译了 不需要离开作用域
         cu.mFn->maxStackSlotNum = cu.mStackSlotNum = cu.mLocalVarNumber;
@@ -274,7 +274,7 @@ namespace hypermind {
 
         // 加载基类
         if (super.type == TokenType::End) {
-            compiler->mCurCompileUnit->LoadModuleVar("Object");
+            compiler->mCurCompileUnit->LoadModuleVar(_HM_C("Object"));
         } else {
             compiler->mCurCompileUnit->LoadModuleVar(super);
         }
@@ -302,7 +302,7 @@ namespace hypermind {
         CompileUnit cu = compiler->CreateCompileUnit();
 #endif
         compiler->mCurCompileUnit = &cu;
-        cu.AddLocalVariable("this");
+        cu.AddLocalVariable(_HM_C("this"));
         cu.EnterScope();
         cu.mFn->maxStackSlotNum = cu.mStackSlotNum = cu.mLocalVarNumber;
         if (params != nullptr) {

@@ -16,10 +16,10 @@ namespace hypermind {
         auto *module = NewObject<HMModule>(nullptr);
         mAllModule->set(this, Value(), module);
 
-        mObjectClass = NewObject<HMClass>(NewObject<HMString>("Object"), nullptr, 0);
-        mObjectClass->bind(this, Signature(SignatureType::Method, "+"), PrimitiveAdd);
+        mObjectClass = NewObject<HMClass>(NewObject<HMString>(_HM_C("Object")), nullptr, 0);
+        mObjectClass->bind(this, Signature(SignatureType::Method, _HM_C("+")), PrimitiveAdd);
 
-        module->varNames.Add(&mGCHeap, Signature("Object"));
+        module->varNames.Add(&mGCHeap, Signature(_HM_C("Object")));
         module->varValues.append(&mGCHeap, mObjectClass);
 
     }

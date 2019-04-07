@@ -41,7 +41,7 @@ namespace hypermind {
         LoadCurFrame();
         //  ------------------------------ 加载完成
         while (true) {
-            dump(ip, vm, curFrame);
+//            dump(ip, vm, curFrame);
 //                hm_cout << "------------------------------" << std::endl;
 //                dumpStack(stack, 10);
 //                hm_cout << "------------------------------" << std::endl;
