@@ -16,15 +16,14 @@ namespace hypermind {
         os << _HM_C(" { HMModule(") << sizeof(HMModule) << _HM_C(") ") << static_cast<const void *>(this)
            << _HM_C(" name : ");
         if (moduleName != nullptr) {
-            moduleName->dump(os);
+            os << moduleName->charSequence;
         } else {
             os << _HM_C("<core>");
         }
         os << std::endl;
-
         for (int i = 0; i < varValues.count; ++i) {
             String str(varNames.mSymbols[i].name, varNames.mSymbols[i].length);
-            os << _HM_C("   ") << str << _HM_C("  :  ");
+            os << _HM_C("     ") << str << _HM_C(" = ");
             varValues[i].dump(os);
             os << std::endl;
         }

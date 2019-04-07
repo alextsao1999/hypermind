@@ -13,18 +13,15 @@ using namespace std;
 
 int main() {
 //    auto *source = const_cast<HMChar *>(_HM_C("类 people {变量 age; 创建(yr) {age = yr + 2 };年龄 { return age+1}; };变量 tt = people.创建(11); 变量 ss = tt.年龄;tt.print();"));
-    auto *source = const_cast<HMChar *>(_HM_C("class fuck{ var ttt ; new() {ttt = 66}; ttt{return ttt+1} };var val = fuck.new();val.print()"));
+    auto *source = const_cast<HMChar *>(_HM_C("class fuck{ var ttt ; new() {ttt = 66+1}; ttt{return ttt+1};[value]{return value + 1} };var val = fuck.new();"));
     VM vm;
     Lexer lexer(&vm, source);
     Parser parser(_HM_C(""), lexer);
     ASTNodePtr ast = parser.ParseProgram();
-//    ast->dump(hm_cout);
-
     Compiler compiler(&vm);
     compiler.mCurModule = vm.NewObject<HMModule>(vm.NewObject<HMString>(_HM_C("test")));
     CompileUnit cu = compiler.CreateCompileUnit(new FunctionDebug(_HM_C("module")));
     compiler.mCurCompileUnit = &cu;
-
     ast->compile(&compiler);
 
     compiler.mCurCompileUnit->EmitPushNull();
@@ -32,9 +29,7 @@ int main() {
     // 由指令流创建闭包
     auto *closure = vm.NewObject<HMClosure>(compiler.mCurCompileUnit->mFn);
     auto *thread = vm.NewObject<HMThread>(closure);
-//    vm.DumpAllObjects();
     thread->execute(&vm);
-//    compiler.mCurModule->dump(hm_cout);
     compiler.mCurModule->dump(hm_cout);
     vm.mGCHeap.StartGC();
     return 0;

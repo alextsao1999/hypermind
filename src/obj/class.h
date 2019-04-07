@@ -54,11 +54,6 @@ namespace hypermind {
             // 加到保护对象中?
         };
 
-        inline void bind(VM *vm, Signature signature, HMPrimitive func) {
-            methods.set(&vm->mGCHeap, static_cast<HMUINT32>(vm->mAllMethods.EnsureFind(&vm->mGCHeap, signature)),
-                        HMMethod(func));
-        }
-
         inline void bind(VM *vm, Signature signature, HMMethod method) {
             methods.set(&vm->mGCHeap, static_cast<HMUINT32>(vm->mAllMethods.EnsureFind(&vm->mGCHeap, signature)),
                         method);

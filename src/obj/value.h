@@ -50,7 +50,7 @@ namespace hypermind {
                     os << _HM_C("[integer : ") << intval << _HM_C("]");
                     break;
                 case ValueType::Object:
-                    os << _HM_C("[pointer : ") << static_cast<const void *>(objval) << _HM_C("]") << "  -> ";
+                    os << _HM_C("[pointer : ") << static_cast<const void *>(objval) << _HM_C("] -> ");
                     objval->dump(os);
                     break;
                 case ValueType::Float:

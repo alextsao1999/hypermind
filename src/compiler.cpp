@@ -28,75 +28,30 @@ namespace hypermind {
         }
         lhs->compile(compiler);
         rhs->compile(compiler);
+        HMInteger index;
         // 根据Op 编译相应的Opcode
         switch (op.type) {
             case TokenType::Add:
-                compiler->mCurCompileUnit->EmitAdd();
-                break;
             case TokenType::Sub:
-                compiler->mCurCompileUnit->EmitSub();
-                break;
             case TokenType::Mul:
-                compiler->mCurCompileUnit->EmitMul();
-                break;
             case TokenType::Div:
-                compiler->mCurCompileUnit->EmitDiv();
-                break;
-            case TokenType::Increase:
-                break;
-            case TokenType::Decrease:
-                break;
-            case TokenType::Assign:
-                break;
-            case TokenType::AddAssign:
-                compiler->mCurCompileUnit->EmitAdd();
-                lhs->compile(compiler);
-                break;
-            case TokenType::SubAssign:
-                compiler->mCurCompileUnit->EmitSub();
-                lhs->compile(compiler);
-                break;
-            case TokenType::MulAssign:
-                compiler->mCurCompileUnit->EmitMul();
-                lhs->compile(compiler);
-                break;
-            case TokenType::DivAssign:
-                compiler->mCurCompileUnit->EmitDiv();
-                lhs->compile(compiler);
-                break;
-            case TokenType::ModAssign:
-                break;
-            case TokenType::AndAssign:
-                break;
-            case TokenType::OrAssign:
-                break;
-            case TokenType::XorAssign:
-                break;
             case TokenType::Arrow:
-                break;
             case TokenType::Not:
-                break;
             case TokenType::Equal:
-                break;
             case TokenType::NotEqual:
-                break;
             case TokenType::Greater:
-                break;
             case TokenType::Less:
-                break;
             case TokenType::GreaterEqual:
-                break;
             case TokenType::LessEqual:
-                break;
             case TokenType::Or:
-                break;
             case TokenType::LogicOr:
-                break;
             case TokenType::And:
-                break;
             case TokenType::LogicAnd:
-                break;
             case TokenType::Mod:
+                index = compiler->mVM->mAllMethods.Find(Signature(SignatureType::Method, op.start, op.length));
+                lhs->compile(compiler);
+                rhs->compile(compiler);
+                compiler->mCurCompileUnit->EmitCall(index, 1);
                 break;
             default:
                 break;

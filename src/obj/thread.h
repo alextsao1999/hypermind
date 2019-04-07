@@ -100,6 +100,10 @@ namespace hypermind {
 #define ConstantShortArg()  index = ReadShort(); \
 hm_cout << _HM_C("_") << index << "  ->  "; \
 frame->closure->pFn->constants[index].dump(hm_cout);
+#define MethodShortArg()                     index = ReadShort(); \
+            hm_cout << " -> "; \
+            vm->mAllMethods[index].dump(hm_cout); \
+            hm_cout << " | " << index; \
 
 #define Finish() hm_cout << std::endl; break;
             opcode = ReadByte();
@@ -120,7 +124,7 @@ frame->closure->pFn->constants[index].dump(hm_cout);
                 case Opcode::LoadModuleVariable:
                     Instruction("Load_Module_Variable");
                     {
-                        int index = ReadShort();
+                        index = ReadShort();
                         hm_cout << "_" << index << " -> ";
                         frame->closure->pFn->module->varNames.mSymbols[index].dump(hm_cout);
                     }
@@ -128,7 +132,7 @@ frame->closure->pFn->constants[index].dump(hm_cout);
                 case Opcode::StoreModuleVariable:
                     Instruction("Store_Module_Varible");
                     {
-                        int index = ReadShort();
+                        index = ReadShort();
                         hm_cout << "_" << index << " -> ";
                         frame->closure->pFn->module->varNames.mSymbols[index].dump(hm_cout);
                     }
@@ -171,6 +175,14 @@ frame->closure->pFn->constants[index].dump(hm_cout);
                     Finish();
                 case Opcode::Call:
                     Instruction("Call");
+                    {
+                        index = ReadShort();
+                        auto argNum = static_cast<HMUINT32>(ReadShort());
+                        hm_cout << argNum;
+                        hm_cout << " -> ";
+                        vm->mAllMethods[index].dump(hm_cout);
+                        hm_cout << " | " << index;
+                    }
                     ShortArg();
                     ShortArg();
                     Finish();
@@ -185,9 +197,7 @@ frame->closure->pFn->constants[index].dump(hm_cout);
                     Instruction("Call_");
                     hm_cout << opcode - (HMByte) Opcode::Call0;
                     {
-                        hm_cout << " -> ";
-                        HMInteger index = ReadShort();
-                        vm->mAllMethods[index].dump(hm_cout);
+                        MethodShortArg();
                     }
                     Finish();
                 case Opcode::Super:
@@ -258,11 +268,11 @@ frame->closure->pFn->constants[index].dump(hm_cout);
                     Finish();
                 case Opcode::BindInstanceMethod:
                     Instruction("Bind_Instance_Method");
-                    ShortArg();
+                    MethodShortArg();
                     Finish();
                 case Opcode::BindStaticMethod:
                     Instruction("Bind_Static_Method");
-                    ShortArg();
+                    MethodShortArg();
                     Finish();
                 case Opcode::End:
                     Instruction("End");
