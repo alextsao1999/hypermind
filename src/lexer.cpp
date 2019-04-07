@@ -169,7 +169,7 @@ namespace hypermind {
                 TOKEN_DUMP("<end>");
                 break;
             case TokenType::Delimiter:
-                TOKEN_DUMP("<行结束>");
+                TOKEN_DUMP("<delimiter>");
                 break;
             case TokenType::Add:
                 TOKEN_DUMP("+");
@@ -291,8 +291,11 @@ namespace hypermind {
             case TokenType::Colon:
                 TOKEN_DUMP(":");
                 break;
+            case TokenType::KeywordNew:
+                TOKEN_DUMP("new");
+                break;
             default:
-                TOKEN_DUMP("<未知>");
+                TOKEN_DUMP("<unknown>");
         }
         os << name ;
 #undef TOKEN_DUMP

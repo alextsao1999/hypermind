@@ -29,6 +29,8 @@ namespace hypermind {
             HMPrimitive pfn; // 指向原生方法
         };
         HMMethod(HMPrimitive func) : type(MethodType::Primitive), pfn(func) {}
+
+        HMMethod(HMClosure *func) : type(MethodType::Script), fn(func) {}
     };
 
     // 类对象

@@ -156,4 +156,19 @@ namespace hypermind {
         name.dump(os);
     }
 
+    AST_DUMP(ASTMethodPostfix) {
+        expr->dump(os);
+        os << _HM_C(".");
+        name.dump(os);
+        args->dump(os);
+
+    }
+
+    AST_DUMP(ASTSubscriptPostfix) {
+        expr->dump(os);
+        os << _HM_C(" [ ");
+        params->dump(os);
+        os << _HM_C(" ] ");
+    }
+
 }

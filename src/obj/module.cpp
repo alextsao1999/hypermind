@@ -19,9 +19,22 @@ namespace hypermind {
         } else {
             os << _HM_C("<core>");
         }
+        os << std::endl;
+
+        for (int i = 0; i < varValues.count; ++i) {
+            String str(varNames.mSymbols[i].name, varNames.mSymbols[i].length);
+            os << "   " << str << "  :  ";
+            varValues[i].dump(os);
+            os << std::endl;
+        }
 
         os << _HM_C(" } ");
 
+    }
+
+    Value &HMModule::getVar(const Signature &signature) {
+        HMInteger index = varNames.Find(signature);
+        return varValues[index];
     }
 
 }

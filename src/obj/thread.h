@@ -88,7 +88,7 @@ namespace hypermind {
             return newUpvalue;//返回该结点
         }
 
-        void dump(HMByte *ip) {
+        void dump(HMByte *ip, VM *vm, Frame *frame) {
             HMInteger index;
             HMByte opcode;
             // 使用小端字节序
@@ -98,13 +98,16 @@ namespace hypermind {
 #define Instruction(v) hm_cout << v;
 #define ShortArg() hm_cout << _HM_C("_") << (int) ReadShort();
 #define ConstantShortArg()  index = ReadShort(); \
-hm_cout << _HM_C("_") << index;
+hm_cout << _HM_C("_") << index << "  ->  "; \
+frame->closure->pFn->constants[index].dump(hm_cout);
+
 #define Finish() hm_cout << std::endl; break;
             opcode = ReadByte();
             switch ((Opcode) opcode) {
                 case Opcode::LoadConstant:
                     Instruction("Load_Constant");
                     ConstantShortArg();
+
                     Finish();
                 case Opcode::LoadLocalVariable:
                     Instruction("Load_Local_Variable");
@@ -116,11 +119,19 @@ hm_cout << _HM_C("_") << index;
                     Finish();
                 case Opcode::LoadModuleVariable:
                     Instruction("Load_Module_Variable");
-                    ShortArg();
+                    {
+                        int index = ReadShort();
+                        hm_cout << "_" << index << " -> ";
+                        frame->closure->pFn->module->varNames.mSymbols[index].dump(hm_cout);
+                    }
                     Finish();
                 case Opcode::StoreModuleVariable:
                     Instruction("Store_Module_Varible");
-                    ShortArg();
+                    {
+                        int index = ReadShort();
+                        hm_cout << "_" << index << " -> ";
+                        frame->closure->pFn->module->varNames.mSymbols[index].dump(hm_cout);
+                    }
                     Finish();
                 case Opcode::LoadUpvalue:
                     Instruction("Load_Upvalue");
@@ -132,9 +143,11 @@ hm_cout << _HM_C("_") << index;
                     Finish();
                 case Opcode::LoadThisField:
                     Instruction("Load_This_Field");
+                    ShortArg();
                     Finish();
                 case Opcode::StoreThisField:
                     Instruction("Store_This_Field");
+                    ShortArg();
                     Finish();
                 case Opcode::LoadField:
                     Instruction("Load_Field");
@@ -169,9 +182,13 @@ hm_cout << _HM_C("_") << index;
                 case Opcode::Call5:
                 case Opcode::Call6:
                 case Opcode::Call7:
-                    Instruction("Call");
+                    Instruction("Call_");
                     hm_cout << opcode - (HMByte) Opcode::Call0;
-                    ShortArg();
+                    {
+                        hm_cout << " -> ";
+                        HMInteger index = ReadShort();
+                        vm->mAllMethods[index].dump(hm_cout);
+                    }
                     Finish();
                 case Opcode::Super:
                     Instruction("Super");
@@ -224,7 +241,7 @@ hm_cout << _HM_C("_") << index;
                     Finish();
                 case Opcode::CreateClosure:
                     Instruction("Create_Closure");
-                    ConstantShortArg();
+                    ShortArg();
                     Finish();
                 case Opcode::CloseUpvalue:
                     Instruction("Close_Upval");
@@ -236,8 +253,8 @@ hm_cout << _HM_C("_") << index;
                     Instruction("Create_Class");
                     ShortArg();
                     Finish();
-                case Opcode::Constructor:
-                    Instruction("Constructor");
+                case Opcode::CreateInstance:
+                    Instruction("CreateInstance");
                     Finish();
                 case Opcode::BindInstanceMethod:
                     Instruction("Bind_Instance_Method");

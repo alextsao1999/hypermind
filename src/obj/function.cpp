@@ -187,8 +187,8 @@ constants[index].dump(os);
                     Instruction("Create_Class");
                     ShortArg();
                     Finish();
-                case Opcode::Constructor:
-                    Instruction("Constructor");
+                case Opcode::CreateInstance:
+                    Instruction("CreateInstance");
                     Finish();
                 case Opcode::BindInstanceMethod:
                     Instruction("Bind_Instance_Method");
@@ -211,4 +211,5 @@ constants[index].dump(os);
 #undef ReadInt
 
     }
+
 }

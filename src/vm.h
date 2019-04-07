@@ -66,6 +66,8 @@ namespace hypermind {
             }
         }
 
+        HMClass *GetValueClass(const Value &value);
+
     };
 }
 

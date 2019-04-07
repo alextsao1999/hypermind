@@ -19,7 +19,8 @@ namespace hypermind {
     class VM;
     enum class CompileFlag {
         Null = 0,
-        Assign = 1
+        Assign = 1,
+        Call = 2,
     };
     enum class ScopeType {
         Invalid,
@@ -435,6 +436,11 @@ namespace hypermind {
             WriteShortOperand(index);
         }
 
+        void EmitCreateInstance() {
+            STACK_CHANGE(1);
+            WriteOpcode(Opcode::CreateInstance);
+        }
+
         void EmitCreateClass(HMInteger fieldNumber) {
             STACK_CHANGE(1);
             WriteOpcode(Opcode::CreateClass);
@@ -503,8 +509,12 @@ namespace hypermind {
          * 离开编译单元 将创建编译单元之前的编译单元设为当前编译单元
          * @param cu
          */
-        void LeaveCompileUnit(CompileUnit &cu) {
-            cu.EmitPushNull();
+        void LeaveCompileUnit(CompileUnit &cu, HMBool isConstrutor) {
+            if (isConstrutor) {
+                cu.EmitLoadVariable(Variable(ScopeType::Local, 0));
+            } else {
+                cu.EmitPushNull();
+            }
             cu.EmitReturn();
             mCurCompileUnit = cu.mOuter;
 

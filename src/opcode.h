@@ -67,7 +67,7 @@ namespace hypermind {
 
          // 创建类
          CreateClass,
-         Constructor,
+         CreateInstance,
 
          // 绑定实例方法
          BindInstanceMethod,

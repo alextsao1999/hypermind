@@ -45,9 +45,19 @@ namespace hypermind {
                 mLexer.Consume();
                 leaf = make_ptr(ASTArgPostfix, leaf, ParseArgList());
                 mLexer.Consume(TokenType::RightParen);
+            } else if (type == TokenType::LeftBracket) {
+                mLexer.Consume();
+                leaf = make_ptr(ASTSubscriptPostfix, leaf, ParseArgList());
+                mLexer.Consume(TokenType::RightBracket);
             } else if (type == TokenType::Dot) {
                 mLexer.Consume();
-                leaf = make_ptr(ASTDotPostfix, leaf, mLexer.Read());
+                Token name = mLexer.Read();
+                if (mLexer.Match(TokenType::LeftParen)) {
+                    leaf = make_ptr(ASTMethodPostfix, leaf, name, ParseArgList());
+                    mLexer.Consume(TokenType::RightParen);
+                } else {
+                    leaf = make_ptr(ASTDotPostfix, leaf, name);
+                }
             } else {
                 break;
             }

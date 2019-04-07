@@ -3,6 +3,7 @@
 //
 
 #include "thread.h"
+#include "value.h"
 #include "class.h"
 namespace hypermind {
     HM_OBJ_DUMP(Thread) {
@@ -31,6 +32,7 @@ namespace hypermind {
 #define Pop() (*(--sp))
 #define PopPtr() --sp
 #define Peek(n) (*(sp - n))
+#define PeekPtr(n) (sp - n)
 #define ReadByte() (*(ip++))
 #define ReadShort() (ip += 2,  (ip[-1] << 8) | ip[-2])
 #define ReadInt() (ip += 4, (ip[-1] << 24) | (ip[-2] << 16) | (ip[-3] << 8) | ip[-4])
@@ -39,7 +41,7 @@ namespace hypermind {
         LoadCurFrame();
         //  ------------------------------ 加载完成
         while (true) {
-            dump(ip);
+            dump(ip, vm, curFrame);
 //                hm_cout << "------------------------------" << std::endl;
 //                dumpStack(stack, 10);
 //                hm_cout << "------------------------------" << std::endl;
@@ -58,6 +60,7 @@ namespace hypermind {
                     Push(fn->module->varValues[ReadShort()]);
                     Finish();
                 case Opcode::StoreModuleVariable:
+
                     fn->module->varValues[ReadShort()] = Peek(1);
                     Finish();
                 case Opcode::LoadUpvalue:
@@ -67,10 +70,20 @@ namespace hypermind {
                     ReadShort();
                     Finish();
                 case Opcode::LoadThisField:
+                    {
+                        auto *instance = (HMInstance *) stackStart->objval;
+                        Push(instance->fields[ReadShort()]);
+                    }
                     Finish();
                 case Opcode::StoreThisField:
+                {
+                    Value *value = PeekPtr(1);
+                    auto *instance = (HMInstance *) stackStart->objval;
+                    instance->fields[ReadShort()] = *value;
+                }
                     Finish();
                 case Opcode::LoadField:
+
                     Finish();
                 case Opcode::StoreField:
                     Finish();
@@ -78,13 +91,13 @@ namespace hypermind {
                     PopPtr();
                     Finish();
                 case Opcode::PushNull:
-                PushType(ValueType::Null);
+                    PushType(ValueType::Null);
                     Finish();
                 case Opcode::PushTrue:
-                PushType(ValueType::True);
+                    PushType(ValueType::True);
                     Finish();
                 case Opcode::PushFalse:
-                PushType(ValueType::False);
+                    PushType(ValueType::False);
                     Finish();
                 case Opcode::Call:
                     ReadShort();
@@ -98,14 +111,20 @@ namespace hypermind {
                 case Opcode::Call5:
                 case Opcode::Call6:
                 case Opcode::Call7: {
-                    // 将闭包函数弹出
+                    int index = ReadShort();
+                    StoreCurFrame();
+
                     int argNum = opcode - (HMByte) Opcode::Call0;
                     Value *closure = sp - argNum - 1;
-                    // 默认将闭包作为第一个参数
-                    createFrame(vm, (HMClosure *) closure->objval, argNum + 1);
-                    ReadShort();
-                    StoreCurFrame();
-                    LoadCurFrame();
+                    HMClass *claz = vm->GetValueClass(*closure);
+                    if (claz->methods[index].type == MethodType::Script) {
+
+                        // 默认将闭包作为第一个参数
+                        createFrame(vm, claz->methods[index].fn, argNum + 1);
+                        LoadCurFrame();
+                    } else if (claz->methods[index].type == MethodType::Primitive) {
+                        claz->methods[index].pfn(vm, closure);
+                    }
                 }
                     Finish();
                 case Opcode::Super:
@@ -169,7 +188,6 @@ namespace hypermind {
                     closeUpvalue(stackStart);
                     // 只有当前没有栈帧的时候线程才结束
                     if (usedFrameNum == 0) {
-                        dumpStack(stack, fn->maxStackSlotNum);
                         if (caller == nullptr) {
                             stack[0] = Pop();
                         }
@@ -178,22 +196,38 @@ namespace hypermind {
                     } else {
                         *stackStart = Pop();
                         sp = stackStart + 1;
+
+                        hm_cout << " --- >>> " << sp - stack << std::endl;
+                        dumpStack(stack, 10);
                     }
                     LoadCurFrame();
+                    Finish();
                 case Opcode::CreateClass:
                 {
                     Value *superClass = PopPtr();
                     Value *className = PopPtr();
                     auto *claz = vm->NewObject<HMClass>(
                             (HMString *) className->objval, (HMClass *) superClass->objval, ReadShort());
-                    claz->dump(hm_cout);
                     Push(claz);
+
                 }
                     Finish();
-                case Opcode::Constructor:
+                case Opcode::CreateInstance:
+                {
+
+                    Value *value = PopPtr();
+                    Push(vm->NewObject<HMInstance>((HMClass *) value->objval));
+                }
                     Finish();
                 case Opcode::BindInstanceMethod:
-                    ReadShort();
+                {
+                    int index = ReadShort();
+                    Value *closure = PopPtr();
+                    Value *value = PeekPtr(1);
+                    auto *claz = (HMClass *) value->objval;
+                    claz->methods.set(&vm->mGCHeap, static_cast<HMUINT32>(index),
+                                      HMMethod((HMClosure *) closure->objval));
+                }
                     Finish();
                 case Opcode::BindStaticMethod:
                     ReadShort();

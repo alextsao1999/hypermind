@@ -29,6 +29,8 @@ namespace hypermind {
             }
         };
 
+        Value &getVar(const Signature &signature);
+
         HM_OBJ_DECL();
     };
 

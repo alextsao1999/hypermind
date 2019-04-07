@@ -239,7 +239,7 @@ namespace hypermind {
         // 默认传入this 并不包含this
         cu.mFn->argNum = params->elements.size();
         body->compile(compiler); // 编译函数实体
-        compiler->LeaveCompileUnit(cu);
+        compiler->LeaveCompileUnit(cu, false);
         cu.EmitEnd();
         // 记录函数上值 创建闭包的时候用
         cu.StoreUpvalue();
@@ -309,9 +309,8 @@ namespace hypermind {
             params->compile(compiler); // 编译参数声明
             cu.mFn->argNum = cu.mLocalVarNumber - 1;
         }
-
         body->compile(compiler); // 编译函数实体
-        compiler->LeaveCompileUnit(cu);
+        compiler->LeaveCompileUnit(cu, name.type == SignatureType::Constructor);
         cu.EmitEnd();
         // 记录函数上值 创建闭包的时候用
         cu.StoreUpvalue();
@@ -342,6 +341,33 @@ namespace hypermind {
     }
 
     AST_COMPILE(ASTDotPostfix) {
+        AST_ENTER();
+        expr->compile(compiler);
+        HMInteger index = compiler->mVM->mAllMethods.Find(
+                Signature(flag == CompileFlag::Assign ? SignatureType::Setter : SignatureType::Getter, name.start,
+                          name.length));
+        compiler->mCurCompileUnit->EmitCall(static_cast<HMUINT32>(index), flag == CompileFlag::Assign ? 1 : 0);
+    }
+
+    AST_COMPILE(ASTMethodPostfix) {
+        AST_ENTER();
+        expr->compile(compiler);
+
+        Signature signature;
+        if (name.type == TokenType::KeywordNew) {
+            signature = Signature(SignatureType::Constructor);
+            compiler->mCurCompileUnit->EmitCreateInstance();
+        } else {
+            signature = Signature(SignatureType::Method, name.start, name.length);
+        }
+        args->compile(compiler, CompileFlag::Null);
+
+        HMInteger index = compiler->mVM->mAllMethods.Find(signature);
+        compiler->mCurCompileUnit->EmitCall(static_cast<HMUINT32>(index), args->elements.size());
+
+    }
+
+    AST_COMPILE(ASTSubscriptPostfix) {
         AST_ENTER();
 
     }

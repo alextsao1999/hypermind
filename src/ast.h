@@ -1,3 +1,11 @@
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
 //
 // Created by 曹顺 on 2019/3/1.
 //
@@ -183,6 +191,27 @@ namespace hypermind {
         ASTDotPostfix(HMUINT32 line, HMUINT32 column, ASTNodePtr expr, const Token &name) : ASTNode(line, column),
                                                                                                    expr(std::move(expr)),
                                                                                                    name(name) {}
+        AST_DECL();
+    };
+
+    AST_NODE(ASTMethodPostfix, ASTMethodPostfixPtr) {
+        ASTNodePtr expr;
+        Token name;
+        ASTListPtr args;
+        ASTMethodPostfix(HMUINT32 line, HMUINT32 column, ASTNodePtr expr, const Token &name,
+                         ASTListPtr args) : ASTNode(line, column), expr(std::move(expr)), name(name), args(
+                std::move(args)) {}
+
+        AST_DECL();
+    };
+
+    AST_NODE(ASTSubscriptPostfix, ASTSubscriptPostfixPtr) {
+        ASTNodePtr expr;
+        ASTListPtr params;
+
+        ASTSubscriptPostfix(HMUINT32 line, HMUINT32 column, ASTNodePtr expr, ASTListPtr params) : ASTNode(
+                line, column), expr(std::move(expr)), params(std::move(params)) {}
+
         AST_DECL();
     };
 
