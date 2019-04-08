@@ -50,43 +50,9 @@ namespace hypermind {
             prepare(closure, sp - argNum);
         }
 
-        void closeUpvalue(Value *lastSlot) {
-            HMUpvalue *upvalue = openUpvalues;
-            while (upvalue != nullptr && upvalue->localVarPtr >= lastSlot) {
-                upvalue->closedUpvalue = *(upvalue->localVarPtr);
-                upvalue->localVarPtr = &(upvalue->closedUpvalue);
-                upvalue = upvalue->nextUpvalue;
-            }
-            openUpvalues = upvalue;
-        }
+        void closeUpvalue(Value *lastSlot);
 
-        HMUpvalue *createOpenUpvalue(VM *vm, Value *localVarPtr) {
-            //如果openUpvalues链表为空就创建
-            if (openUpvalues == nullptr) {
-                openUpvalues = vm->NewObject<HMUpvalue>(localVarPtr);
-                return openUpvalues;
-            }
-
-            HMUpvalue *preUpvalue = nullptr;
-            HMUpvalue *upvalue = openUpvalues;
-
-            while (upvalue != nullptr && upvalue->localVarPtr > localVarPtr) {
-                preUpvalue = upvalue;
-                upvalue = upvalue->nextUpvalue;
-            }
-
-            if (upvalue != nullptr && upvalue->localVarPtr == localVarPtr) {
-                return upvalue;
-            }
-            auto *newUpvalue = vm->NewObject<HMUpvalue>(localVarPtr);
-            if (preUpvalue == nullptr) {
-                openUpvalues = newUpvalue;
-            } else {
-                preUpvalue->nextUpvalue = newUpvalue;
-            }
-            newUpvalue->nextUpvalue = upvalue;
-            return newUpvalue;//返回该结点
-        }
+        HMUpvalue *createOpenUpvalue(VM *vm, Value *localVarPtr);
 
         void dump(HMByte *ip, VM *vm, Frame *frame) {
             HMInteger index;

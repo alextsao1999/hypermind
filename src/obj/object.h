@@ -34,7 +34,6 @@ namespace hypermind {
         String,
         Upvalue,
         Function,
-        Method,
         Closure,
         Instance,
         Thread

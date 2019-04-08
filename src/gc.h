@@ -45,9 +45,9 @@ namespace hypermind {
          */
         inline void Black(HMObject *obj);
 
-        inline void PushProtectedObject(HMObject *object);
+        void PushProtectedObject(HMObject *object);
 
-        inline void PopProtectedObject();
+        void PopProtectedObject();
 
         void StartGC();
 

@@ -75,7 +75,6 @@ namespace hypermind {
                     break;
                 case SignatureType::Subscript:
                     os << _HM_C("[subscript]");
-
                     break;
                 case SignatureType::SubscriptSetter:
                     os << _HM_C("[subscript setter]");

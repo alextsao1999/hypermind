@@ -15,6 +15,16 @@ namespace hypermind {
 
     }
 
+    HM_OBJ_HASH(Upvalue) {
+        return 0;
+    }
+    HM_OBJ_FREE(Upvalue) {
+        return false;
+    }
+    HM_OBJ_DUMP(Upvalue) {
+
+    }
+
     HM_OBJ_HASH(Function) {
         return 0;
     }
@@ -45,7 +55,6 @@ namespace hypermind {
 #define ConstantShortArg()  index = ReadShort(); \
 os << _HM_C("_") << index << _HM_C(" -> "); \
 constants[index].dump(os);
-
 #define Finish() os << std::endl; break;
         int i = 0;
         while (i < instructions.count) {

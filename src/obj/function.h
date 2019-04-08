@@ -1,5 +1,3 @@
-#include <utility>
-
 //
 // Created by 曹顺 on 2019/2/23.
 //
@@ -47,7 +45,7 @@ namespace hypermind {
 
     // Upvalue对象
     HM_OBJECT(Upvalue) {
-        Value *localVarPtr;
+        Value *localVarPtr{nullptr};
         Value closedUpvalue;
 
         // 链接下一个Upvalue
@@ -55,6 +53,7 @@ namespace hypermind {
         HM_OBJ_CONSTRUCTOR_CLASS(Upvalue, nullptr, Value *local), localVarPtr(local) {
 
         }
+
         HM_OBJ_DECL();
     };
 

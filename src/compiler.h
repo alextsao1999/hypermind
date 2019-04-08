@@ -60,6 +60,7 @@ namespace hypermind {
     // 正在编译的类信息
     struct ClassInfo {
         SymbolTable fields;
+        SymbolTable methods;
         ClassInfo *outer{nullptr};
     };
 

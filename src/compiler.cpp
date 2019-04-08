@@ -65,7 +65,8 @@ namespace hypermind {
             case TokenType::And:
             case TokenType::LogicAnd:
             case TokenType::Mod:
-                index = compiler->mVM->mAllMethods.Find(Signature(SignatureType::Method, op.start, op.length));
+                index = compiler->mVM->mAllMethods.EnsureFind(&compiler->mVM->mGCHeap,
+                                                              Signature(SignatureType::Method, op.start, op.length));
                 lhs->compile(compiler);
                 rhs->compile(compiler);
                 compiler->mCurCompileUnit->EmitCall(index, 1);
@@ -111,6 +112,7 @@ namespace hypermind {
         AST_ENTER();
         Variable variable = compiler->mCurCompileUnit->FindVariable(var);
         if (variable.scopeType == ScopeType::Invalid) {
+            // 局部变量不存在 尝试加载this中的Field
             if (compiler->mCurClassInfo != nullptr) {
                 // 查找Class Field
                 variable.index = compiler->mCurClassInfo->fields.Find(var);
@@ -328,7 +330,8 @@ namespace hypermind {
     AST_COMPILE(ASTNegativeExpr) {
         AST_ENTER();
         expr->compile(compiler);
-        HMInteger index = compiler->mVM->mAllMethods.Find(Signature(SignatureType::Getter, _HM_C("-")));
+        HMInteger index = compiler->mVM->mAllMethods.EnsureFind(&compiler->mVM->mGCHeap,
+                                                                Signature(SignatureType::Getter, _HM_C("-")));
         compiler->mCurCompileUnit->EmitCall(static_cast<HMUINT32>(index), 0);
         AST_LEAVE();
     }
@@ -343,7 +346,8 @@ namespace hypermind {
 
     AST_COMPILE(ASTArgPostfix) {
         AST_ENTER();
-        HMInteger index = compiler->mVM->mAllMethods.Find(Signature(SignatureType::Method, _HM_C("call")));
+        HMInteger index = compiler->mVM->mAllMethods.EnsureFind(&compiler->mVM->mGCHeap,
+                                                                Signature(SignatureType::Method, _HM_C("call")));
         expr->compile(compiler);
         args->compile(compiler, CompileFlag::Null);
         compiler->mCurCompileUnit->EmitCall(index, args->elements.size());
@@ -354,30 +358,33 @@ namespace hypermind {
         HMBool isThis = expr->compile(compiler, CompileFlag::Check) == CompileFlag::This;
 
         if (flag == CompileFlag::Check) {
+            // 如果expr为this 则返回赋值 即 rhs先编译  lhs生成store指令
             return isThis ? CompileFlag::Assign : CompileFlag::Setter;
         }
         AST_ENTER();
         HMInteger index;
         if (isThis) {
+            compiler->mCurCompileUnit->LoadThis();
             // 如果为 this 就直接加载
-            index = compiler->mCurCompileUnit->mCurClassInfo->fields.Find(Signature(name));
+            index = compiler->mCurClassInfo->fields.Find(Signature(name));
             if (flag == CompileFlag::Assign) {
-                compiler->mCurCompileUnit->EmitStoreThisField(index);
+                compiler->mCurCompileUnit->EmitStoreField(index);
             } else {
-                compiler->mCurCompileUnit->EmitLoadThisField(index);
+                compiler->mCurCompileUnit->EmitLoadField(index);
             }
             return CompileFlag::Null;
         }
         if (flag == CompileFlag::Setter) {
+            // 如果为setter 先将对象加载到栈顶 之后将rhs加载到栈顶
             expr->compile(compiler);
         } else {
             if (flag != CompileFlag::Assign) {
                 // Getter 要将对象加载到栈顶
                 expr->compile(compiler);
             }
-            index = compiler->mVM->mAllMethods.Find(
-                    Signature(flag == CompileFlag::Assign ? SignatureType::Setter : SignatureType::Getter, name.start,
-                              name.length));
+            index = compiler->mVM->mAllMethods.EnsureFind(&compiler->mVM->mGCHeap, Signature(
+                    flag == CompileFlag::Assign ? SignatureType::Setter : SignatureType::Getter,
+                    name.start, name.length));
             compiler->mCurCompileUnit->EmitCall(static_cast<HMUINT32>(index), flag == CompileFlag::Assign ? 1 : 0);
         }
         AST_LEAVE();
@@ -386,7 +393,7 @@ namespace hypermind {
     AST_COMPILE(ASTMethodPostfix) {
         AST_ENTER();
         expr->compile(compiler);
-
+        // 计算Signature
         Signature signature;
         if (name.type == TokenType::KeywordNew) {
             signature = Signature(SignatureType::Constructor);
@@ -395,8 +402,7 @@ namespace hypermind {
             signature = Signature(SignatureType::Method, name.start, name.length);
         }
         args->compile(compiler, CompileFlag::Null);
-
-        HMInteger index = compiler->mVM->mAllMethods.Find(signature);
+        HMInteger index = compiler->mVM->mAllMethods.EnsureFind(&compiler->mVM->mGCHeap, signature);
         compiler->mCurCompileUnit->EmitCall(static_cast<HMUINT32>(index), args->elements.size());
         AST_LEAVE();
     }
