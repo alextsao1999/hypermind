@@ -43,9 +43,9 @@ namespace hypermind {
             }
             return CompileFlag::Null;
         }
+
         lhs->compile(compiler);
         rhs->compile(compiler);
-        HMInteger index;
         // 根据Op 编译相应的Opcode
         switch (op.type) {
             case TokenType::Add:
@@ -65,11 +65,7 @@ namespace hypermind {
             case TokenType::And:
             case TokenType::LogicAnd:
             case TokenType::Mod:
-                index = compiler->mVM->mAllMethods.EnsureFind(&compiler->mVM->mGCHeap,
-                                                              Signature(SignatureType::Method, op.start, op.length));
-                lhs->compile(compiler);
-                rhs->compile(compiler);
-                compiler->mCurCompileUnit->EmitCall(index, 1);
+                compiler->mCurCompileUnit->EmitCallSignature(Signature(SignatureType::Method, op.start, op.length), 1);
                 break;
             default:
                 break;
@@ -291,6 +287,10 @@ namespace hypermind {
             method->compile(compiler, CompileFlag::Null);
         }
 
+        for (auto &stc : statics) {
+            stc->compile(compiler, CompileFlag::Static);
+        }
+
         // 恢复外层ClassInfo
         compiler->mCurClassInfo = classInfo.outer;
         compiler->mCurCompileUnit->DefineVariable(classIdx);
@@ -323,34 +323,48 @@ namespace hypermind {
         cu.mOuter->EmitCreateClosure(index);
 
         HMInteger methodIndex = cu.mVM->mAllMethods.EnsureFind(&cu.mVM->mGCHeap, name);
-        cu.mOuter->EmitBindInstanceMethod(methodIndex);
+        if (flag == CompileFlag::Static) {
+            cu.mOuter->EmitBindStaticMethod(methodIndex);
+        } else {
+            cu.mOuter->EmitBindInstanceMethod(methodIndex);
+        }
+
+        if (name.type == SignatureType::Constructor) {
+            // 为构造函数在Meta类中生成静态方法
+            CompileUnit newCu = compiler->CreateCompileUnit(new FunctionDebug(name));
+            compiler->mCurCompileUnit = &newCu;
+            newCu.EmitCreateInstance();
+            newCu.EmitCall(methodIndex, cu.mFn->argNum);
+            compiler->LeaveCompileUnit(newCu, true);
+            newCu.EmitEnd();
+            newCu.StoreUpvalue();
+            index = newCu.mOuter->AddConstant(Value(newCu.mFn));
+            newCu.mOuter->EmitCreateClosure(index);
+            newCu.mOuter->EmitBindStaticMethod(methodIndex);
+        }
         AST_LEAVE();
     }
 
     AST_COMPILE(ASTNegativeExpr) {
         AST_ENTER();
         expr->compile(compiler);
-        HMInteger index = compiler->mVM->mAllMethods.EnsureFind(&compiler->mVM->mGCHeap,
-                                                                Signature(SignatureType::Getter, _HM_C("-")));
-        compiler->mCurCompileUnit->EmitCall(static_cast<HMUINT32>(index), 0);
+        compiler->mCurCompileUnit->EmitCallSignature(Signature(SignatureType::Getter, _HM_C("-")), 0);
         AST_LEAVE();
     }
 
     AST_COMPILE(ASTNotExpr) {
         AST_ENTER();
         expr->compile(compiler);
-        HMInteger index = compiler->mVM->mAllMethods.Find(Signature(SignatureType::Getter, _HM_C("!")));
-        compiler->mCurCompileUnit->EmitCall(static_cast<HMUINT32>(index), 0);
+        compiler->mCurCompileUnit->EmitCallSignature(Signature(SignatureType::Getter, _HM_C("!")), 0);
         AST_LEAVE();
     }
 
     AST_COMPILE(ASTArgPostfix) {
         AST_ENTER();
-        HMInteger index = compiler->mVM->mAllMethods.EnsureFind(&compiler->mVM->mGCHeap,
-                                                                Signature(SignatureType::Method, _HM_C("call")));
         expr->compile(compiler);
         args->compile(compiler, CompileFlag::Null);
-        compiler->mCurCompileUnit->EmitCall(index, args->elements.size());
+        compiler->mCurCompileUnit->EmitCallSignature(
+                Signature(SignatureType::Method, _HM_C("call")), args->elements.size());
         AST_LEAVE();
     }
 
@@ -382,10 +396,9 @@ namespace hypermind {
                 // Getter 要将对象加载到栈顶
                 expr->compile(compiler);
             }
-            index = compiler->mVM->mAllMethods.EnsureFind(&compiler->mVM->mGCHeap, Signature(
-                    flag == CompileFlag::Assign ? SignatureType::Setter : SignatureType::Getter,
-                    name.start, name.length));
-            compiler->mCurCompileUnit->EmitCall(static_cast<HMUINT32>(index), flag == CompileFlag::Assign ? 1 : 0);
+            compiler->mCurCompileUnit->EmitCallSignature(Signature(
+                    flag == CompileFlag::Assign ? SignatureType::Setter : SignatureType::Getter, name.start,
+                    name.length), flag == CompileFlag::Assign ? 1 : 0);
         }
         AST_LEAVE();
     }
@@ -397,13 +410,11 @@ namespace hypermind {
         Signature signature;
         if (name.type == TokenType::KeywordNew) {
             signature = Signature(SignatureType::Constructor);
-            compiler->mCurCompileUnit->EmitCreateInstance();
         } else {
             signature = Signature(SignatureType::Method, name.start, name.length);
         }
         args->compile(compiler, CompileFlag::Null);
-        HMInteger index = compiler->mVM->mAllMethods.EnsureFind(&compiler->mVM->mGCHeap, signature);
-        compiler->mCurCompileUnit->EmitCall(static_cast<HMUINT32>(index), args->elements.size());
+        compiler->mCurCompileUnit->EmitCallSignature(signature, args->elements.size());
         AST_LEAVE();
     }
 
@@ -419,9 +430,9 @@ namespace hypermind {
                 expr->compile(compiler);
             }
             args->compile(compiler, CompileFlag::Null);
-            HMInteger index = compiler->mVM->mAllMethods.Find(
-                    Signature(flag == CompileFlag::Assign ? SignatureType::SubscriptSetter : SignatureType::Subscript));
-            compiler->mCurCompileUnit->EmitCall(static_cast<HMUINT32>(index), args->elements.size());
+            compiler->mCurCompileUnit->EmitCallSignature(
+                    Signature(flag == CompileFlag::Assign ? SignatureType::SubscriptSetter
+                                                          : SignatureType::Subscript), args->elements.size());
         }
         AST_LEAVE();
     }
@@ -429,8 +440,7 @@ namespace hypermind {
 
     HMInteger CompileUnit::DeclareVariable(Signature signature) {
         if (mScopeDepth == -1) {
-            mCurCompiler->mCurModule->varNames.Add(&mVM->mGCHeap, signature);
-            return mCurCompiler->mCurModule->varValues.append(&mVM->mGCHeap, Value());
+            return mCurCompiler->mCurModule->add(mVM, signature, Value());
         }
 
         HMInteger index = FindLocal(signature);

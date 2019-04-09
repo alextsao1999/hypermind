@@ -37,22 +37,41 @@ namespace hypermind {
 
     // 类对象
     HM_OBJECT(Class) {
-        HMClass *superClass;  // 父类
+        HMClass *superClass{nullptr};  // 父类
         HMUINT32 fieldNubmer;
         Buffer<HMMethod> methods;
-        SymbolTable methodTable;
+//        SymbolTable methodTable;
         HMString *name; // 类名
         HM_OBJ_CONSTRUCTOR_CLASS(Class, nullptr, HMString *name, HMClass *super, HMUINT32 fieldNumber), name(name),
                                                                                                         superClass(super),
                                                                                                         fieldNubmer(fieldNumber){
+            vm->mGCHeap.PushProtectedObject(this);
+            HMChar newName[MAX_IDENTIFIER_LENTH] = {_HM_C('\0')};
+            hm_memcpy(newName, name->charSequence, name->length);
+            hm_memcpy(newName + name->length, " Class", 6);
+            classObj = vm->NewObject<HMClass>(newName, name->length + 6, 0);
+            vm->mGCHeap.PushProtectedObject(classObj); // 加入到保护对象中
+            classObj->classObj = vm->mMetaClass; // 设置Class Meta类的类为 Class
+            classObj->bindSuper(vm, vm->mMetaClass); // 继承Meta类的方法
+            bindSuper(vm, super);
+            vm->mGCHeap.PopProtectedObject();
+            vm->mGCHeap.PopProtectedObject();
+        };
+
+        HM_OBJ_CONSTRUCTOR_CLASS(Class, nullptr, const HMChar *name, HMUINT32 length, HMUINT32 fieldNumber),
+                name(vm->NewObject<HMString>(name, length)), fieldNubmer(fieldNumber) {
+        };
+
+
+        inline void bindSuper(VM *vm, HMClass *super) {
             if (super != nullptr) {
+                fieldNubmer += super->fieldNubmer;
                 // 继承super的方法
                 for (int i = 0; i < super->methods.count; ++i) {
                     methods.append(&vm->mGCHeap, super->methods[i]);
                 }
             }
-            // 加到保护对象中?
-        };
+        }
 
         inline void bind(VM *vm, Signature signature, HMMethod method) {
             methods.set(&vm->mGCHeap, static_cast<HMUINT32>(vm->mAllMethods.EnsureFind(&vm->mGCHeap, signature)),

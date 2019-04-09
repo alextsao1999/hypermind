@@ -20,6 +20,7 @@ namespace hypermind {
     enum class CompileFlag {
         Null,
         Error,
+        Static,
         Assign,
         Check,
         Setter,
@@ -350,6 +351,11 @@ namespace hypermind {
             }
         }
 
+        void EmitCallSignature(Signature signature, HMInteger argNum){
+            HMInteger index = mVM->mAllMethods.EnsureFind(&mVM->mGCHeap, signature);
+            EmitCall(static_cast<HMUINT32>(index), argNum);
+        };
+
         void EmitReturn() {
             STACK_CHANGE(-1);
             WriteOpcode(Opcode::Return);
@@ -456,7 +462,6 @@ namespace hypermind {
         }
 
         void EmitCreateInstance() {
-            STACK_CHANGE(1);
             WriteOpcode(Opcode::CreateInstance);
         }
 

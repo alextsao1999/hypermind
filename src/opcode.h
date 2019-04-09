@@ -24,6 +24,7 @@ namespace hypermind {
         PushTrue,
         PushFalse,
 
+        // 不算上this 参数就是参数的数量
         Call,
         Call0,
         Call1,

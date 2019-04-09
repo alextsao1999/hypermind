@@ -23,13 +23,19 @@ namespace hypermind {
                 Value value = vm->mAllModule->get(Value());
                 auto *core = (HMModule *) value.objval;
                 for (int i = 0; i < core->varValues.count; ++i) {
-                    varNames.Add(&vm->mGCHeap, core->varNames[i]);
-                    varValues.append(&vm->mGCHeap, core->varValues[i]);
+                    add(vm, core->varNames[i], core->varValues[i]);
                 }
             }
         };
 
-        Value &getVar(const Signature &signature);
+        inline Value &find(const Signature &signature);
+
+        inline HMInteger add(VM *vm, Signature name, const Value &value) {
+            varNames.Add(&vm->mGCHeap, name);
+            varValues.append(&vm->mGCHeap, value);
+            return varValues.count - 1;
+
+        };
 
         HM_OBJ_DECL();
     };

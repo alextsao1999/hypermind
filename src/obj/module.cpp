@@ -32,7 +32,7 @@ namespace hypermind {
 
     }
 
-    Value &HMModule::getVar(const Signature &signature) {
+    Value &HMModule::find(const Signature &signature) {
         HMInteger index = varNames.Find(signature);
         return varValues[index];
     }

@@ -20,6 +20,7 @@ namespace hypermind {
         HMClass *mIntegerClass{nullptr};
         HMClass *mFloatClass{nullptr};
         HMClass *mFunctionClass{nullptr};
+        HMClass *mNullClass{nullptr};
         HMClass *mThreadClass{nullptr};
         HMClass *mMetaClass{nullptr};
         HMClass *mMapClass{nullptr};

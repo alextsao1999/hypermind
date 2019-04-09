@@ -253,6 +253,7 @@ frame->closure->pFn->constants[index].dump(hm_cout);
 
         void dumpStack(Value *stack, HMUINT32 num) {
             for (int i = 0; i < num; ++i) {
+                hm_cout << static_cast<const void *>(stack + i) << "   ";
                 hm_cout << i << " : ";
                 stack[i].dump(hm_cout);
                 hm_cout << std::endl;
