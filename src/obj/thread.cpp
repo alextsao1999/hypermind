@@ -52,7 +52,7 @@ namespace hypermind {
         LoadCurFrame();
         //  ------------------------------ 加载完成
         while (true) {
-            dump(ip, vm, curFrame);
+//            dump(ip, vm, curFrame);
             opcode = ReadByte();
             switch ((Opcode) opcode) {
                 case Opcode::LoadConstant:
@@ -148,13 +148,11 @@ namespace hypermind {
                     {
                         int index = ReadShort();
                         int argNum = opcode - (HMByte) Opcode::Call0;
-                        if (index == 9) {
-                            hm_cout << "-----------------------------" << std::endl;
-                            curFrame->closure->pFn->debug->name.dump(hm_cout);
-                            hm_cout << "  ---> " << static_cast<const void *>(sp);
-                            hm_cout << std::endl;
-                            dumpStack(stack, 10);
-                        }
+//                        hm_cout << "-----------------------------" << std::endl;
+//                        curFrame->closure->pFn->debug->name.dump(hm_cout);
+//                        hm_cout << "  ---> " << static_cast<const void *>(sp);
+//                        hm_cout << std::endl;
+//                        dumpStack(stack, 10);
 
                         Value *object = sp - argNum - 1;
                         HMClass *claz = vm->GetValueClass(*object);

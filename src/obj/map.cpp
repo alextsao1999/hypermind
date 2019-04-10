@@ -6,6 +6,24 @@
 
 namespace hypermind {
     HM_OBJ_DUMP(Map) {
+        os << _HM_C(" { HMMap(") << sizeof(HMMap) << _HM_C(") ") << static_cast<const void *>(this) <<
+        _HM_C("  count : ") << count << _HM_C("    ");
+
+        if (capacity > 0) {
+            Entry *entryArr = entries;
+            HMInteger idx = 0;
+            while (idx < capacity) {
+                if (entryArr[idx].key.type != ValueType::Undefined) {
+                    entryArr->key.dump(hm_cout);
+                    hm_cout << "->";
+                    entryArr->value.dump(hm_cout);
+                    hm_cout << "   ";
+                }
+                idx++;
+            }
+        }
+
+        hm_cout << _HM_C(" } ");
 
     }
     HM_OBJ_HASH(Map) {

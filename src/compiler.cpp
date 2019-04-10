@@ -30,13 +30,9 @@ namespace hypermind {
                     lhs->compile(compiler, CompileFlag::Assign);
                     break;
                 case CompileFlag::Setter:
-                    lhs->compile(compiler, CompileFlag::Setter); // 将要Setter的对象加载到栈顶
+                    lhs->compile(compiler, CompileFlag::Setter); // 将要Setter的对象和arg加载到栈顶
                     rhs->compile(compiler, CompileFlag::Null); // 加载参数
-                    lhs->compile(compiler, CompileFlag::Assign); // 调用Setter
-                    break;
-                case CompileFlag::This:
-                    rhs->compile(compiler, CompileFlag::Null);
-                    lhs->compile(compiler, CompileFlag::Assign);
+                    lhs->compile(compiler, CompileFlag::Assign); // EmitCall
                     break;
                 default:
                     break;
@@ -372,7 +368,8 @@ namespace hypermind {
         HMBool isThis = expr->compile(compiler, CompileFlag::Check) == CompileFlag::This;
 
         if (flag == CompileFlag::Check) {
-            // 如果expr为this 则返回赋值 即 rhs先编译  lhs生成store指令
+            // 如果expr为this 则返回CompileFlag::Assign 即 rhs先编译  lhs生成store指令
+            // Setter 则是调用方法
             return isThis ? CompileFlag::Assign : CompileFlag::Setter;
         }
         AST_ENTER();
@@ -424,15 +421,18 @@ namespace hypermind {
         AST_ENTER();
         if (flag == CompileFlag::Setter) {
             expr->compile(compiler);
-        } else {
-            if (flag != CompileFlag::Assign) {
-                // Getter 要把对象加载到栈顶
-                expr->compile(compiler);
-            }
             args->compile(compiler, CompileFlag::Null);
-            compiler->mCurCompileUnit->EmitCallSignature(
-                    Signature(flag == CompileFlag::Assign ? SignatureType::SubscriptSetter
-                                                          : SignatureType::Subscript), args->elements.size());
+        } else {
+            if (flag == CompileFlag::Assign) {
+                compiler->mCurCompileUnit->EmitCallSignature(Signature(SignatureType::SubscriptSetter),
+                                                             args->elements.size() + 1);
+            } else {
+                // Getter 要把对象和参数加载到栈顶
+                expr->compile(compiler);
+                args->compile(compiler, CompileFlag::Null);
+                compiler->mCurCompileUnit->EmitCallSignature(Signature(SignatureType::Subscript),
+                                                             args->elements.size());
+            }
         }
         AST_LEAVE();
     }

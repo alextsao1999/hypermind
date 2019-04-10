@@ -99,7 +99,9 @@ namespace hypermind {
     ASTNodePtr Parser::ParseFunctionStmt() {
         mLexer.Consume(); // Consume function
         ASTFunctionStmtPtr ast = make_ptr(ASTFunctionStmt);
-        ast->name = mLexer.Read();
+        if (mLexer.PeekTokenType() != TokenType::LeftParen) {
+            ast->name = mLexer.Read();
+        }
         mLexer.Consume(TokenType::LeftParen);
         ast->params = ParseParamList();
         mLexer.Consume(TokenType::RightParen);

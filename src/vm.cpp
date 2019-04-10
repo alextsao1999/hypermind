@@ -7,37 +7,32 @@
 #include "obj/module.h"
 #include "obj/map.h"
 #define METHOD  HMMethod([](VM *vm, HMInteger argNum, Value *args) -> bool
-
+#define RETURN(value) args[0] = value;return true;
+#define RETURN_INT(value) args[0].intval = value;return true;
+#define RETURN_TYPE(t) args[0].type = t;return true;
 namespace hypermind {
     bool PrimitiveName(VM *vm, HMInteger argNum, Value *args) {
-        args[0] = ((HMClass *) (args[0].objval))->name;
-        return true;
+        RETURN(((HMClass *) (args[0].objval))->name);
     }
 
     bool PrimitiveAdd(VM *vm, HMInteger argNum, Value *args) {
-        args[0].intval = args[0].intval + args[1].intval;
-
-        return true;
+        RETURN_INT(args[0].intval + args[1].intval);
     }
 
     bool PrimitiveSub(VM *vm, HMInteger argNum, Value *args) {
-        args[0].intval = args[0].intval - args[1].intval;
-        return true;
+        RETURN_INT(args[0].intval - args[1].intval);
     }
 
     bool PrimitiveNegative(VM *vm, HMInteger argNum, Value *args) {
-        args[0].intval = -args[0].intval;
-        return true;
+        RETURN_INT(-args[0].intval);
     }
 
     bool PrimitiveMul(VM *vm, HMInteger argNum, Value *args) {
-        args[0].intval = args[0].intval * args[1].intval;
-        return true;
+        RETURN_INT(args[0].intval * args[1].intval);
     }
 
     bool PrimitiveDiv(VM *vm, HMInteger argNum, Value *args) {
-        args[0].intval = args[0].intval / args[1].intval;
-        return true;
+        RETURN_INT(args[0].intval / args[1].intval);
     }
 
     VM::VM() {
@@ -77,31 +72,38 @@ namespace hypermind {
         mIntegerClass->bind(this, Signature(SignatureType::Method, _HM_C("/")), PrimitiveDiv);
 
         mBooleanClass = NewObject<HMClass>(NewObject<HMString>(_HM_C("Boolean")), nullptr, 0);
-        mBooleanClass->bind(this, Signature(SignatureType::Getter, _HM_C("!")), METHOD {
-            args[0].type = args[0].type == ValueType::True ? ValueType::False : ValueType::True;
-            return true;
-        }));
+        mBooleanClass->bind(this, Signature(SignatureType::Getter, _HM_C("!")),
+                METHOD {
+                           RETURN_TYPE(args[0].type == ValueType::True ? ValueType::False : ValueType::True);
+       }));
 
         auto *mSystemClass = NewObject<HMClass>(NewObject<HMString>(_HM_C("System")), nullptr, 0);
-        mSystemClass->classObj->bind(this, Signature(SignatureType::Method, _HM_C("print")), METHOD {
+        mSystemClass->classObj->bind(this, Signature(SignatureType::Method, _HM_C("print")),
+                METHOD {
             args[1].dump(hm_cout);
             hm_cout << std::endl;
-            return true;
+            RETURN_TYPE(ValueType::True);
         }));
-        module->add(this, _HM_C("Object"), mObjectClass);
-        module->add(this, _HM_C("System"), mSystemClass);
 
         mMapClass = NewObject<HMClass>(NewObject<HMString>(_HM_C("Map")), nullptr, 0);
-        mMapClass->bind(this, Signature(SignatureType::SubscriptSetter), METHOD {
+        mMapClass->classObj->bind(this, Signature(SignatureType::Constructor),
+                METHOD {
+                           RETURN(Value(vm->NewObject<HMMap>()));
+        }));
+        mMapClass->bind(this, Signature(SignatureType::SubscriptSetter),
+                METHOD {
             auto *objMap = (HMMap *) args[0].objval;
             objMap->set(vm, args[1], args[2]);
-            return true;
+            RETURN_TYPE(ValueType::True);
         }));
-        mMapClass->bind(this, Signature(SignatureType::Subscript), METHOD {
+        mMapClass->bind(this, Signature(SignatureType::Subscript),
+                METHOD {
             auto *objMap = (HMMap *) args[0].objval;
-            objMap->get(args[1]);
-            return true;
+            RETURN(objMap->get(args[1]));
         }));
+
+        module->add(this, _HM_C("Object"), mObjectClass);
+        module->add(this, _HM_C("System"), mSystemClass);
         module->add(this, _HM_C("Map"), mMapClass);
 
     }

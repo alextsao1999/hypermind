@@ -25,6 +25,7 @@ namespace hypermind {
         Check,
         Setter,
         This,
+        EmitCall,
     };
     enum class ScopeType {
         Invalid,
@@ -351,7 +352,7 @@ namespace hypermind {
             }
         }
 
-        void EmitCallSignature(Signature signature, HMInteger argNum){
+        void EmitCallSignature(Signature signature, HMInteger argNum) {
             HMInteger index = mVM->mAllMethods.EnsureFind(&mVM->mGCHeap, signature);
             EmitCall(static_cast<HMUINT32>(index), argNum);
         };

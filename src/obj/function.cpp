@@ -12,6 +12,8 @@ namespace hypermind {
         return false;
     }
     HM_OBJ_DUMP(Closure) {
+        os << _HM_C(" { HMClosure(") << sizeof(HMClosure) << _HM_C(") ")  << static_cast<const void *>(this)
+        << _HM_C("  } ");
 
     }
 

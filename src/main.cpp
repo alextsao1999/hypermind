@@ -15,18 +15,28 @@ int main() {
 //    auto *source = const_cast<HMChar *>(_HM_C("类 people {变量 age; 创建(yr) {age = yr + 2 };年龄 { return age+1}; };变量 tt = people.创建(11); 变量 ss = tt.年龄;tt.print();"));
 //    auto *source = const_cast<HMChar *>(_HM_C("function test(){class people{var age;new(yr){age = yr}age{return age}age=(value){age =value}}return people.new(123)}var value=test();value.age = 444;"));
     auto *source = const_cast<HMChar *>(_HM_C(""
-                                              "class people{"
-                                              "var age;"
-                                              "new(age){"
-                                              "this.age = age;"
-                                              "} ;"
-                                              "age{return age} ; "
-                                              "age=(age){this.age = age;} ;"
-                                              "test(){return 2222;}"
-                                              "};"
-                                              "var value=people.new(234);"
-                                              ""
-                                              "System.print(value.test() + 1);"
+//                                              "class people{"
+//                                              "var age;"
+//                                              "new(age){"
+//                                              "this.age = age;"
+//                                              "} ;"
+//                                              "age{return age} ; "
+//                                              "age=(age){this.age = age;} ;"
+//                                              "test(){return 2222;}"
+//                                              "};"
+//                                              "var value=people.new(234);"
+//                                              ""
+//                                              "System.print(value.test() + 1);"
+                                              "var global = 1;"
+                                              "function test(kk){"
+                                              "var a= kk + global;"
+                                              "function temp(){"
+                                              "return a"
+                                              "}"
+                                              "return temp"
+                                              "}"
+                                              "var func = test(123);"
+                                              "var pp = func();"
                                               ));
     VM vm;
     Lexer lexer(&vm, source);
@@ -46,10 +56,10 @@ int main() {
     auto *closure = vm.NewObject<HMClosure>(compiler.mCurCompileUnit->mFn);
     auto *thread = vm.NewObject<HMThread>(closure);
 //    vm.DumpAllObjects();
-//
+
     thread->execute(&vm);
     compiler.mCurModule->dump(hm_cout);
-    vm.mGCHeap.StartGC();
+    vm.mGCHeap.StartGC(&vm);
     return 0;
 }
 
