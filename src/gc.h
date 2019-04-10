@@ -17,6 +17,7 @@ namespace hypermind {
     struct HMModule;
     struct HMInstance;
     struct HMString;
+    struct HMThread;
     struct Value;
     template <typename T>
     class Buffer;
@@ -55,22 +56,15 @@ namespace hypermind {
          * 将对象置灰
          * @param obj
          */
-        inline void Gray(HMObject *obj);
-        inline void Gray(Value obj);
-        inline void Gray(Buffer<Value> values);
-
-        inline void BlackGrayObjects(){
-            while (!mGrayObjs.empty()) {
-                Black(mGrayObjs.back());
-                mGrayObjs.pop_back();
-            }
-        }
+        void Gray(HMObject *obj);
+        void Gray(Value obj);
+        void Gray(Buffer<Value> values);
 
         /**
          * 标黑对象
          * @param obj
          */
-        inline void Black(HMObject *obj);
+        void Black(HMObject *obj);
         inline void BlackClass(HMClass *clazz);
         inline void BlackMap(HMMap *map);
         inline void BlackClosure(HMClosure *closure);
@@ -78,6 +72,7 @@ namespace hypermind {
         inline void BlackModule(HMModule *module);
         inline void BlackInstance(HMInstance *instance);
         inline void BlackString(HMString *string);
+        inline void BlackThread(HMThread *thread);
 
         void PushProtectedObject(HMObject *object);
 

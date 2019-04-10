@@ -71,6 +71,8 @@ namespace hypermind {
         mIntegerClass->bind(this, Signature(SignatureType::Method, _HM_C("*")), PrimitiveMul);
         mIntegerClass->bind(this, Signature(SignatureType::Method, _HM_C("/")), PrimitiveDiv);
 
+        mStringClass = NewObject<HMClass>(NewObject<HMString>(_HM_C("String")), nullptr, 0);
+
         mBooleanClass = NewObject<HMClass>(NewObject<HMString>(_HM_C("Boolean")), nullptr, 0);
         mBooleanClass->bind(this, Signature(SignatureType::Getter, _HM_C("!")),
                 METHOD {
@@ -105,6 +107,10 @@ namespace hypermind {
         module->add(this, _HM_C("Object"), mObjectClass);
         module->add(this, _HM_C("System"), mSystemClass);
         module->add(this, _HM_C("Map"), mMapClass);
+        module->add(this, _HM_C("String"), mStringClass);
+        module->add(this, _HM_C("Function"), mFunctionClass);
+        module->add(this, _HM_C("Integer"), mIntegerClass);
+        module->add(this, _HM_C("Boolean"), mBooleanClass);
 
     }
 

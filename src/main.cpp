@@ -55,11 +55,16 @@ int main() {
 
     auto *closure = vm.NewObject<HMClosure>(compiler.mCurCompileUnit->mFn);
     auto *thread = vm.NewObject<HMThread>(closure);
-//    vm.DumpAllObjects();
+//
 
     thread->execute(&vm);
-    compiler.mCurModule->dump(hm_cout);
+//    compiler.mCurModule->dump(hm_cout);
+    vm.DumpAllObjects();
+
     vm.mGCHeap.StartGC(&vm);
+
+    hm_cout << "----------------------";
+    vm.DumpAllObjects();
     return 0;
 }
 

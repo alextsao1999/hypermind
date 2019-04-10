@@ -61,6 +61,9 @@ namespace hypermind {
         void DumpAllObjects() {
             HMObject *nextObj = mGCHeap.mAllObjects;
             while (nextObj != nullptr) {
+                if (nextObj->isDark) {
+                    hm_cout << "dark -> ";
+                }
                 nextObj->dump(hm_cout);
                 hm_cout << std::endl;
                 nextObj = nextObj->next;

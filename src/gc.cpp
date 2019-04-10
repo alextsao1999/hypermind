@@ -9,16 +9,11 @@
 #include "obj/function.h"
 #include "obj/string.h"
 #include "obj/value.h"
+#include "obj/thread.h"
+#include "compiler.h"
 #include "vm.h"
 //#include "obj/class.h"
 namespace hypermind {
-    void GCHeap::Gray(HMObject *obj) {
-        if (obj == nullptr || obj->isDark)
-            return;
-        obj->isDark = true;
-        mGrayObjs.push_back(obj);
-    }
-
     void *GCHeap::MemManger(void *ptr, size_t oldSize, size_t newSize) {
         mAllocatedBytes += newSize - oldSize;
         if (newSize == 0){
@@ -48,8 +43,13 @@ namespace hypermind {
         Gray(vm->mCurrentThread);
 
         // 将所有灰对象标黑
-        BlackGrayObjects();
+        while (!mGrayObjs.empty()) {
+            HMObject *obj = mGrayObjs.back();
+            mGrayObjs.pop_back();
+            Black(obj);
+        }
 
+/*
         HMObject *obj = mAllObjects;
         while (obj != nullptr) {
             if (obj->isDark) {
@@ -64,6 +64,42 @@ namespace hypermind {
 //                vm->Deallocate(obj, sizeof(HMObject));
             }
         }
+*/
+/*
+        HMObject **obj = &mAllObjects;
+        while (*obj != nullptr) {
+            //回收白对象
+            if (!((*obj)->isDark)) {
+                HMObject *unreached = *obj;
+                *obj = unreached->next;
+                vm->Deallocate(unreached, 0);
+//                freeObject(vm, unreached);
+            } else {
+                //如果已经是黑对象,为了下一次gc重新判定,
+                //现在将其恢复为未标记状态,避免永远不被回收
+                (*obj)->isDark = false;
+                obj = &(*obj)->next;
+            }
+        }
+*/
+
+        printf(" sweeping : %d allocated : %d \n", mSweepingBytes, mAllocatedBytes);
+
+    }
+
+    void GCHeap::Gray(Value obj) {
+        if (obj.type == ValueType::Object) {
+            Gray(obj.objval);
+        }
+    }
+
+    void GCHeap::Gray(HMObject *obj) {
+        if (obj == nullptr || obj->isDark)
+            return;
+        obj->isDark = true;
+//        obj->dump(hm_cout);
+//        hm_cout << std::endl;
+        mGrayObjs.push_back(obj);
     }
 
     void GCHeap::Black(HMObject *obj) {
@@ -99,20 +135,8 @@ namespace hypermind {
                 BlackInstance((HMInstance *) obj);
                 break;
             case ObjectType::Thread:
-
+                BlackThread((HMThread *) obj);
                 break;
-        }
-    }
-
-    void GCHeap::Gray(Value obj) {
-        if (obj.type == ValueType::Object) {
-            Gray(obj.objval);
-        }
-    }
-
-    void GCHeap::Gray(Buffer<Value> values) {
-        for (int i = 0; i < values.count; ++i) {
-            Gray(values[i]);
         }
     }
 
@@ -143,6 +167,7 @@ namespace hypermind {
     }
 
     void GCHeap::BlackClosure(HMClosure *closure) {
+        Gray(closure->classObj);
         Gray(closure->pFn);
         for (int i = 0; i < closure->pFn->upvalueNum; ++i) {
             Gray(closure->upvalues[i]);
@@ -152,18 +177,47 @@ namespace hypermind {
     }
 
     void GCHeap::BlackFunction(HMFunction *function) {
+        Gray(function->classObj);
+        for (int i = 0; i < function->constants.count; ++i) {
+            Gray(function->constants[i]);
+        }
+        mSweepingBytes += sizeof(HMFunction);
+        mSweepingBytes +=
+                function->instructions.size() + function->constants.size() + function->symbols.mSymbols.size() +
+                function->upvalueNum * sizeof(Upvalue);
+#ifdef HMDebug
+        mSweepingBytes += sizeof(FunctionDebug) + function->debug->line.size();
+#endif
 
     }
 
     void GCHeap::BlackModule(HMModule *module) {
+        Gray(module->moduleName);
+        for (int i = 0; i < module->varValues.count; ++i) {
+            Gray(module->varValues[i]);
+        }
+
+        mSweepingBytes += sizeof(HMModule);
 
     }
 
     void GCHeap::BlackInstance(HMInstance *instance) {
-
+        Gray(instance->classObj);
+        for (int i = 0; i < instance->classObj->fieldNubmer; ++i) {
+            Gray(instance->fields[i]);
+        }
+        mSweepingBytes += sizeof(HMInstance);
+        mSweepingBytes += sizeof(Value) * instance->classObj->fieldNubmer;
     }
 
     void GCHeap::BlackString(HMString *string) {
+        Gray(string->classObj);
+        mSweepingBytes += sizeof(HMString) + (string->length + 1) * sizeof(HMChar);
+    }
+
+    void GCHeap::BlackThread(HMThread *thread) {
+        mSweepingBytes += sizeof(HMThread);
+        mSweepingBytes += thread->stackCapacity * sizeof(Value) + thread->frameCapacity * sizeof(Frame);
 
     }
 
