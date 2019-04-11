@@ -18,6 +18,7 @@ namespace hypermind {
     struct HMInstance;
     struct HMString;
     struct HMThread;
+    struct HMUpvalue;
     struct Value;
     template <typename T>
     class Buffer;
@@ -27,22 +28,22 @@ namespace hypermind {
         HMUINT32 mAllocatedBytes{0};
 
         // 清理中字节数
-        HMUINT32 mSweepingBytes{0};
+        HMUINT32 mScaningBytes{0};
     public:
+        VM *mVM;
 
         HMObject *mAllObjects{nullptr};
 
         //堆生长因子
         float mHeapGrowthFactor{1.5};
 
-        //初始堆大小,默认为10MB
-        HMUINT32 mInitialHeapSize{1024 * 1024 * 10};
-
         //最小堆大小,默认为1MB
-        HMUINT32 mMinHeapSize;
+        HMUINT32 mMinHeapSize{1024 * 1024};
 
-        //第一次触发gc的堆大小,默认为initialHeapSize
-        HMUINT32 mNextGC;
+        // 下一次触发GC的阈值
+        HMUINT32 mNextGC{1024 * 1024 * 10};
+
+        explicit GCHeap(VM *vm);
 
         // 所有灰对象
         Vector<HMObject *> mGrayObjs;
@@ -58,7 +59,6 @@ namespace hypermind {
          */
         void Gray(HMObject *obj);
         void Gray(Value obj);
-        void Gray(Buffer<Value> values);
 
         /**
          * 标黑对象
@@ -73,13 +73,13 @@ namespace hypermind {
         inline void BlackInstance(HMInstance *instance);
         inline void BlackString(HMString *string);
         inline void BlackThread(HMThread *thread);
+        inline void BlackUpvalue(HMUpvalue *upvalue);
 
         void PushProtectedObject(HMObject *object);
 
         void PopProtectedObject();
 
-        void StartGC(VM *vm);
-
+        void StartGC();
 
     };
 

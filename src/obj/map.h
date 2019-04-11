@@ -13,7 +13,6 @@
 #include "value.h"
 namespace hypermind {
     struct Entry {
-        HMHash hash{0}; // 将hash值储存避免重复计算
         Value key;
         Value value;
     };
@@ -33,7 +32,6 @@ namespace hypermind {
             while (idx < newCapacity) {
                 newEntries[idx].key = Value(ValueType::Undefined);
                 newEntries[idx].value = Value(false);
-//                new(&newEntries[idx].value) Value(false);
                 idx++;
             }
             if (capacity > 0) {

@@ -35,7 +35,7 @@ namespace hypermind {
         RETURN_INT(args[0].intval / args[1].intval);
     }
 
-    VM::VM() {
+    VM::VM() : mGCHeap(this) {
         mAllModule = NewObject<HMMap>();
         auto *module = NewObject<HMModule>(nullptr);
         mAllModule->set(this, Value(), module);

@@ -25,8 +25,7 @@ namespace hypermind {
                 for (int i = 0; i < core->varValues.count; ++i) {
                     add(vm, core->varNames[i], core->varValues[i]);
                 }
-            } else {
-//                vm->mAllModule->set(vm, Value(name), Value(this));
+                vm->mAllModule->set(vm, Value(name), Value(this));
             }
         };
 

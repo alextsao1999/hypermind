@@ -52,19 +52,18 @@ int main() {
     // 由指令流创建闭包
 //    ast->dump(hm_cout);
 
-
     auto *closure = vm.NewObject<HMClosure>(compiler.mCurCompileUnit->mFn);
     auto *thread = vm.NewObject<HMThread>(closure);
 //
 
     thread->execute(&vm);
 //    compiler.mCurModule->dump(hm_cout);
-    vm.DumpAllObjects();
 
-    vm.mGCHeap.StartGC(&vm);
+    vm.mGCHeap.StartGC();
+//    vm.DumpAllObjects();
 
     hm_cout << "----------------------";
-    vm.DumpAllObjects();
+//    vm.DumpAllObjects();
     return 0;
 }
 

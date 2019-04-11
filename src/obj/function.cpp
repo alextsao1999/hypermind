@@ -3,26 +3,31 @@
 //
 
 #include "function.h"
+#include "compiler.h"
 namespace hypermind {
 
     HM_OBJ_HASH(Closure) {
         return 0;
     }
+
     HM_OBJ_FREE(Closure) {
-        return false;
+        vm->Deallocate(upvalues, pFn->upvalueNum * sizeof(HMUpvalue *));
+        HM_FREE_THIS(Closure);
     }
+
     HM_OBJ_DUMP(Closure) {
         os << _HM_C(" { HMClosure(") << sizeof(HMClosure) << _HM_C(") ")  << static_cast<const void *>(this)
         << _HM_C("  } ");
-
     }
 
     HM_OBJ_HASH(Upvalue) {
         return 0;
     }
+
     HM_OBJ_FREE(Upvalue) {
-        return false;
+        HM_FREE_THIS(Upvalue);
     }
+
     HM_OBJ_DUMP(Upvalue) {
 
     }
@@ -31,7 +36,15 @@ namespace hypermind {
         return 0;
     }
     HM_OBJ_FREE(Function) {
-        return false;
+        instructions.clear(&vm->mGCHeap);
+        constants.clear(&vm->mGCHeap);
+        symbols.mSymbols.clear(&vm->mGCHeap);
+        vm->Deallocate(upvalues, sizeof(Upvalue) * upvalueNum);
+#ifdef HMDebug
+        debug->line.clear(&vm->mGCHeap);
+        vm->Deallocate(debug, sizeof(FunctionDebug));
+#endif
+        HM_FREE_THIS(Function);
     }
     HM_OBJ_DUMP(Function) {
         os << _HM_C(" { HMFunction(") << sizeof(HMFunction) << _HM_C(") ") << static_cast<const void *>(this)

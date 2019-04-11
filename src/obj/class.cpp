@@ -8,7 +8,7 @@ namespace hypermind {
         return 0;
     }
     HM_OBJ_FREE(Class) {
-        return false;
+        HM_FREE_THIS(Class);
     }
     HM_OBJ_DUMP(Class) {
         os << _HM_C(" { HMClass(") << sizeof(HMClass) << _HM_C(") ") << static_cast<const void *>(this)
@@ -29,7 +29,8 @@ namespace hypermind {
         return 0;
     }
     HM_OBJ_FREE(Instance) {
-        return false;
+        vm->Deallocate(fields, sizeof(Value) * classObj->fieldNubmer);
+        HM_FREE_THIS(Instance);
     }
     HM_OBJ_DUMP(Instance) {
         os << _HM_C(" { HMInstance(") << sizeof(HMInstance) << _HM_C(") ") << static_cast<const void *>(this)

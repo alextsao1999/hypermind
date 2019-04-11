@@ -9,9 +9,13 @@ namespace hypermind {
     HM_OBJ_HASH(Module) {
         return 0;
     }
+
     HM_OBJ_FREE(Module) {
-        return false;
+        varValues.clear(&vm->mGCHeap);
+        varNames.mSymbols.clear(&vm->mGCHeap);
+        HM_FREE_THIS(Module);
     }
+
     HM_OBJ_DUMP(Module) {
         os << _HM_C(" { HMModule(") << sizeof(HMModule) << _HM_C(") ") << static_cast<const void *>(this)
            << _HM_C(" name : ");

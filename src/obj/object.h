@@ -21,7 +21,7 @@ explicit HM##obj(VM *vm, ##args) : HMObject(vm, ObjectType::obj,vm->m##obj##Clas
 
 #define HM_OBJ_CONSTRUCTOR_CLASS(obj, claz, args...)  \
 explicit HM##obj(VM *vm, ##args) : HMObject(vm, ObjectType::obj, claz)
-
+#define HM_FREE_THIS(type) vm->Deallocate(this, sizeof(HM##type)) ;return true;
 namespace hypermind {
     struct HMClass;
     class VM;
@@ -66,6 +66,7 @@ namespace hypermind {
          * @return bool
          */
         virtual HMBool free(VM *vm){
+
             return true;
         };
         virtual HMBool equals(HMObject * object){

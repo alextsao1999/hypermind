@@ -10,11 +10,14 @@ namespace hypermind {
     HM_OBJ_DUMP(Thread) {
 
     }
+
     HM_OBJ_HASH(Thread) {
         return 0;
     }
     HM_OBJ_FREE(Thread) {
-        return false;
+        vm->Deallocate(stack, sizeof(Value) * stackCapacity);
+        vm->Deallocate(frames, sizeof(Frame) * frameCapacity);
+        HM_FREE_THIS(Thread);
     }
 
     void HMThread::closeUpvalue(Value *lastSlot) {

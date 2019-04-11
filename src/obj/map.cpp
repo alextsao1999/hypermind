@@ -30,7 +30,8 @@ namespace hypermind {
         return 0;
     }
     HM_OBJ_FREE(Map) {
-        return false;
+        vm->Deallocate(entries, sizeof(Entry) * capacity);
+        HM_FREE_THIS(Map);
     }
 
     HMBool addEntry(Entry *entries, HMUINT32 capacity, Value key, Value value) {
