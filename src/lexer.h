@@ -138,6 +138,7 @@ namespace hypermind {
             {_HM_C("true"),   TokenType::KeywordTrue},
             {_HM_C("false"),   TokenType::KeywordFalse},
             {_HM_C("static"),   TokenType::KeywordStatic},
+/*
             {_HM_C("如果"),       TokenType::KeywordIf},
             {_HM_C("否则"),     TokenType::KeywordElse},
             {_HM_C("循环"),    TokenType::KeywordWhile},
@@ -154,6 +155,7 @@ namespace hypermind {
             {_HM_C("真"),   TokenType::KeywordTrue},
             {_HM_C("假"),   TokenType::KeywordFalse},
             {_HM_C("静态"),   TokenType::KeywordStatic},
+*/
 
     };
 

@@ -94,11 +94,11 @@ namespace hypermind {
         Buffer<Signature> mSymbols;
 
         HMInteger Add(GCHeap *heap, SignatureType type, HMChar *name, HMUINT32 length) {
-            mSymbols.append(heap, Signature(type, name, length));
+            return mSymbols.append(heap, Signature(type, name, length));
         };
 
         HMInteger Add(GCHeap *heap, Signature signature) {
-            mSymbols.append(heap, signature);
+            return mSymbols.append(heap, signature);
         };
 
         /**

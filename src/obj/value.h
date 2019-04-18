@@ -89,6 +89,8 @@ namespace hypermind {
                     if (objval == value.objval)
                         return true;
                     return objval->equals(value.objval);
+                default:
+                    return false;
             }
 
         }

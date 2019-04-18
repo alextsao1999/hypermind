@@ -20,7 +20,11 @@ namespace hypermind {
     }
     bool IsCodeChar(HMChar ch) {
         // 汉字范围 [\u4e00-\u9fa5]
+#ifdef HMUNICODE
         return IsAlpha(ch) || ch == _HM_C('_') || (ch >= _HM_C('\u4e00') && ch <= _HM_C('\u9fa5'));
+#else
+        return IsAlpha(ch) || ch == _HM_C('_');
+#endif
     }
 
     void DumpTokenType(Ostream &os, TokenType type) {

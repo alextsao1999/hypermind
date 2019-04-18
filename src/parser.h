@@ -10,7 +10,7 @@
 #include <memory>
 #include "lexer.h"
 #include "ast.h"
-#define make_ptr(v, args...) std::make_shared<v>(mLexer.GetCurrentLineNumber(), mLexer.GetLineColumn(), ##args)
+#define make_ptr(v, ...) std::make_shared<v>(mLexer.GetCurrentLineNumber(), mLexer.GetLineColumn(), ##__VA_ARGS__)
 
 namespace hypermind {
     struct Precedence {

@@ -26,8 +26,9 @@ namespace hypermind {
         ASTNode(HMUINT32 line, HMUINT32 column) : line(line), column(column) {};
         ASTNode() = default;
         virtual void dump(Ostream &os){};
+
         // 虚函数不允许默认参数 不过这样能运行 我太懒了 直接就这样吧 (●'◡'●)
-        virtual CompileFlag compile(Compiler *compiler, CompileFlag flag = (CompileFlag) 0) {};
+        virtual CompileFlag compile(Compiler *compiler, CompileFlag flag = (CompileFlag) 0) { return (CompileFlag) 0; };
     };
     using ASTNodePtr = std::shared_ptr<ASTNode>;
 
