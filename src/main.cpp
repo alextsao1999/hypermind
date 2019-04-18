@@ -25,8 +25,8 @@ int main() {
 //                                              "test(){return 2222;}"
 //                                              "};"
 //                                              "var value=people.new(234);"
-//                                              ""
-//                                              "System.print(value.test() + 1);"
+                                              ""
+                                              "System.print(value.test() + 1);"
                                               "var global = 1;"
                                               "function test(kk){"
                                               "var a= kk + global;"
@@ -37,6 +37,7 @@ int main() {
                                               "}"
                                               "var func = test(123);"
                                               "var pp = func();"
+                                              "System.print(pp);"
                                               ));
     VM vm;
     Lexer lexer(&vm, source);

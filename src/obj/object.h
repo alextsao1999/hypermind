@@ -16,11 +16,10 @@ HMBool free(VM *vm) override;
 #define HM_OBJ_HASH(obj)  HMHash HM##obj::hash()
 #define HM_OBJ_DUMP(obj)  void HM##obj::dump(Ostream &os)
 #define HM_OBJ_FREE(obj)  HMBool HM##obj::free(VM *vm)
-#define HM_OBJ_CONSTRUCTOR(obj, args...)  \
-explicit HM##obj(VM *vm, ##args) : HMObject(vm, ObjectType::obj,vm->m##obj##Class)
-
-#define HM_OBJ_CONSTRUCTOR_CLASS(obj, claz, args...)  \
-explicit HM##obj(VM *vm, ##args) : HMObject(vm, ObjectType::obj, claz)
+#define HM_OBJ_CONSTRUCTOR(obj, ...)  \
+explicit HM##obj(VM *vm, ##__VA_ARGS__) : HMObject(vm, ObjectType::obj,vm->m##obj##Class)
+#define HM_OBJ_CONSTRUCTOR_CLASS(obj, claz, ...)  \
+explicit HM##obj(VM *vm, ##__VA_ARGS__) : HMObject(vm, ObjectType::obj, claz)
 #define HM_FREE_THIS(type) vm->Deallocate(this, sizeof(HM##type)) ;return true;
 namespace hypermind {
     struct HMClass;
