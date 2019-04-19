@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by 曹顺 on 2019/3/1.
 //
@@ -139,6 +141,7 @@ namespace hypermind {
     };
 
     AST_NODE(ASTMethodStmt, ASTMethodStmtPtr) {
+        // 没有用Token 是因为有一些其他的属性直接就放到Signature中了 比如Setter Getter Method
         Signature name;
         ASTListPtr params; // 形式参数
         ASTNodePtr body; // 函数体
@@ -164,6 +167,16 @@ namespace hypermind {
     AST_NODE(ASTNotExpr, ASTNotExprPtr) {
         ASTNodePtr expr;
         ASTNotExpr(HMUINT32 line, HMUINT32 column, ASTNodePtr expr) : ASTNode(line, column), expr(std::move(expr)) {}
+        AST_DECL();
+    };
+
+    AST_NODE(ASTFunctionCall, ASTFunctionCallPtr) {
+        Token name;
+        ASTListPtr args;
+        ASTFunctionCall(HMUINT32 line, HMUINT32 column, const Token &name, ASTListPtr args) : ASTNode(line, column),
+                                                                                                  name(name),
+                                                                                                  args(std::move(args)) {
+        }
         AST_DECL();
     };
 

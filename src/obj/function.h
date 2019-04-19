@@ -20,7 +20,7 @@ namespace hypermind {
 
     // 函数对象
     HM_OBJECT(Function) {
-        HMInteger argNum{0};
+        HMInteger argNum{0}; // 参数数量 不算This
         Buffer<HMByte> instructions; // 指令流
         Buffer<Value> constants;  // 所有常量
         SymbolTable symbols; // 所有符号

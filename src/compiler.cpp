@@ -106,29 +106,17 @@ namespace hypermind {
         if (variable.scopeType == ScopeType::Invalid) {
             // 局部变量不存在 尝试加载this中的Field
             if (compiler->mCurClassInfo != nullptr) {
-                // 查找Class Field
                 variable.index = compiler->mCurClassInfo->fields.Find(var);
                 if (variable.index == -1) {
-                    // TODO Error 域不存在
+                    // TODO Error 域不存在!!
                 }
-
-                if (compiler->mCurCompileUnit->mCurClassInfo != nullptr) {
-                    // 编译方法
-                    if (flag == CompileFlag::Assign) {
-                        compiler->mCurCompileUnit->EmitStoreThisField(variable.index);
-                    } else {
-                        compiler->mCurCompileUnit->EmitLoadThisField(variable.index);
-                    }
+                compiler->mCurCompileUnit->LoadThis();
+                // 先将 this 弹出 之后对this进行 取值赋值
+                if (flag == CompileFlag::Assign) {
+                    // 此时的栈结构为  值 | this
+                    compiler->mCurCompileUnit->EmitStoreField(variable.index);
                 } else {
-                    // 编译方法中的闭包 将this作为upvalue加载到其中
-                    compiler->mCurCompileUnit->LoadThis();
-                    // 先将 this 弹出 之后对this进行 取值赋值
-                    if (flag == CompileFlag::Assign) {
-                        // 此时的栈结构为  值 | this
-                        compiler->mCurCompileUnit->EmitStoreField(variable.index);
-                    } else {
-                        compiler->mCurCompileUnit->EmitLoadField(variable.index);
-                    }
+                    compiler->mCurCompileUnit->EmitLoadField(variable.index);
                 }
             } else {
                 // TODO Error 变量不存在
@@ -317,26 +305,19 @@ namespace hypermind {
         cu.StoreUpvalue();
         HMInteger index = cu.mOuter->AddConstant(Value(cu.mFn));
         cu.mOuter->EmitCreateClosure(index);
-
-        HMInteger methodIndex = cu.mVM->mAllMethods.EnsureFind(&cu.mVM->mGCHeap, name);
-        if (flag == CompileFlag::Static) {
-            cu.mOuter->EmitBindStaticMethod(methodIndex);
-        } else {
-            cu.mOuter->EmitBindInstanceMethod(methodIndex);
-        }
-
+        cu.mOuter->EmitBindMethodSignature(name, flag == CompileFlag::Static);
         if (name.type == SignatureType::Constructor) {
             // 为构造函数在Meta类中生成静态方法
             CompileUnit newCu = compiler->CreateCompileUnit(new FunctionDebug(name));
             compiler->mCurCompileUnit = &newCu;
             newCu.EmitCreateInstance();
-            newCu.EmitCall(methodIndex, cu.mFn->argNum);
+            newCu.EmitCallSignature(name, cu.mFn->argNum);
             compiler->LeaveCompileUnit(newCu, true);
             newCu.EmitEnd();
             newCu.StoreUpvalue();
             index = newCu.mOuter->AddConstant(Value(newCu.mFn));
             newCu.mOuter->EmitCreateClosure(index);
-            newCu.mOuter->EmitBindStaticMethod(methodIndex);
+            newCu.mOuter->EmitBindMethodSignature(name, true);
         }
         AST_LEAVE();
     }
@@ -352,6 +333,17 @@ namespace hypermind {
         AST_ENTER();
         expr->compile(compiler);
         compiler->mCurCompileUnit->EmitCallSignature(Signature(SignatureType::Getter, _HM_C("!")), 0);
+        AST_LEAVE();
+    }
+
+    AST_COMPILE(ASTFunctionCall) {
+        AST_ENTER();
+        ASTVariable var;
+        var.var = name;
+        var.compile(compiler, CompileFlag::Null);
+        args->compile(compiler, CompileFlag::Null);
+        compiler->mCurCompileUnit->EmitCallSignature(
+                Signature(SignatureType::Method, _HM_C("call")), args->elements.size());
         AST_LEAVE();
     }
 
@@ -457,6 +449,10 @@ namespace hypermind {
             HMInteger index = mCurCompiler->mCurModule->varNames.Find(signature);
             if (index != -1) {
                 return Variable(ScopeType::Module, index);
+            }
+            index = mCurClassInfo->fields.Find(signature);
+            if (index != -1) {
+                return Variable(ScopeType::Class, index);
             }
         }
         return var;

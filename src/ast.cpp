@@ -145,6 +145,11 @@ namespace hypermind {
         expr->dump(os);
     }
 
+    AST_DUMP(ASTFunctionCall) {
+        name.dump(os);
+        args->dump(os);
+    }
+
     AST_DUMP(ASTArgPostfix) {
         expr->dump(os);
         args->dump(os);

@@ -254,15 +254,13 @@ namespace hypermind {
                         int index = ReadShort();
                         Value *closure = PopPtr();
                         Value *value = PeekPtr(1);
+//                        curFrame->closure->pFn->symbols[index]
                         auto *claz = (HMClass *) value->objval;
-                        if ((Opcode) opcode == Opcode::BindInstanceMethod) {
-                            claz->methods.set(&vm->mGCHeap, static_cast<HMUINT32>(index),
-                                              HMMethod((HMClosure *) closure->objval));
-                        } else {
-                            claz->classObj->methods.set(&vm->mGCHeap, static_cast<HMUINT32>(index),
-                                    HMMethod((HMClosure *) closure->objval));
+                        if ((Opcode) opcode == Opcode::BindStaticMethod) {
+                            claz = claz->classObj;
                         }
-                    }
+                        claz->bind(vm, static_cast<HMUINT32>(index), (HMClosure *) closure->objval);
+                }
                     Finish();
                 case Opcode::End:
                     // 这里不可达

@@ -31,7 +31,8 @@ namespace hypermind {
         Invalid,
         Module,  // 模块变量
         Local, // 局部变量
-        Upvalue
+        Upvalue,
+        Class,
     };
 
     struct Upvalue {
@@ -64,6 +65,17 @@ namespace hypermind {
         SymbolTable fields;
         SymbolTable methods;
         ClassInfo *outer{nullptr};
+    };
+
+    enum class BlockType {
+        For,
+        While,
+        Unnamed,
+    };
+
+    struct BlockInfo {
+
+        BlockInfo *outer;
     };
 
     class CompileUnit {
@@ -336,6 +348,19 @@ namespace hypermind {
             WriteOpcode(Opcode::PushFalse);
         };
 
+        void EmitBindMethod(HMInteger index, HMBool isStatic) {
+            STACK_CHANGE(-1);
+            WriteOpcode(isStatic ? Opcode::BindStaticMethod : Opcode::BindInstanceMethod);
+            WriteShortOperand(index);
+        }
+
+        void EmitBindMethodSignature(Signature signature, HMBool isStatic) {
+            STACK_CHANGE(-1);
+            WriteOpcode(isStatic ? Opcode::BindStaticMethod : Opcode::BindInstanceMethod);
+            HMInteger index = mVM->mAllMethods.EnsureFind(&mVM->mGCHeap, signature);
+            WriteShortOperand(index);
+        }
+
         /**
          * 弹出栈顶参数
          * @param argNum
@@ -378,6 +403,9 @@ namespace hypermind {
                 case ScopeType::Upvalue:
                     WriteOpcode(Opcode::LoadUpvalue);
                     break;
+                case ScopeType::Class:
+                    WriteOpcode(Opcode::LoadThisField);
+                    break;
                 case ScopeType::Invalid:
                     // FIXME
                     break;
@@ -399,6 +427,9 @@ namespace hypermind {
                     break;
                 case ScopeType::Upvalue:
                     WriteOpcode(Opcode::StoreUpvalue);
+                    break;
+                case ScopeType::Class:
+                    WriteOpcode(Opcode::StoreThisField);
                     break;
                 case ScopeType::Invalid:
                     // FIXME
@@ -470,19 +501,6 @@ namespace hypermind {
             STACK_CHANGE(1);
             WriteOpcode(Opcode::CreateClass);
             WriteShortOperand(fieldNumber);
-        }
-
-        void EmitBindInstanceMethod(HMInteger index) {
-            STACK_CHANGE(-1);
-            WriteOpcode(Opcode::BindInstanceMethod);
-            WriteShortOperand(index);
-        }
-
-        void EmitBindStaticMethod(HMInteger index) {
-            STACK_CHANGE(-1);
-            WriteOpcode(Opcode::BindStaticMethod);
-            WriteShortOperand(index);
-
         }
 
         void EmitEnd() {

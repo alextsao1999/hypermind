@@ -58,6 +58,10 @@ namespace hypermind {
                    hm_memcmp(name, signature.name, length) == 0;
         }
 
+        bool operator<(const Signature&signature) {
+            return length < signature.length;
+        }
+
         void dump(Ostream &os) const {
             switch (type) {
                 case SignatureType::None:

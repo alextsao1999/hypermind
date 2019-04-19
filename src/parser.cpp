@@ -25,7 +25,12 @@ namespace hypermind {
         Token tok = mLexer.Read();
         ASTNodePtr leaf;
         if (tok.type == TokenType::Identifier || tok.type == TokenType::KeywordThis) {
-            leaf = make_ptr(ASTVariable, tok);
+            if (mLexer.Match(TokenType::LeftParen)) {
+                leaf = make_ptr(ASTFunctionCall, tok, ParseArgList());
+                mLexer.Consume(TokenType::RightParen);
+            } else {
+                leaf = make_ptr(ASTVariable, tok);
+            }
         } else if (tok.type == TokenType::String || tok.type == TokenType::Number) {
             leaf = make_ptr(ASTLiteral, tok.value);
         } else if (tok.type == TokenType::KeywordTrue) {
@@ -257,6 +262,9 @@ namespace hypermind {
                     case TokenType::KeywordStatic:
                         inStatic = true;
                         break;
+                    case TokenType::KeywordPublic:
+
+                        break;
                     case TokenType::RightBrace:
                         return classPtr;
                     default:
@@ -317,8 +325,6 @@ namespace hypermind {
                 break;
             case TokenType::KeywordVar:
                 ptr = ParseVarStmt();
-                break;
-            case TokenType::KeywordStatic:
                 break;
             default:
                 ptr = ParseExpression();

@@ -18,7 +18,9 @@ namespace hypermind {
         None,     // 空方法类型, 并不等同于undefined
         Primitive,   // 原生方法
         Script,  // 脚本中定义的方法
-        FunctionCall  // 有关函数对象的调用方法, 用来实现函数重载
+        FunctionCall,  // 有关函数对象的调用方法, 用来实现函数重载
+        Getter,
+        Setter,
     };
 
     // Method对象
@@ -27,6 +29,7 @@ namespace hypermind {
         union {
             HMClosure *fn{};  // 方法引用的函数闭包
             HMPrimitive pfn; // 指向原生方法
+            HMInteger index; // 指向域的索引
         };
         HMMethod(HMPrimitive func) : type(MethodType::Primitive), pfn(func) {}
 
@@ -40,7 +43,7 @@ namespace hypermind {
         HMClass *superClass{nullptr};  // 父类
         HMUINT32 fieldNubmer;
         Buffer<HMMethod> methods;
-//        SymbolTable methodTable;
+        SymbolTable table;
         HMString *name; // 类名
         HM_OBJ_CONSTRUCTOR_CLASS(Class, nullptr, HMString *name, HMClass *super, HMUINT32 fieldNumber), name(name),
                                                                                                         superClass(super),
@@ -76,6 +79,10 @@ namespace hypermind {
         inline void bind(VM *vm, Signature signature, HMMethod method) {
             methods.set(&vm->mGCHeap, static_cast<HMUINT32>(vm->mAllMethods.EnsureFind(&vm->mGCHeap, signature)),
                         method);
+        }
+
+        inline void bind(VM *vm, HMUINT32 index, HMMethod method) {
+            methods.set(&vm->mGCHeap, index, method);
         }
 
         HM_OBJ_DECL();

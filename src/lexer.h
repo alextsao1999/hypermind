@@ -117,6 +117,7 @@ namespace hypermind {
         KeywordTrue,
         KeywordFalse,
         KeywordStatic,
+        KeywordPublic,
     };
 
     void DumpTokenType(Ostream &os, TokenType type);
@@ -138,6 +139,7 @@ namespace hypermind {
             {_HM_C("true"),   TokenType::KeywordTrue},
             {_HM_C("false"),   TokenType::KeywordFalse},
             {_HM_C("static"),   TokenType::KeywordStatic},
+            {_HM_C("public"),   TokenType::KeywordPublic},
 /*
             {_HM_C("如果"),       TokenType::KeywordIf},
             {_HM_C("否则"),     TokenType::KeywordElse},
@@ -155,6 +157,7 @@ namespace hypermind {
             {_HM_C("真"),   TokenType::KeywordTrue},
             {_HM_C("假"),   TokenType::KeywordFalse},
             {_HM_C("静态"),   TokenType::KeywordStatic},
+            {_HM_C("公开"),   TokenType::KeywordPublic},
 */
 
     };
