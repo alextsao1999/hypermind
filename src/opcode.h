@@ -75,6 +75,9 @@ namespace hypermind {
          // 绑定静态方法
          BindStaticMethod,
 
+         EnterBlock,
+         LeaveBlock,
+
          End
 
     };

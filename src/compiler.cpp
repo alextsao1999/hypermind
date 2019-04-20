@@ -61,7 +61,7 @@ namespace hypermind {
             case TokenType::And:
             case TokenType::LogicAnd:
             case TokenType::Mod:
-                compiler->mCurCompileUnit->EmitCallSignature(Signature(SignatureType::Method, op.start, op.length), 1);
+                compiler->mCurCompileUnit->EmitCall(Signature(SignatureType::Method, op.start, op.length), 1);
                 break;
             default:
                 break;
@@ -135,24 +135,79 @@ namespace hypermind {
     // 编译IF
     AST_COMPILE(ASTIfStmt) {
         AST_ENTER();
+        BlockInfo then(BlockType::If);
+        condition->compile(compiler);
+        then.lables.leave = compiler->mCurCompileUnit->CreateLable();
+        compiler->mCurCompileUnit->EnterBlock(&then);
+        compiler->mCurCompileUnit->EmitJumpIfFalse(then.lables.leave);
+        thenBlock->compile(compiler);
+        compiler->mCurCompileUnit->LeaveBlock();
+
+        if (elseBlock != nullptr) {
+            BlockInfo el(BlockType::Else);
+            el.lables.leave = compiler->mCurCompileUnit->CreateLable();
+            compiler->mCurCompileUnit->EmitJump(el.lables.leave);
+            compiler->mCurCompileUnit->SetLable(then.lables.leave);
+
+            // 编译Else
+            compiler->mCurCompileUnit->EnterBlock(&el);
+            elseBlock->compile(compiler);
+            compiler->mCurCompileUnit->SetLable(el.lables.leave);
+            compiler->mCurCompileUnit->LeaveBlock();
+            // 编译完成
+        } else {
+            compiler->mCurCompileUnit->SetLable(then.lables.leave);
+        }
+
+        compiler->mCurCompileUnit->FixLable(&then);
         AST_LEAVE();
     }
 
     // 编译While
     AST_COMPILE(ASTWhileStmt) {
         AST_ENTER();
+        BlockInfo wh(BlockType::While);
+        wh.lables.condition = compiler->mCurCompileUnit->CreateLable();
+        wh.lables.leave = compiler->mCurCompileUnit->CreateLable();
+        // 条件标签开始
+        compiler->mCurCompileUnit->EnterBlock(&wh); // 设置开始回填的地址 sp入栈保护
+        compiler->mCurCompileUnit->SetLable(wh.lables.condition);
+        condition->compile(compiler);
+        compiler->mCurCompileUnit->EmitJumpIfFalse(wh.lables.leave);
+        block->compile(compiler);
+        compiler->mCurCompileUnit->EmitLoop(wh.lables.condition);
+        compiler->mCurCompileUnit->SetLable(wh.lables.leave);
+        compiler->mCurCompileUnit->LeaveBlock();
+        compiler->mCurCompileUnit->FixLable(&wh);
         AST_LEAVE();
     }
 
     // 编译Continue
     AST_COMPILE(ASTContinueStmt) {
         AST_ENTER();
+        BlockInfo *block = compiler->mCurCompileUnit->mCurBlockInfo;
+        while (block != nullptr) {
+            if (block->type == BlockType::While) {
+                compiler->mCurCompileUnit->EmitJump(block->lables.condition);
+                break;
+            }
+            block = block->outer;
+        }
         AST_LEAVE();
     }
 
     // 编译Break
     AST_COMPILE(ASTBreakStmt) {
         AST_ENTER();
+        BlockInfo *block = compiler->mCurCompileUnit->mCurBlockInfo;
+        while (block != nullptr) {
+            if (block->type == BlockType::While) {
+                compiler->mCurCompileUnit->EmitJump(block->lables.leave);
+                break;
+            }
+            block = block->outer;
+        }
+
         AST_LEAVE();
     }
 
@@ -205,7 +260,10 @@ namespace hypermind {
     // 编译函数
     AST_COMPILE(ASTFunctionStmt) {
         AST_ENTER();
-        HMInteger funIdx = compiler->mCurCompileUnit->DeclareVariable(name);
+        HMInteger funIdx = -1;
+        if (name.type != TokenType::End) {
+            funIdx = compiler->mCurCompileUnit->DeclareVariable(name);
+        }
         // 创建编译单元
 #ifdef HMDebug
         //  附上调试信息
@@ -223,14 +281,13 @@ namespace hypermind {
         cu.mFn->argNum = params->elements.size();
         body->compile(compiler); // 编译函数实体
         compiler->LeaveCompileUnit(cu, false);
-        cu.EmitEnd();
         // 记录函数上值 创建闭包的时候用
         cu.StoreUpvalue();
         HMInteger index = cu.mOuter->AddConstant(Value(cu.mFn));
         cu.mOuter->EmitCreateClosure(index);
-        cu.mOuter->DefineVariable(funIdx);
+        if (funIdx != -1)
+            cu.mOuter->DefineVariable(funIdx);
         AST_LEAVE();
-
     }
 
     // 编译类
@@ -260,6 +317,7 @@ namespace hypermind {
         if (super.type == TokenType::End) {
             compiler->mCurCompileUnit->LoadModuleVar(_HM_C("Object"));
         } else {
+            // TODO 之后改成一下 这里可以不是模块变量
             compiler->mCurCompileUnit->LoadModuleVar(super);
         }
 
@@ -300,24 +358,27 @@ namespace hypermind {
         }
         body->compile(compiler); // 编译函数实体
         compiler->LeaveCompileUnit(cu, name.type == SignatureType::Constructor);
-        cu.EmitEnd();
         // 记录函数上值 创建闭包的时候用
         cu.StoreUpvalue();
         HMInteger index = cu.mOuter->AddConstant(Value(cu.mFn));
         cu.mOuter->EmitCreateClosure(index);
-        cu.mOuter->EmitBindMethodSignature(name, flag == CompileFlag::Static);
+        cu.mOuter->EmitBindMethod(name, flag == CompileFlag::Static);
         if (name.type == SignatureType::Constructor) {
             // 为构造函数在Meta类中生成静态方法
+#ifdef HMDebug
+            //  附上调试信息
             CompileUnit newCu = compiler->CreateCompileUnit(new FunctionDebug(name));
+#else
+            CompileUnit newCu = compiler->CreateCompileUnit();
+#endif
             compiler->mCurCompileUnit = &newCu;
             newCu.EmitCreateInstance();
-            newCu.EmitCallSignature(name, cu.mFn->argNum);
+            newCu.EmitCall(name, cu.mFn->argNum);
             compiler->LeaveCompileUnit(newCu, true);
-            newCu.EmitEnd();
             newCu.StoreUpvalue();
             index = newCu.mOuter->AddConstant(Value(newCu.mFn));
             newCu.mOuter->EmitCreateClosure(index);
-            newCu.mOuter->EmitBindMethodSignature(name, true);
+            newCu.mOuter->EmitBindMethod(name, true);
         }
         AST_LEAVE();
     }
@@ -325,25 +386,31 @@ namespace hypermind {
     AST_COMPILE(ASTNegativeExpr) {
         AST_ENTER();
         expr->compile(compiler);
-        compiler->mCurCompileUnit->EmitCallSignature(Signature(SignatureType::Getter, _HM_C("-")), 0);
+        compiler->mCurCompileUnit->EmitCall(Signature(SignatureType::Getter, _HM_C("-")), 0);
         AST_LEAVE();
     }
 
     AST_COMPILE(ASTNotExpr) {
         AST_ENTER();
         expr->compile(compiler);
-        compiler->mCurCompileUnit->EmitCallSignature(Signature(SignatureType::Getter, _HM_C("!")), 0);
+        compiler->mCurCompileUnit->EmitCall(Signature(SignatureType::Getter, _HM_C("!")), 0);
         AST_LEAVE();
     }
 
     AST_COMPILE(ASTFunctionCall) {
         AST_ENTER();
-        ASTVariable var;
-        var.var = name;
-        var.compile(compiler, CompileFlag::Null);
-        args->compile(compiler, CompileFlag::Null);
-        compiler->mCurCompileUnit->EmitCallSignature(
-                Signature(SignatureType::Method, _HM_C("call")), args->elements.size());
+        Variable variable = compiler->mCurCompileUnit->FindVariable(name);
+        if (variable.scopeType != ScopeType::Invalid) {
+            compiler->mCurCompileUnit->EmitLoadVariable(variable);
+            args->compile(compiler, CompileFlag::Null);
+            compiler->mCurCompileUnit->EmitCall(Signature(SignatureType::Method, _HM_C("call")),
+                                                args->elements.size());
+        } else {
+            // 类方法 隐式加载this
+            compiler->mCurCompileUnit->LoadThis();
+            args->compile(compiler, CompileFlag::Null);
+            compiler->mCurCompileUnit->EmitCall(Signature(name), args->elements.size());
+        }
         AST_LEAVE();
     }
 
@@ -351,8 +418,7 @@ namespace hypermind {
         AST_ENTER();
         expr->compile(compiler);
         args->compile(compiler, CompileFlag::Null);
-        compiler->mCurCompileUnit->EmitCallSignature(
-                Signature(SignatureType::Method, _HM_C("call")), args->elements.size());
+        compiler->mCurCompileUnit->EmitCall(Signature(SignatureType::Method, _HM_C("call")), args->elements.size());
         AST_LEAVE();
     }
 
@@ -385,9 +451,9 @@ namespace hypermind {
                 // Getter 要将对象加载到栈顶
                 expr->compile(compiler);
             }
-            compiler->mCurCompileUnit->EmitCallSignature(Signature(
-                    flag == CompileFlag::Assign ? SignatureType::Setter : SignatureType::Getter, name.start,
-                    name.length), flag == CompileFlag::Assign ? 1 : 0);
+            compiler->mCurCompileUnit->EmitCall(
+                    Signature(flag == CompileFlag::Assign ? SignatureType::Setter : SignatureType::Getter, name.start,
+                              name.length), flag == CompileFlag::Assign ? 1 : 0);
         }
         AST_LEAVE();
     }
@@ -403,7 +469,7 @@ namespace hypermind {
             signature = Signature(SignatureType::Method, name.start, name.length);
         }
         args->compile(compiler, CompileFlag::Null);
-        compiler->mCurCompileUnit->EmitCallSignature(signature, args->elements.size());
+        compiler->mCurCompileUnit->EmitCall(signature, args->elements.size());
         AST_LEAVE();
     }
 
@@ -416,14 +482,14 @@ namespace hypermind {
             args->compile(compiler, CompileFlag::Null);
         } else {
             if (flag == CompileFlag::Assign) {
-                compiler->mCurCompileUnit->EmitCallSignature(Signature(SignatureType::SubscriptSetter),
-                                                             args->elements.size() + 1);
+                compiler->mCurCompileUnit->EmitCall(Signature(SignatureType::SubscriptSetter),
+                                                    args->elements.size() + 1);
             } else {
                 // Getter 要把对象和参数加载到栈顶
                 expr->compile(compiler);
                 args->compile(compiler, CompileFlag::Null);
-                compiler->mCurCompileUnit->EmitCallSignature(Signature(SignatureType::Subscript),
-                                                             args->elements.size());
+                compiler->mCurCompileUnit->EmitCall(Signature(SignatureType::Subscript),
+                                                    args->elements.size());
             }
         }
         AST_LEAVE();
@@ -450,9 +516,11 @@ namespace hypermind {
             if (index != -1) {
                 return Variable(ScopeType::Module, index);
             }
-            index = mCurClassInfo->fields.Find(signature);
-            if (index != -1) {
-                return Variable(ScopeType::Class, index);
+            if (mCurClassInfo != nullptr) {
+                index = mCurClassInfo->fields.Find(signature);
+                if (index != -1) {
+                    return Variable(ScopeType::Class, index);
+                }
             }
         }
         return var;

@@ -29,8 +29,9 @@ typedef bool HMBool;
 //#define HMUNICODE
 
 #ifdef HMUNICODE
+// ---------------------------------
 // Unicode
-// 字符通用字符类型
+// ---------------------------------
 #define _HM_C(ch) L##ch
 typedef wchar_t HMChar;
 typedef std::wstring String;
@@ -41,7 +42,9 @@ typedef std::wostream Ostream;
 #define hm_strtoi _wtoi
 #define hm_strlen wcslen
 #else
-// ---- Ansi ----
+// ---------------------------------
+//      Ansi
+// ---------------------------------
 #define _HM_C(ch) ch
 #include <cstring>
 typedef char HMChar;
@@ -67,7 +70,7 @@ namespace hypermind {
     #define ASSERT(condition, err) \
         do { \
             if (!(condition)) { \
-                fprintf(stderr, "断言失败 !  %s:%d  in %s -> Message: %s", __FILE__, __LINE__, __func__, err); \
+                fprintf(stderr, "断言失败  %s:%d  in %s -> Message: %s", __FILE__, __LINE__, __func__, err); \
             } \
         } while (0);
 #else

@@ -54,11 +54,11 @@ namespace hypermind {
         os << _HM_C("  max local : ") << maxLocalVarNum << _HM_C("  ");
         os << _HM_C("  arg number : ") << argNum << _HM_C("  ");
         os << std::endl << _HM_C("   opcode dump : ") << std::endl;
-        DumpAllInstructions(os);
+        dumpAllInstructions(os);
         os << _HM_C(" } ");
     }
 
-    void HMFunction::DumpAllInstructions(Ostream &os) {
+    void HMFunction::dumpAllInstructions(Ostream &os) {
         HMByte *code = instructions.data;
         HMInteger index;
         // 使用小端字节序
@@ -170,6 +170,7 @@ constants[index].dump(os);
                     Finish();
                 case Opcode::Loop:
                     Instruction("Loop");
+                    ShortArg();
                     Finish();
                 case Opcode::JumpIfFalse:
                     Instruction("Jump_If_False");
@@ -224,6 +225,12 @@ constants[index].dump(os);
                     Finish();
                 case Opcode::End:
                     Instruction("End");
+                    Finish();
+                case Opcode::EnterBlock:
+                    Instruction("Enter_Block");
+                    Finish();
+                case Opcode::LeaveBlock:
+                    Instruction("Leave_Block");
                     Finish();
             }
             i++;

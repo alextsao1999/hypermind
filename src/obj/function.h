@@ -39,7 +39,7 @@ namespace hypermind {
 
         HM_OBJ_DECL();
 
-        void DumpAllInstructions(Ostream &os);
+        void dumpAllInstructions(Ostream &os);
 
     };
 

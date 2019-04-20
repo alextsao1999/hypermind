@@ -26,10 +26,18 @@ namespace hypermind {
             }
         };
 
-        inline HMUINT32 append(GCHeap *heap, const T &data) {
+        inline HMUINT32 push(GCHeap *heap, const T &data) {
             fill(heap, data, 1);
             return count - 1;
         };
+
+        inline const T &back() {
+            return data[count - 1];
+        }
+
+        inline const T &pop() {
+            return data[--count];
+        }
 
         /**
          *  注意: 删除时会调用析构函数

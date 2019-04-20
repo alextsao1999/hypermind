@@ -33,6 +33,13 @@ namespace hypermind {
             }
         } else if (tok.type == TokenType::String || tok.type == TokenType::Number) {
             leaf = make_ptr(ASTLiteral, tok.value);
+        } else if (tok.type == TokenType::KeywordFunction) {
+            ASTFunctionStmtPtr func = make_ptr(ASTFunctionStmt);
+            mLexer.Consume(TokenType::LeftParen);
+            func->params = ParseParamList();
+            mLexer.Consume(TokenType::RightParen);
+            func->body = ParseBlock();
+            leaf = func;
         } else if (tok.type == TokenType::KeywordTrue) {
             leaf = make_ptr(ASTLiteral, Value(ValueType::True));
         } else if (tok.type == TokenType::KeywordFalse) {
@@ -104,9 +111,7 @@ namespace hypermind {
     ASTNodePtr Parser::ParseFunctionStmt() {
         mLexer.Consume(); // Consume function
         ASTFunctionStmtPtr ast = make_ptr(ASTFunctionStmt);
-        if (mLexer.PeekTokenType() != TokenType::LeftParen) {
-            ast->name = mLexer.Read();
-        }
+        ast->name = mLexer.Read();
         mLexer.Consume(TokenType::LeftParen);
         ast->params = ParseParamList();
         mLexer.Consume(TokenType::RightParen);

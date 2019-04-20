@@ -63,19 +63,28 @@ namespace hypermind {
     // 正在编译的类信息
     struct ClassInfo {
         SymbolTable fields;
-        SymbolTable methods;
+        /*SymbolTable methods;*/
         ClassInfo *outer{nullptr};
     };
 
     enum class BlockType {
+        None,
         For,
         While,
-        Unnamed,
+        If,
+        Else,
     };
 
     struct BlockInfo {
-
-        BlockInfo *outer;
+        BlockType type; // 块类型
+        HMUINT32 start{0};
+        HMInteger scope{-1}; // 作用域深度
+        struct {
+            HMInteger condition{-1};
+            HMInteger leave{-1};
+        } lables;
+        BlockInfo *outer{nullptr}; // 外部块
+        explicit BlockInfo(BlockType type) : type(type) {};
     };
 
     class CompileUnit {
@@ -107,6 +116,8 @@ namespace hypermind {
         CompileUnit *mOuter{nullptr};
         Compiler *mCurCompiler{nullptr};
         ClassInfo *mCurClassInfo{nullptr};
+        BlockInfo *mCurBlockInfo{nullptr};
+        Buffer<HMUINT32> mLables;
 
 #ifdef HMDebug
         HMUINT32 mLine{0};
@@ -114,9 +125,9 @@ namespace hypermind {
 #endif
 
         inline void WriteByte(HMByte byte) {
-            mFn->instructions.append(&mVM->mGCHeap, byte);
+            mFn->instructions.push(&mVM->mGCHeap, byte);
 #ifdef HMDebug
-            mFn->debug->line.append(&mVM->mGCHeap, mLine);
+            mFn->debug->line.push(&mVM->mGCHeap, mLine);
 #endif
 
         };
@@ -131,7 +142,7 @@ namespace hypermind {
          * 写入 short 操作数 小端字节序
          * @param operand
          */
-        void WriteShortOperand(int operand) {
+        void WriteShortOperand(HMInteger operand) {
             WriteByte(static_cast<HMByte>(operand & 0xff)); // 写入 低8位
             WriteByte(static_cast<HMByte>((operand >> 8) & 0xff)); // 写入 高8位
         };
@@ -139,12 +150,111 @@ namespace hypermind {
          * 写入 Int 操作数 小端字节序
          * @param operand
          */
-        void WriteIntOperand(int operand) {
+        void WriteIntOperand(HMInteger operand) {
             WriteByte(static_cast<HMByte>(operand & 0xff)); // 写入 0~7位
             WriteByte(static_cast<HMByte>((operand >> 8) & 0xff)); // 写入 8~15
             WriteByte(static_cast<HMByte>((operand >> 16) & 0xff)); // 写入 16~24
             WriteByte(static_cast<HMByte>((operand >> 24) & 0xff)); // 写入 25~32
         };
+
+        void RewriteShortOperand(HMInteger index, HMInteger operand) {
+            mFn->instructions[index] = static_cast<HMByte>(operand & 0xff); // 写入 低8位
+            mFn->instructions[index + 1] = static_cast<HMByte>((operand >> 8) & 0xff); // 写入 高8位
+        }
+
+        inline void EnterBlock(BlockInfo *blockInfo) {
+            if (blockInfo->type == BlockType::While) {
+                EmitEnterBlock();
+            }
+            blockInfo->outer = mCurBlockInfo;
+            blockInfo->start = mFn->instructions.count;
+            blockInfo->scope = mScopeDepth;
+            mCurBlockInfo = blockInfo;
+        }
+
+        inline void LeaveBlock() {
+            if (mCurBlockInfo != nullptr) {
+                if (mCurBlockInfo->type == BlockType::While) {
+                    EmitLeaveBlock();
+                }
+                mCurBlockInfo = mCurBlockInfo->outer;
+            }
+        }
+
+        inline void FixLable(BlockInfo *block) {
+            if (block->outer == nullptr) {
+                HMByte *code = mFn->instructions.data;
+                for (int i = block->start; i < mFn->instructions.count; ++i) {
+                    auto opcode = (Opcode) code[i];
+                    switch (opcode) {
+                        case Opcode::LoadConstant:
+                        case Opcode::LoadLocalVariable:
+                        case Opcode::StoreLocalVariable:
+                        case Opcode::LoadModuleVariable:
+                        case Opcode::StoreModuleVariable:
+                        case Opcode::LoadUpvalue:
+                        case Opcode::StoreUpvalue:
+                        case Opcode::LoadThisField:
+                        case Opcode::StoreThisField:
+                        case Opcode::LoadField:
+                        case Opcode::StoreField:
+                        case Opcode::Call0:
+                        case Opcode::Call1:
+                        case Opcode::Call2:
+                        case Opcode::Call3:
+                        case Opcode::Call4:
+                        case Opcode::Call5:
+                        case Opcode::Call6:
+                        case Opcode::Call7:
+                        case Opcode::Super0:
+                        case Opcode::Super1:
+                        case Opcode::Super2:
+                        case Opcode::Super3:
+                        case Opcode::Super4:
+                        case Opcode::Super5:
+                        case Opcode::Super6:
+                        case Opcode::Super7:
+                        case Opcode::CreateClass:
+                        case Opcode::BindInstanceMethod:
+                        case Opcode::BindStaticMethod:
+                            i += 2;
+                            break;
+                        case Opcode::Call:
+                        case Opcode::Super:
+                            i += 4;
+                            break;
+                        case Opcode::Loop:
+                        {
+                            HMInteger index = code[i + 1] | (code[i + 2] << 8);
+                            RewriteShortOperand(i + 1, i + 3 - mLables[index]);
+                            i += 2;
+                        }
+                            break;
+                        case Opcode::Jump:
+                        case Opcode::JumpIfFalse:
+                        case Opcode::JumpIfTrue:
+                        {
+                            HMInteger index = code[i + 1] | (code[i + 2] << 8);
+                            RewriteShortOperand(i + 1, mLables[index] - i - 3);
+                            i += 2;
+                        }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+            }
+
+        }
+
+        HMInteger CreateLable() {
+            return mLables.push(&mVM->mGCHeap, 0);
+        }
+
+        void SetLable(HMInteger lable) {
+            mLables[lable] = mFn->instructions.count;
+        }
 
         /**
          * 当前作用域添加局部变量 返回索引
@@ -304,7 +414,7 @@ namespace hypermind {
         HMInteger AddConstant(const Value &value) {
             // TODO 现在直接将value存到constants中了
             //  相同的文本或者数值会造成资源重复 可以先取hash
-            return mFn->constants.append(&mVM->mGCHeap, value);
+            return mFn->constants.push(&mVM->mGCHeap, value);
         };
 
         /**
@@ -325,6 +435,32 @@ namespace hypermind {
         void LoadThis();
 
         void LoadModuleVar(Signature signature);
+
+        void EmitEnterBlock() {
+            WriteOpcode(Opcode::EnterBlock);
+        }
+        void EmitLeaveBlock() {
+            WriteOpcode(Opcode::LeaveBlock);
+        }
+
+        void EmitJumpIfTrue(HMInteger lable) {
+            STACK_CHANGE(-1);
+            WriteOpcode(Opcode::JumpIfTrue);
+            WriteShortOperand(lable);
+        }
+        void EmitJumpIfFalse(HMInteger lable) {
+            STACK_CHANGE(-1);
+            WriteOpcode(Opcode::JumpIfFalse);
+            WriteShortOperand(lable);
+        }
+        void EmitJump(HMInteger lable) {
+            WriteOpcode(Opcode::Jump);
+            WriteShortOperand(lable);
+        }
+        void EmitLoop(HMInteger lable) {
+            WriteOpcode(Opcode::Loop);
+            WriteShortOperand(lable);
+        }
 
         void EmitCloseUpvalue() {
             STACK_CHANGE(-1);
@@ -354,7 +490,7 @@ namespace hypermind {
             WriteShortOperand(index);
         }
 
-        void EmitBindMethodSignature(Signature signature, HMBool isStatic) {
+        void EmitBindMethod(Signature signature, HMBool isStatic) {
             STACK_CHANGE(-1);
             WriteOpcode(isStatic ? Opcode::BindStaticMethod : Opcode::BindInstanceMethod);
             HMInteger index = mVM->mAllMethods.EnsureFind(&mVM->mGCHeap, signature);
@@ -377,7 +513,7 @@ namespace hypermind {
             }
         }
 
-        void EmitCallSignature(Signature signature, HMInteger argNum) {
+        void EmitCall(Signature signature, HMInteger argNum) {
             HMInteger index = mVM->mAllMethods.EnsureFind(&mVM->mGCHeap, signature);
             EmitCall(static_cast<HMUINT32>(index), argNum);
         };
@@ -456,17 +592,6 @@ namespace hypermind {
 
         void EmitStoreField(HMInteger index) {
             WriteOpcode(Opcode::StoreField);
-            WriteShortOperand(index);
-        }
-
-        void EmitLoadThisField(HMInteger index) {
-            STACK_CHANGE(1);
-            WriteOpcode(Opcode::LoadThisField);
-            WriteShortOperand(index);
-        }
-
-        void EmitStoreThisField(HMInteger index) {
-            WriteOpcode(Opcode::StoreThisField);
             WriteShortOperand(index);
         }
 
@@ -559,6 +684,7 @@ namespace hypermind {
                 cu.EmitPushNull();
             }
             cu.EmitReturn();
+            cu.mLables.clear(&mVM->mGCHeap);
             mCurCompileUnit = cu.mOuter;
 
         };

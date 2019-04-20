@@ -37,6 +37,7 @@ namespace hypermind {
         HMByte *ip;
         HMFunction *fn;
         HMByte opcode;
+        Buffer<Value *> block;
         //  ------------------------------ 定义宏函数 (使用小端字节序)
 #define LoadCurFrame() curFrame = &frames[usedFrameNum - 1]; stackStart = curFrame->stackStart; \
     fn = curFrame->closure->pFn;ip = curFrame->ip;
@@ -51,6 +52,30 @@ namespace hypermind {
 #define ReadShort() (ip += 2,  (ip[-1] << 8) | ip[-2])
 #define ReadInt() (ip += 4, (ip[-1] << 24) | (ip[-2] << 16) | (ip[-3] << 8) | ip[-4])
 #define Finish() break;
+#define Call(idx, num) { \
+        int index = idx; \
+        int argNum = num; \
+        Value *object = sp - argNum - 1; \
+        HMClass *claz = vm->GetValueClass(*object); \
+        if (claz->methods[index].type == MethodType::Script) { \
+            StoreCurFrame(); \
+            createFrame(vm, claz->methods[index].fn, argNum + 1); \
+            LoadCurFrame(); \
+        } else if (claz->methods[index].type == MethodType::Primitive) { \
+            claz->methods[index].pfn(vm, argNum, object); \
+            sp = object + 1;\
+        } else if (claz->methods[index].type == MethodType::Getter) { \
+            *object = ((HMInstance *) object->objval)->fields[claz->methods[index].index]; \
+            sp = object + 1; \
+        } else if (claz->methods[index].type == MethodType::Setter) { \
+            sp = object + 1; \
+            ((HMInstance *) object->objval)->fields[claz->methods[index].index] = *sp; \
+        } else if (claz->methods[index].type == MethodType::FunctionCall) { \
+            StoreCurFrame(); \
+            createFrame(vm, (HMClosure *) object->objval, argNum + 1); \
+            LoadCurFrame(); \
+        } \
+    }
         //  ------------------------------ 加载当前栈帧
         LoadCurFrame();
         //  ------------------------------ 加载完成
@@ -132,6 +157,12 @@ namespace hypermind {
                         } else if (claz->methods[index].type == MethodType::Primitive) {
                             claz->methods[index].pfn(vm, argNum, object);
                             sp = object + 1;
+                        } else if (claz->methods[index].type == MethodType::Getter) {
+                            *object = ((HMInstance *) object->objval)->fields[claz->methods[index].index];
+                            sp = object + 1;
+                        } else if (claz->methods[index].type == MethodType::Setter) {
+                            sp = object + 1;
+                            ((HMInstance *) object->objval)->fields[claz->methods[index].index] = *sp;
                         } else if (claz->methods[index].type == MethodType::FunctionCall) {
                             StoreCurFrame();
                             // 默认将闭包作为第一个参数
@@ -148,32 +179,7 @@ namespace hypermind {
                 case Opcode::Call5:
                 case Opcode::Call6:
                 case Opcode::Call7:
-                    {
-                        int index = ReadShort();
-                        int argNum = opcode - (HMByte) Opcode::Call0;
-//                        hm_cout << "-----------------------------" << std::endl;
-//                        curFrame->closure->pFn->debug->name.dump(hm_cout);
-//                        hm_cout << "  ---> " << static_cast<const void *>(sp);
-//                        hm_cout << std::endl;
-//                        dumpStack(stack, 10);
-
-                        Value *object = sp - argNum - 1;
-                        HMClass *claz = vm->GetValueClass(*object);
-                        if (claz->methods[index].type == MethodType::Script) {
-                            StoreCurFrame();
-                            // 默认将闭包作为第一个参数
-                            createFrame(vm, claz->methods[index].fn, argNum + 1);
-                            LoadCurFrame();
-                        } else if (claz->methods[index].type == MethodType::Primitive) {
-                            claz->methods[index].pfn(vm, argNum, object);
-                            sp = object + 1;
-                        } else if (claz->methods[index].type == MethodType::FunctionCall) {
-                            StoreCurFrame();
-                            // 默认将闭包作为第一个参数
-                            createFrame(vm, (HMClosure *) object->objval, argNum + 1);
-                            LoadCurFrame();
-                        }
-                    }
+                    Call(ReadShort(), opcode - (HMByte) Opcode::Call0);
                     Finish();
                 case Opcode::Super:
                     Finish();
@@ -187,10 +193,26 @@ namespace hypermind {
                 case Opcode::Super7:
                     Finish();
                 case Opcode::Jump:
+                {
+                    HMInteger offset = ReadShort();
+                    ip += offset;
+                }
                     Finish();
                 case Opcode::Loop:
+                {
+                    HMInteger offset = ReadShort();
+                    sp = block.back();
+                    ip -= offset;
+                }
                     Finish();
                 case Opcode::JumpIfFalse:
+                {
+                    Value *value = PopPtr();
+                    HMInteger offset = ReadShort();
+                    if (value->type == ValueType::False) {
+                        ip += offset;
+                    }
+                }
                     Finish();
                 case Opcode::JumpIfTrue:
                     Finish();
@@ -224,6 +246,7 @@ namespace hypermind {
                             stack[0] = Pop();
                         }
                         sp = stack + 1;
+                        block.clear(&vm->mGCHeap);
                         return;
                     } else {
                         *stackStart = Pop();
@@ -264,6 +287,12 @@ namespace hypermind {
                     Finish();
                 case Opcode::End:
                     // 这里不可达
+                    Finish();
+                case Opcode::EnterBlock:
+                    block.push(&vm->mGCHeap, sp);
+                    Finish();
+                case Opcode::LeaveBlock:
+                    sp = block.pop();
                     Finish();
                 default:
                     break;

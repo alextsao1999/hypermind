@@ -33,7 +33,7 @@ namespace hypermind {
 
         inline HMInteger add(VM *vm, Signature name, const Value &value) {
             varNames.Add(&vm->mGCHeap, name);
-            varValues.append(&vm->mGCHeap, value);
+            varValues.push(&vm->mGCHeap, value);
             return varValues.count - 1;
 
         };

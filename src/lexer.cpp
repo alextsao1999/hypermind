@@ -524,7 +524,7 @@ namespace hypermind {
         NEXT(); // 跳过 '   "  文本符
         TOKEN(TokenType::String, 0);
 
-#define APPEND_CHAR(c) strbuf.append(&mVM->mGCHeap, c)
+#define APPEND_CHAR(c) strbuf.push(&mVM->mGCHeap, c)
         do {
             if (CURRENT_CHAR == _HM_C('\\')) { // 跳过转义符
                 NEXT();

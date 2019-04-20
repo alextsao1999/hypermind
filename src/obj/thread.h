@@ -243,6 +243,12 @@ frame->closure->pFn->constants[index].dump(hm_cout);
                 case Opcode::End:
                     Instruction("End");
                     Finish();
+                case Opcode::EnterBlock:
+                    Instruction("Enter_Block");
+                    Finish();
+                case Opcode::LeaveBlock:
+                    Instruction("Leave_Block");
+                    Finish();
             }
 #undef Instruction
 #undef ReadByte

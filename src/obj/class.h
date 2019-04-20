@@ -36,6 +36,8 @@ namespace hypermind {
         HMMethod(HMClosure *func) : type(MethodType::Script), fn(func) {}
 
         HMMethod(MethodType type) : type(type), fn(nullptr) {}
+
+        HMMethod(MethodType type, HMInteger index) : type(type), index(index) {}
     };
 
     // 类对象
@@ -71,7 +73,7 @@ namespace hypermind {
                 fieldNubmer += super->fieldNubmer;
                 // 继承super的方法
                 for (int i = 0; i < super->methods.count; ++i) {
-                    methods.append(&vm->mGCHeap, super->methods[i]);
+                    methods.push(&vm->mGCHeap, super->methods[i]);
                 }
             }
         }
