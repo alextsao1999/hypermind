@@ -171,6 +171,7 @@ namespace hypermind {
             classPtr->super = mLexer.Read();
         }
         HMBool inStatic = false;
+        HMBool inPublic = false;
         SkipDelimiter();
         if (mLexer.Match(TokenType::LeftBrace)) {
             while (true) {

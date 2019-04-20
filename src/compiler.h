@@ -221,6 +221,7 @@ namespace hypermind {
                             break;
                         case Opcode::Call:
                         case Opcode::Super:
+                        case Opcode::BindFieldMethod:
                             i += 4;
                             break;
                         case Opcode::Loop:
@@ -495,6 +496,13 @@ namespace hypermind {
             WriteOpcode(isStatic ? Opcode::BindStaticMethod : Opcode::BindInstanceMethod);
             HMInteger index = mVM->mAllMethods.EnsureFind(&mVM->mGCHeap, signature);
             WriteShortOperand(index);
+        }
+
+        void EmitFieldMethod(Signature signature, HMInteger field) {
+            WriteOpcode(Opcode::BindFieldMethod);
+            HMInteger index = mVM->mAllMethods.EnsureFind(&mVM->mGCHeap, signature);
+            WriteShortOperand(index);
+            WriteShortOperand(field);
         }
 
         /**

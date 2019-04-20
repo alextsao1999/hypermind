@@ -6,6 +6,7 @@
 #include "obj/value.h"
 #include "obj/module.h"
 #include "obj/map.h"
+#include "obj/thread.h"
 #define METHOD  HMMethod([](VM *vm, HMInteger argNum, Value *args) -> bool
 #define RETURN(value) args[0] = value;return true;
 #define RETURN_INT(value) args[0].intval = value;return true;
@@ -145,6 +146,10 @@ namespace hypermind {
                 break;
         }
         return mMetaClass;
+    }
+
+    HMThread *VM::NewThread(HMFunction *func) {
+        return NewObject<HMThread>(NewObject<HMClosure>(func));
     }
 
 }

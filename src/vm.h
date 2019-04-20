@@ -58,6 +58,8 @@ namespace hypermind {
             return mGCHeap.MemManger(ptr, size, 0);
         }
 
+        HMThread *NewThread(HMFunction *func);
+
         void DumpAllObjects() {
             HMObject *nextObj = mGCHeap.mAllObjects;
             while (nextObj != nullptr) {

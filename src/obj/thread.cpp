@@ -288,6 +288,17 @@ namespace hypermind {
                 case Opcode::End:
                     // 这里不可达
                     Finish();
+                case Opcode::BindFieldMethod:
+                {
+                    int index = ReadShort();
+                    int field = ReadShort();
+                    Value *value = PeekPtr(1);
+                    auto *claz = (HMClass *) value->objval;
+                    claz->bind(vm, static_cast<HMUINT32>(index), HMMethod(
+                            vm->mAllMethods[index].type == SignatureType::Getter ? MethodType::Getter
+                                                                                 : MethodType::Setter));
+                }
+                    Finish();
                 case Opcode::EnterBlock:
                     block.push(&vm->mGCHeap, sp);
                     Finish();

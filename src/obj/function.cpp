@@ -223,6 +223,11 @@ constants[index].dump(os);
                     Instruction("Bind_Static_Method");
                     ShortArg();
                     Finish();
+                case Opcode::BindFieldMethod:
+                    Instruction("Bind_Field_Method");
+                    ShortArg();
+                    ShortArg();
+                    Finish();
                 case Opcode::End:
                     Instruction("End");
                     Finish();

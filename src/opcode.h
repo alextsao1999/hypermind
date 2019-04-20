@@ -68,12 +68,14 @@ namespace hypermind {
 
          // 创建类
          CreateClass,
+         // 有栈顶创建实例并且替换栈顶
          CreateInstance,
 
          // 绑定实例方法
          BindInstanceMethod,
          // 绑定静态方法
          BindStaticMethod,
+         BindFieldMethod,
 
          EnterBlock,
          LeaveBlock,
