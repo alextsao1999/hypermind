@@ -189,7 +189,7 @@ namespace hypermind {
         HMBool mEof{false};
         Token mCurrentToken;
 
-        Lexer(VM *mVM, HMChar *mSource) : mVM(mVM), mSource(mSource) {};
+        Lexer(VM *mVM, const HMChar *mSource) : mVM(mVM), mSource(mSource) {};
         ~Lexer() = default;
 
         Token Read();
@@ -207,12 +207,12 @@ namespace hypermind {
             return mPosition - mLineStart;
         };
 
-        HMChar *GetSource() {
+        const HMChar *GetSource() {
             return mSource;
         }
     private:
         VM *mVM;
-        HMChar *mSource;
+        const HMChar *mSource;
         HMUINT32 mPosition{0};
         HMUINT32 mLine{1};
         HMUINT32 mLineStart{0};

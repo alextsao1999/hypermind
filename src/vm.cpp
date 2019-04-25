@@ -7,6 +7,7 @@
 #include "obj/module.h"
 #include "obj/map.h"
 #include "obj/thread.h"
+#include <time.h>
 #define METHOD  HMMethod([](VM *vm, HMInteger argNum, Value *args) -> bool
 #define RETURN(value) args[0] = value;return true;
 #define RETURN_INT(value) args[0].intval = value;return true;
@@ -102,6 +103,9 @@ namespace hypermind {
             args[1].dump(hm_cout);
             hm_cout << std::endl;
             RETURN_TYPE(ValueType::True);
+        }));
+        mSystemClass->classObj->bind(this, Signature(SignatureType::Getter, _HM_C("clock")), METHOD {
+            RETURN(Value((int)clock()));
         }));
 
         mMapClass = NewObject<HMClass>(NewObject<HMString>(_HM_C("Map")), nullptr, 0);

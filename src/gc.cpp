@@ -38,7 +38,7 @@ namespace hypermind {
     }
 
     void GCHeap::StartGC() {
-        mScaningBytes = 0;
+        mScaningBytes = mVM->mAllMethods.mSymbols.size();
 
         // 将要保护的对象置灰
         Gray(mVM->mAllModule);
@@ -54,7 +54,7 @@ namespace hypermind {
             Black(obj);
         }
 
-        printf("GC :  sweeping : %d allocated : %d \n", mScaningBytes, mAllocatedBytes);
+        printf("GC :  sweeping : %d allocated : %d ", mScaningBytes, mAllocatedBytes);
 
         HMObject **obj = &mAllObjects;
         while (*obj != nullptr) {
@@ -69,6 +69,7 @@ namespace hypermind {
                 unreached->free(mVM);
             }
         }
+        printf(" over : %d \n", mAllocatedBytes);
 
         mNextGC = static_cast<HMUINT32>(mAllocatedBytes * mHeapGrowthFactor);
         if (mNextGC < mMinHeapSize) {

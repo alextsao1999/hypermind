@@ -272,7 +272,7 @@ namespace hypermind {
         CompileUnit cu = compiler->CreateCompileUnit();
 #endif
         compiler->mCurCompileUnit = &cu;
-        cu.AddLocalVariable(_HM_C("arg"));
+        cu.AddLocalVariable(name);
         // 进入作用域
         cu.EnterScope(); // 直接就编译了 不需要离开作用域
         cu.mFn->maxStackSlotNum = cu.mStackSlotNum = cu.mLocalVarNumber;
@@ -323,6 +323,15 @@ namespace hypermind {
 
         // 创建Class对象
         compiler->mCurCompileUnit->EmitCreateClass(classInfo.fields.GetCount());
+
+        // 生成public的getter 和 setter
+        for (auto &pub : publics) {
+            HMInteger index = classInfo.fields.Find(pub->identifier);
+            compiler->mCurCompileUnit->EmitFieldMethod(
+                    Signature(SignatureType::Getter, pub->identifier.start, pub->identifier.length), index);
+            compiler->mCurCompileUnit->EmitFieldMethod(
+                    Signature(SignatureType::Setter, pub->identifier.start, pub->identifier.length), index);
+        }
 
         // 绑定方法
         for (auto &method : methods) {

@@ -12,38 +12,19 @@ using namespace hypermind;
 using namespace std;
 
 int main() {
-//    auto *source = const_cast<HMChar *>(_HM_C("类 people {变量 age; 创建(yr) {age = yr + 2 };年龄 { return age+1}; };变量 tt = people.创建(11); 变量 ss = tt.年龄;tt.print();"));
-//    auto *source = const_cast<HMChar *>(_HM_C("function test(){class people{var age;new(yr){age = yr}age{return age}age=(value){age =value}}return people.new(123)}var value=test();value.age = 444;"));
-    auto *source = const_cast<HMChar *>(_HM_C(
-                                              "var a = 0;"
-                                              "while(a < 10) {"
-                                              "a= a + 1;"
-                                              "}"
-                                              "System.print(a);"
-//                                              "class people{"
-//                                              "var age;"
-//                                              "new(age){"
-//                                              "this.age = age;"
-//                                              "} ;"
-//                                              "age{return age} ; "
-//                                              "age=(age){this.age = age;} ;"
-//                                              "test(){return 2222;}"
-//                                              "};"
-//                                              "var value=people.new(234);"
-//                                              ""
-//                                              "System.print(value.test() + 1);"
-//                                              "var global = 1;"
-//                                              "function test(kk){"
-//                                              "var a= kk + global;"
-//                                              "function temp(){"
-//                                              "return a"
-//                                              "}"
-//                                              "return temp"
-//                                              "}"
-//                                              "var func = test(123);"
-//                                              "var pp = func();"
-//                                              "System.print(pp);"
-                                              ));
+    auto *source = R"(
+
+class Value  {
+    public var value;
+    new(val) {
+        value = val;
+    }
+}
+var test = Value.new(1234);
+test.value = 5555;
+System.print(test.value);
+
+)";
     VM vm;
     Lexer lexer(&vm, source);
     Parser parser(_HM_C(""), lexer);
@@ -56,6 +37,8 @@ int main() {
     compiler.mCurCompileUnit->EmitPushNull();
     compiler.mCurCompileUnit->EmitReturn();
     auto *thread = vm.NewThread(cu.mFn);
+//    vm.DumpAllObjects();
+
     thread->execute(&vm);
     vm.mGCHeap.StartGC();
 

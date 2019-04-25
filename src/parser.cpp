@@ -227,6 +227,7 @@ namespace hypermind {
                             else
                                 classPtr->methods.push_back(method);
                         }
+                        inPublic = false;
                         inStatic = false;
                         break;
                     case TokenType::LeftBracket:
@@ -250,6 +251,7 @@ namespace hypermind {
                             else
                                 classPtr->methods.push_back(method);
                         }
+                        inPublic = false;
                         inStatic = false;
                         break;
                     case TokenType::KeywordVar: {
@@ -262,14 +264,17 @@ namespace hypermind {
                             classPtr->statics.push_back(ast);
                         else
                             classPtr->fields.push_back(ast);
+                        if (inPublic)
+                            classPtr->publics.push_back(ast);
                     }
+                        inPublic = false;
                         inStatic = false;
                         break;
                     case TokenType::KeywordStatic:
                         inStatic = true;
                         break;
                     case TokenType::KeywordPublic:
-
+                        inPublic = true;
                         break;
                     case TokenType::RightBrace:
                         return classPtr;

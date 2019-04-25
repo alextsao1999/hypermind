@@ -296,7 +296,7 @@ namespace hypermind {
                     auto *claz = (HMClass *) value->objval;
                     claz->bind(vm, static_cast<HMUINT32>(index), HMMethod(
                             vm->mAllMethods[index].type == SignatureType::Getter ? MethodType::Getter
-                                                                                 : MethodType::Setter));
+                                                                                 : MethodType::Setter, field));
                 }
                     Finish();
                 case Opcode::EnterBlock:

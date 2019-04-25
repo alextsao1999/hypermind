@@ -153,6 +153,7 @@ namespace hypermind {
         Token name; // 类名称
         Token super;
         std::vector<ASTVarStmtPtr> fields; // 域
+        std::vector<ASTVarStmtPtr> publics; // 公开的域
         std::vector<ASTNodePtr> statics; // 静态的域或方法
         std::vector<ASTMethodStmtPtr> methods; // 方法
         AST_DECL();
